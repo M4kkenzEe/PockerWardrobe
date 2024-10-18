@@ -29,4 +29,5 @@ dependencyResolutionManagement {
 }
 
 include(":composeApp")
-include(":card-feature")
+include(":features:card-feature")
+include(":features:pin-card-feature")

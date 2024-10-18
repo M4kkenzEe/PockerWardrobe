@@ -12,11 +12,14 @@ import com.ownstd.project.internal.presentation.screens.SettingsScreen
 import com.ownstd.project.internal.presentation.screens.ShopScreen
 
 @Composable
-internal fun BottomNavigationNavHost(navController: NavHostController) {
+internal fun BottomNavigationNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         navController = navController,
         startDestination = BottomNavigationItems.HOME.route,
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         composable(BottomNavigationItems.HOME.route) {
             HomeScreen()

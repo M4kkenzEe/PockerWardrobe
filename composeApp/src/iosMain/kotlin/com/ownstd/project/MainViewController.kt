@@ -1,56 +1,29 @@
 package com.ownstd.project
 
 import androidx.compose.ui.window.ComposeUIViewController
+import platform.UIKit.UIRectEdgeAll
+import platform.UIKit.UIViewController
 
-fun MainViewController() = ComposeUIViewController {
-    App()
-}.apply {
-    // Скрываем статус-бар
-    setNeedsStatusBarAppearanceUpdate()
+fun MainViewController(): UIViewController {
+    val viewController = ComposeUIViewController {
+        App()
+    }
+
+    viewController.setNeedsStatusBarAppearanceUpdate()
+    viewController.edgesForExtendedLayout = UIRectEdgeAll
+
+    // Скрытие статус бара
+
+    // Возвращаем наш настроенный UIViewController
+    return viewController
 }
 
-//class MainViewController : UIViewController(nibName = null, bundle = null) {
+//fun MainViewController() = ComposeUIViewController {
+//    App()
+//}
 //
-//    override fun viewDidLoad() {
-//        super.viewDidLoad()
-//        // Настройка представления Compose
-//        setContent { App() }
 //
+//    .apply {
 //        // Скрываем статус-бар
-//        UIApplication.shared.isStatusBarHidden = true
-//    }
-//
-//    // Скрытие статус-бара
-//    override fun prefersStatusBarHidden(): Boolean {
-//        return true
-//    }
-//
-//    // Обновление состояния статус-бара
-//    override fun viewWillAppear(animated: Boolean) {
-//        super.viewWillAppear(animated)
 //        setNeedsStatusBarAppearanceUpdate()
 //    }
-//}
-
-
-//class AppDelegate: UIResponder(), UIApplicationDelegate {
-//
-//    var window: UIWindow? = null
-//
-//    override fun application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: Map<String, Any>?): Boolean {
-//        window = UIWindow(frame = UIScreen.main.bounds)
-//        window?.rootViewController = MainViewController() // Используем ваш MainViewController
-//        window?.makeKeyAndVisible()
-//        return true
-//    }
-//}
-
-
-// Переопределение методов для управления статус-баром
-//override fun prefersStatusBarHidden(): Boolean {
-//    return true
-//}
-//
-//override fun prefersHomeIndicatorAutoHidden(): Boolean {
-//    return true
-//}

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.ownstd.project.design_system.BG_GREY_COLOR
 import com.ownstd.project.design_system.BLUE_COLOR
 import com.ownstd.project.design_system.DARK_GREY_COLOR
 import com.ownstd.project.design_system.GREY_COLOR
@@ -41,8 +42,9 @@ fun MainScreen() {
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
         modifier = Modifier.fillMaxSize(),
+        backgroundColor = BG_GREY_COLOR
     ) {
-        BottomNavigationNavHost(navController)
+        BottomNavigationNavHost(navController, modifier = Modifier.padding(bottom = 40.dp))
     }
 }
 
@@ -66,7 +68,7 @@ internal fun BottomNavigationBar(navController: NavHostController) {
                     else item.disabledIcon
                 ),
                 label = item.label,
-                textColor = if (currentItem.route == item.route) BLUE_COLOR else GREY_COLOR ,
+                textColor = if (currentItem.route == item.route) BLUE_COLOR else GREY_COLOR,
                 onItemClick = {
                     navController.navigate(item.route)
                     currentItem = item

@@ -36,25 +36,18 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             //navigation
             implementation(libs.compose.navigation)
-            implementation(libs.voyager.transitions)
-            implementation(libs.voyager.navigator)
-            implementation(libs.voyager.lifecycleKmp)
-
-            implementation(libs.compose.navigation)
-
-            //viewmodel
-//            implementation(libs.mokoMvvm)
-//            implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.6")
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             //koin
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
+
+            implementation(project(":features:pin-card-feature"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -72,9 +65,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-}
-dependencies {
-//    implementation(libs.androidx.ui.android)
 }
 
 compose.resources {
