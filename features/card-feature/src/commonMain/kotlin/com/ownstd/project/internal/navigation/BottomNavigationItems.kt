@@ -1,0 +1,38 @@
+package com.ownstd.project.internal.navigation
+
+import com.ownstd.project.resources.Res
+import com.ownstd.project.resources.shopping_cart_disabled
+import com.ownstd.project.resources.shopping_cart_enabled
+import org.jetbrains.compose.resources.DrawableResource
+
+internal enum class BottomNavigationItems(
+    val route: String,
+    val label: String,
+    val enabledIcon: DrawableResource,
+    val disabledIcon: DrawableResource,
+) {
+    HOME(
+        route = "home_screen",
+        label = "Home",
+        enabledIcon = Res.drawable.shopping_cart_enabled,
+        disabledIcon = Res.drawable.shopping_cart_disabled
+    ),
+    SHOP(
+        route = "shop_screen",
+        label = "Shop",
+        enabledIcon = Res.drawable.shopping_cart_enabled,
+        disabledIcon = Res.drawable.shopping_cart_disabled
+    ),
+    PROFILE(
+        route = "profile_screen",
+        label = "Profile",
+        enabledIcon = Res.drawable.shopping_cart_enabled,
+        disabledIcon = Res.drawable.shopping_cart_disabled
+    ),
+    SETTINGS(
+        route = "settings_screen",
+        label = "Settings",
+        enabledIcon = Res.drawable.shopping_cart_enabled,
+        disabledIcon = Res.drawable.shopping_cart_disabled
+    )
+}

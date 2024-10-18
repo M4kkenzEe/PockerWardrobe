@@ -4,7 +4,6 @@ import androidx.compose.ui.window.ComposeUIViewController
 import platform.UIKit.UIRectEdgeAll
 import platform.UIKit.UIViewController
 
-
 fun MainViewController(): UIViewController {
     val viewController = ComposeUIViewController {
         App()
