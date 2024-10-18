@@ -35,10 +35,10 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation("androidx.activity:activity-ktx:1.9.3")
+            implementation(libs.androidx.activity.ktx)
         }
         commonMain.dependencies {
-            implementation(project(":card-feature"))
+            implementation(project(":features:card-feature"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
