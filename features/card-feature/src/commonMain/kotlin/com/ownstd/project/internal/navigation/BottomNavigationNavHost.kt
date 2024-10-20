@@ -33,7 +33,7 @@ internal fun BottomNavigationNavHost(
             ProfileScreen()
         }
 
-        composable(BottomNavigationItems.SETTINGS.route) {
+        composable(BottomNavigationItems.OUTFITS.route) {
             SettingsScreen()
         }
     }
