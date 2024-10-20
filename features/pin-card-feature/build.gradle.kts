@@ -29,6 +29,9 @@ kotlin {
 
 
     sourceSets {
+        androidMain.dependencies {
+            implementation(libs.ktor.client.android)
+        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -54,6 +57,13 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            //coil
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -72,9 +82,3 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
-
-//compose.resources {
-//    publicResClass = false
-//    packageOfResClass = "com.ownstd.project.resources"
-//    generateResClass = always
-//}

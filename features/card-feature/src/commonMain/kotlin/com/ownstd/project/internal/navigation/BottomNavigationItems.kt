@@ -13,26 +13,26 @@ internal enum class BottomNavigationItems(
 ) {
     HOME(
         route = "home_screen",
-        label = "Home",
+        label = "Лента",
         enabledIcon = Res.drawable.shopping_cart_enabled,
         disabledIcon = Res.drawable.shopping_cart_disabled
     ),
     SHOP(
         route = "shop_screen",
-        label = "Shop",
+        label = "Гардероб",
+        enabledIcon = Res.drawable.shopping_cart_enabled,
+        disabledIcon = Res.drawable.shopping_cart_disabled
+    ),
+    OUTFITS(
+        route = "outfits_screen",
+        label = "Образы",
         enabledIcon = Res.drawable.shopping_cart_enabled,
         disabledIcon = Res.drawable.shopping_cart_disabled
     ),
     PROFILE(
         route = "profile_screen",
-        label = "Profile",
+        label = "Профиль",
         enabledIcon = Res.drawable.shopping_cart_enabled,
         disabledIcon = Res.drawable.shopping_cart_disabled
     ),
-    SETTINGS(
-        route = "settings_screen",
-        label = "Settings",
-        enabledIcon = Res.drawable.shopping_cart_enabled,
-        disabledIcon = Res.drawable.shopping_cart_disabled
-    )
 }
