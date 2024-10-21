@@ -29,6 +29,9 @@ kotlin {
 
 
     sourceSets {
+        androidMain.dependencies {
+            implementation(libs.ktor.client.android)
+        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -36,10 +39,12 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             //navigation
             implementation(libs.compose.navigation)
+
+            //viewmodel
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
             //koin
             implementation(libs.koin.core)
@@ -47,8 +52,18 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
 
-            implementation(project(":features:pin-card-feature"))
-            implementation(project(":features:recommendations-page-screen"))
+            //ktor
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+
+            //coil
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -66,10 +81,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-}
-
-compose.resources {
-    publicResClass = false
-    packageOfResClass = "com.ownstd.project.resources"
-    generateResClass = always
 }
