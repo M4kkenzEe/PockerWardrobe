@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 include(":composeApp")
 include(":features:card-feature")
 include(":features:pin-card-feature")
+include(":features:recommendations-page-screen")
