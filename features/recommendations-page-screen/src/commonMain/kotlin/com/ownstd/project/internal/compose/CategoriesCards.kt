@@ -26,7 +26,7 @@ import kotlinprojecttesting.features.recommendations_page_screen.generated.resou
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun CategoriesCard() {
+fun CategoriesCards() {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
