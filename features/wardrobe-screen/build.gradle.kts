@@ -46,10 +46,6 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
-
-            implementation(project(":features:pin-card-feature"))
-            implementation(project(":features:recommendations-page-screen"))
-            implementation(project(":features:wardrobe-screen"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -71,6 +67,6 @@ android {
 
 compose.resources {
     publicResClass = false
-    packageOfResClass = "com.ownstd.project.card.resources"
+    packageOfResClass = "com.ownstd.project.wardrobe.resources"
     generateResClass = always
 }

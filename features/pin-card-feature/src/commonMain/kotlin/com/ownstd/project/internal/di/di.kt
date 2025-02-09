@@ -1,5 +1,6 @@
-package com.ownstd.project.internal
+package com.ownstd.project.internal.di
 
+import com.ownstd.project.internal.presentation.viewmodel.ConstructorViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
