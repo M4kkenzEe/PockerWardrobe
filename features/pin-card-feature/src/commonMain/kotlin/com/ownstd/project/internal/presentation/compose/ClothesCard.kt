@@ -1,4 +1,4 @@
-package com.ownstd.project
+package com.ownstd.project.internal.presentation.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +25,7 @@ private const val RED_SWEATER =
     "https://img2.freepng.ru/20180602/cbc/kisspng-sweater-bluza-clothing-choker-wool-sweater-5b130b017d0a61.0627974415279746575122.jpg"
 
 @Composable
-fun WardrobeScreen() {
+fun SweaterScreen() {
     val itemsCount = 13
     LazyVerticalGrid(
         modifier = Modifier
@@ -50,7 +50,7 @@ fun WardrobeScreen() {
 }
 
 @Composable
-fun ClothesCard(imgUrl: String = RED_SWEATER) {
+internal fun ClothesCard(imgUrl: String = RED_SWEATER) {
     Box(
         modifier = Modifier
             .size(160.dp)

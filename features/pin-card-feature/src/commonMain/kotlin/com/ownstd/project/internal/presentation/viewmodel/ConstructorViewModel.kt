@@ -1,4 +1,4 @@
-package com.ownstd.project.internal
+package com.ownstd.project.internal.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import kotlinprojecttesting.features.pin_card_feature.generated.resources.Res

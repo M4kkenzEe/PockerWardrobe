@@ -1,8 +1,8 @@
 package com.ownstd.project.internal.navigation
 
-import com.ownstd.project.resources.Res
-import com.ownstd.project.resources.shopping_cart_disabled
-import com.ownstd.project.resources.shopping_cart_enabled
+import com.ownstd.project.card.resources.Res
+import com.ownstd.project.card.resources.shopping_cart_disabled
+import com.ownstd.project.card.resources.shopping_cart_enabled
 import org.jetbrains.compose.resources.DrawableResource
 
 internal enum class BottomNavigationItems(
