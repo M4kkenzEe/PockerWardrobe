@@ -54,7 +54,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project"
+    namespace = "com.ownstd.project.wardrobe"
     compileSdk = 34
     defaultConfig {
         minSdk = 24

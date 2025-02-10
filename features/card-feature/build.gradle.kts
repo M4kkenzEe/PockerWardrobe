@@ -58,7 +58,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project"
+    namespace = "com.ownstd.project.card"
     compileSdk = 34
     defaultConfig {
         minSdk = 24

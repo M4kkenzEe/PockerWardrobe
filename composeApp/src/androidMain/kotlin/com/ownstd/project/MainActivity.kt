@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
-import com.ownstd.project.design_system.DARK_GREY_COLOR
+import com.ownstd.project.card.design_system.DARK_GREY_COLOR
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("ResourceType")
