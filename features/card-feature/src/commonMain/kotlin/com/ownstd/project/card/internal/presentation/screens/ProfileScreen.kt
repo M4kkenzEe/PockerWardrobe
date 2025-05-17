@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ownstd.project.card.internal.presentation.viewmodel.SecondViewModel
+import com.ownstd.project.tiktok_feed.TikTokFeedScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -22,17 +23,19 @@ internal fun ProfileScreen(navigateTo: () -> Unit = {}) {
     val viewModel = koinViewModel<SecondViewModel>()
     val st by viewModel.state.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("PROFILE $st")
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = navigateTo) {
-            Text("Back to First Screen")
-        }
-    }
+    TikTokFeedScreen()
+
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text("PROFILE $st")
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Button(onClick = navigateTo) {
+//            Text("Back to First Screen")
+//        }
+//    }
 }
