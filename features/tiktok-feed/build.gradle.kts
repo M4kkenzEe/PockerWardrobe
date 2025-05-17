@@ -46,11 +46,6 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
-
-            implementation(project(":features:pin-card-feature"))
-            implementation(project(":features:recommendations-page-screen"))
-            implementation(project(":features:wardrobe-screen"))
-            implementation(project(":features:tiktok-feed"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -59,8 +54,8 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project.card"
-    compileSdk = 34
+    namespace = "com.ownstd.project.tiktok_feed"
+    compileSdk = 35
     defaultConfig {
         minSdk = 24
     }
@@ -72,6 +67,6 @@ android {
 
 compose.resources {
     publicResClass = false
-    packageOfResClass = "com.ownstd.project.card.resources"
+    packageOfResClass = "com.ownstd.project.tiktok_feed.resources"
     generateResClass = always
 }
