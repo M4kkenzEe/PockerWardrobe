@@ -1,4 +1,4 @@
-package com.ownstd.project.tiktok_feed
+package com.ownstd.project.tiktok_feed.presentation.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -82,24 +82,7 @@ fun FeedItemCard(item: FeedItem) {
                 .background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Video Placeholder\n${item.description}",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        // Play/Pause button
-        IconButton(
-            onClick = { isPlaying = !isPlaying },
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.5f))
-        ) {
-            Text("GGG")
+            FeedScreen()
         }
 
         // Right-side action buttons (like, share)

@@ -46,6 +46,8 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
+
+            implementation(project(":features:pin-card-feature"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
