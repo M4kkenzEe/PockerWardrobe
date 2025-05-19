@@ -31,6 +31,18 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.coil.compose)
+            implementation(compose.preview)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.activity.ktx)
+
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material)
+            implementation(compose.ui)
+            implementation(libs.accompanist.permissions)
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
