@@ -1,4 +1,4 @@
-package com.ownstd.project.card.api
+package com.ownstd.project.card.internal.presentation.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,18 +27,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.design_system.BG_GREY_COLOR
 import com.ownstd.project.card.design_system.BLUE_COLOR
 import com.ownstd.project.card.design_system.DARK_GREY_COLOR
 import com.ownstd.project.card.design_system.GREY_COLOR
-import com.ownstd.project.card.internal.navigation.BottomNavigationItems
 import com.ownstd.project.card.internal.navigation.BottomNavigationNavHost
+import com.ownstd.project.card.internal.navigation.BottomNavigationScreens
+import kotlinprojecttesting.features.card_feature.generated.resources.Res
+import kotlinprojecttesting.features.card_feature.generated.resources.shopping_cart_disabled
+import kotlinprojecttesting.features.card_feature.generated.resources.shopping_cart_enabled
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
+internal fun MainScreen(navController: NavHostController) {
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
         modifier = Modifier.fillMaxSize(),
@@ -50,8 +52,7 @@ fun MainScreen() {
 
 @Composable
 internal fun BottomNavigationBar(navController: NavHostController) {
-
-    var currentItem by remember { mutableStateOf(BottomNavigationItems.HOME) }
+    var currentItem by remember { mutableStateOf<BottomNavigationScreens>(BottomNavigationScreens.Home()) }
 
     Row(
         modifier = Modifier
@@ -61,16 +62,24 @@ internal fun BottomNavigationBar(navController: NavHostController) {
             .background(DARK_GREY_COLOR),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        for (item in BottomNavigationItems.entries) {
+        val screens = listOf(
+            BottomNavigationScreens.Home(),
+            BottomNavigationScreens.Shop(),
+            BottomNavigationScreens.Outfits(),
+            BottomNavigationScreens.Profile()
+        )
+        for (item in screens) {
             BottomNavigationItem(
                 painter = painterResource(
-                    if (currentItem.route == item.route) item.enabledIcon
-                    else item.disabledIcon
+                    if (currentItem == item)
+                        mapper(item.enabledIcon)
+                    else
+                        mapper(item.disabledIcon)
                 ),
                 label = item.label,
-                textColor = if (currentItem.route == item.route) BLUE_COLOR else GREY_COLOR,
+                textColor = if (currentItem == item) BLUE_COLOR else GREY_COLOR,
                 onItemClick = {
-                    navController.navigate(item.route)
+                    navController.navigate(item)
                     currentItem = item
                 }
             )
@@ -102,5 +111,14 @@ internal fun BottomNavigationItem(
             fontWeight = FontWeight.Medium,
             color = textColor
         )
+    }
+}
+
+fun mapper(name: String): DrawableResource {
+    return when (name) {
+        "shopping_cart_enabled" -> Res.drawable.shopping_cart_enabled
+        "shopping_cart_disabled" -> Res.drawable.shopping_cart_disabled
+        // Добавьте другие ресурсы по мере необходимости
+        else -> throw IllegalArgumentException("Unknown resource name: $name")
     }
 }

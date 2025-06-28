@@ -13,6 +13,7 @@ import com.ownstd.project.wardrobe.resources.Res
 import com.ownstd.project.wardrobe.resources.clothe1
 import com.ownstd.project.wardrobe.resources.clothe2
 import com.ownstd.project.wardrobe.resources.clothe3
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun WardrobeScreen() {
@@ -38,4 +39,10 @@ fun WardrobeScreen() {
             OutfitCard(img = outfitsList[it])
         }
     }
+}
+
+@Preview
+@Composable
+fun WardrobeScreenPreview() {
+    WardrobeScreen()
 }
