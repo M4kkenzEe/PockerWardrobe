@@ -55,6 +55,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
 
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.noarg)
+
             implementation(project(":core:network"))
         }
         commonTest.dependencies {
@@ -64,7 +67,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project.wardrobe"
+    namespace = "com.ownstd.project.authorization"
     compileSdk = 34
     defaultConfig {
         minSdk = 24
@@ -77,6 +80,6 @@ android {
 
 compose.resources {
     publicResClass = false
-    packageOfResClass = "com.ownstd.project.wardrobe.resources"
+    packageOfResClass = "com.ownstd.project.authorization.resources"
     generateResClass = always
 }

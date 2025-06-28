@@ -18,22 +18,22 @@ internal fun BottomNavigationNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavigationItems.HOME.route,
+        startDestination = BottomNavigationScreens.Home(),
         modifier = modifier.fillMaxSize()
     ) {
-        composable(BottomNavigationItems.HOME.route) {
+        composable<BottomNavigationScreens.Home> {
             HomeScreen()
         }
 
-        composable(BottomNavigationItems.SHOP.route) {
+        composable<BottomNavigationScreens.Shop> {
             ShopScreen()
         }
 
-        composable(BottomNavigationItems.PROFILE.route) {
+        composable<BottomNavigationScreens.Profile> {
             ProfileScreen()
         }
 
-        composable(BottomNavigationItems.OUTFITS.route) {
+        composable<BottomNavigationScreens.Outfits> {
             SettingsScreen()
         }
     }

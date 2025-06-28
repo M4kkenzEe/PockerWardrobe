@@ -61,7 +61,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project.database"
+    namespace = "com.ownstd.project.core.database"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")

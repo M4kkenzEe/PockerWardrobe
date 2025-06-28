@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.jetbrainsCompose)
-    alias(libs.plugins.compose.compiler)
     kotlin("plugin.serialization") version "1.9.21"
 }
 
@@ -30,17 +28,10 @@ kotlin {
 
 
     sourceSets {
+        androidMain.dependencies {
+            implementation(libs.ktor.client.android)
+        }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-            //navigation
-            implementation(libs.compose.navigation)
 
             //koin
             implementation(libs.koin.core)
@@ -49,13 +40,15 @@ kotlin {
             implementation(libs.koin.compose.viewmodel.navigation)
 
             //ktor
+            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
-
-            implementation(project(":core:network"))
+            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.logging)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -64,7 +57,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project.wardrobe"
+    namespace = "com.ownstd.project.core.network"
     compileSdk = 34
     defaultConfig {
         minSdk = 24
@@ -73,10 +66,4 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-}
-
-compose.resources {
-    publicResClass = false
-    packageOfResClass = "com.ownstd.project.wardrobe.resources"
-    generateResClass = always
 }
