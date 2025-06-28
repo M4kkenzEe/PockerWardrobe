@@ -1,40 +1,24 @@
-package com.ownstd.project.network
+package com.ownstd.project.authorization.internal.data.repository
 
-import com.ownstd.project.network.model.LoginRequest
-import com.ownstd.project.network.model.LoginResponse
-import com.ownstd.project.network.model.RegisterRequest
-import com.ownstd.project.network.model.User
-import io.ktor.client.HttpClient
+import com.ownstd.project.authorization.internal.data.model.LoginRequest
+import com.ownstd.project.authorization.internal.data.model.LoginResponse
+import com.ownstd.project.authorization.internal.data.model.RegisterRequest
+import com.ownstd.project.authorization.internal.data.model.User
+import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.network.api.NetworkRepository
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 
-class AuthClient(
-    private val baseUrl: String
+class AuthServiceImpl(
+    private val networkRepository: NetworkRepository
 ) : AuthService {
-    private val client = HttpClient {
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-        }
-        install(ContentNegotiation) {
-            json(Json {
-                prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
-            })
-        }
-    }
+
+    private val client = networkRepository.getClient()
+    private val baseUrl = networkRepository.baseUrl
 
     override suspend fun register(
         username: String,
@@ -72,8 +56,8 @@ class AuthClient(
                 else -> Result.failure(Exception("Unexpected response: ${response.status}"))
             }
         } catch (e: Exception) {
+            println("Login failed: ${e.message}")
             Result.failure(e)
         }
     }
 }
-

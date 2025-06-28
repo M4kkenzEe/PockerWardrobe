@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    kotlin("plugin.serialization") version "1.9.21"
 }
 
 kotlin {
@@ -48,15 +47,8 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
 
-            //ktor
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.cio)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-
             implementation(project(":core:network"))
-            implementation(project(":core:storage"))
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -65,8 +57,8 @@ kotlin {
 }
 
 android {
-    namespace = "com.ownstd.project.authorization"
-    compileSdk = 34
+    namespace = "com.ownstd.project.profile"
+    compileSdk = 35
     defaultConfig {
         minSdk = 24
     }
@@ -78,6 +70,6 @@ android {
 
 compose.resources {
     publicResClass = false
-    packageOfResClass = "com.ownstd.project.authorization.resources"
+    packageOfResClass = "com.ownstd.project.tiktok_feed.resources"
     generateResClass = always
 }

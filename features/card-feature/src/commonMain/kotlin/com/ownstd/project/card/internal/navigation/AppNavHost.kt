@@ -33,14 +33,6 @@ internal fun AppNavHost(
         }
         composable<AppScreens.Main> {
             MainScreen(navController = rememberNavController())
-//                LaunchedEffect(Unit) {
-//                    navController.navigate(AppScreens.Authorization) {
-//                        popUpTo(navController.graph.startDestinationId) {
-//                            inclusive = true
-//                        }
-//                    }
-//                }
-//            }
         }
     }
 }

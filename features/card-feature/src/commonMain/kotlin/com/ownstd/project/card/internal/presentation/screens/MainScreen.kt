@@ -118,7 +118,6 @@ fun mapper(name: String): DrawableResource {
     return when (name) {
         "shopping_cart_enabled" -> Res.drawable.shopping_cart_enabled
         "shopping_cart_disabled" -> Res.drawable.shopping_cart_disabled
-        // Добавьте другие ресурсы по мере необходимости
         else -> throw IllegalArgumentException("Unknown resource name: $name")
     }
 }

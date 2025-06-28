@@ -1,20 +1,20 @@
 package com.ownstd.project.authorization.di
 
-import com.ownstd.project.authorization.internal.data.AuthorizationRepositoryImpl
+import com.ownstd.project.authorization.internal.data.repository.AuthServiceImpl
+import com.ownstd.project.authorization.internal.data.repository.AuthorizationRepositoryImpl
+import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.AuthorizationViewModel
-import com.ownstd.project.authorization.internal.storage.TokenStorage
-import com.ownstd.project.authorization.internal.storage.TokenStorageImpl
-import com.ownstd.project.network.di.networkModule
-import com.russhwolf.settings.Settings
+import com.ownstd.project.network.api.di.networkModule
+import com.ownstd.project.storage.di.storageModule
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 fun authorizationModule(): Module = module {
-    includes(networkModule())
-    single { Settings() }
-    single<TokenStorage> { TokenStorageImpl(settings = get()) }
+    includes(networkModule)
+    includes(storageModule)
+
     factory<AuthorizationRepository> {
         AuthorizationRepositoryImpl(
             authService = get(),
@@ -23,5 +23,7 @@ fun authorizationModule(): Module = module {
     }
 
     viewModel<AuthorizationViewModel> { AuthorizationViewModel(authorizationRepository = get()) }
+
+    factory<AuthService> { AuthServiceImpl(networkRepository = get()) }
 }
 
