@@ -1,4 +1,4 @@
-package com.ownstd.project.network.model
+package com.ownstd.project.authorization.internal.data.model
 
 import kotlinx.serialization.Serializable
 

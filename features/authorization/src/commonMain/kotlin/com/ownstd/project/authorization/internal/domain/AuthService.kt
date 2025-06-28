@@ -1,6 +1,6 @@
-package com.ownstd.project.network
+package com.ownstd.project.authorization.internal.domain
 
-import com.ownstd.project.network.model.User
+import com.ownstd.project.authorization.internal.data.model.User
 
 interface AuthService {
     suspend fun register(

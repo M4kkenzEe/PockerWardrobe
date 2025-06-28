@@ -1,9 +1,10 @@
-package com.ownstd.project.authorization.internal.data
+package com.ownstd.project.authorization.internal.data.repository
 
+import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
-import com.ownstd.project.authorization.internal.storage.TokenStorage
-import com.ownstd.project.network.AuthService
+import com.ownstd.project.storage.TokenStorage
+import io.ktor.util.rootCause
 
 class AuthorizationRepositoryImpl(
     private val authService: AuthService,

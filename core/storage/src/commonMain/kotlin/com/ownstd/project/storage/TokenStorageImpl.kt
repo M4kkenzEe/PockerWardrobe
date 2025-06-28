@@ -1,4 +1,4 @@
-package com.ownstd.project.authorization.internal.storage
+package com.ownstd.project.storage
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set

@@ -1,4 +1,4 @@
-package com.ownstd.project.authorization.internal.storage
+package com.ownstd.project.storage
 
 interface TokenStorage {
     fun saveToken(token: String)
