@@ -81,6 +81,7 @@ kotlin {
             implementation(project(":features:wardrobe-screen"))
             implementation(project(":features:tiktok-feed"))
             implementation(project(":features:authorization"))
+            implementation(project(":features:profile"))
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

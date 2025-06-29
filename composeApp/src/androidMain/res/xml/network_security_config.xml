@@ -3,7 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">0.0.0.0</domain>
-        <domain includeSubdomains="true">192.168.0.56</domain> <!-- Ваш IP -->
+        <domain includeSubdomains="true">192.168.0.61</domain> <!-- Ваш IP -->
         <domain includeSubdomains="true">192.168.50.108</domain> <!-- Ваш IP -->
     </domain-config>
 </network-security-config>
