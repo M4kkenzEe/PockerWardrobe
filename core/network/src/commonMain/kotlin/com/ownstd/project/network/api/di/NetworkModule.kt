@@ -5,5 +5,5 @@ import com.ownstd.project.network.internal.NetworkRepositoryImpl
 import org.koin.dsl.module
 
 val networkModule = module {
-    single<NetworkRepository> { NetworkRepositoryImpl("http://192.168.50.108:8080") }
+    single<NetworkRepository> { NetworkRepositoryImpl("http://192.168.0.61:8080") }
 }

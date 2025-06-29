@@ -4,7 +4,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 
 
-class TokenStorageImpl(
+internal class TokenStorageImpl(
     private val settings: Settings
 ) : TokenStorage {
     private companion object {
