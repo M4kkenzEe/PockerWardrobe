@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 kotlin {
@@ -68,11 +69,17 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.auth)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation("io.github.suwasto:kmp-capturable-compose:0.1.1")
 
             //coil
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
+
+            implementation(project(":core:storage"))
+            implementation(project(":core:network"))
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
