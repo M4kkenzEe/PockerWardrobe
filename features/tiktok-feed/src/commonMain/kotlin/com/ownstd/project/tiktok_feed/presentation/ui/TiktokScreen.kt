@@ -9,9 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,16 +90,16 @@ fun FeedItemCard(item: FeedItem) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ActionButton(
-                icon = Icons.Default.Favorite,
-                count = "12.3K",
-                contentDescription = "Like"
-            )
-            ActionButton(
-                icon = Icons.Default.Share,
-                count = "1.2K",
-                contentDescription = "Share"
-            )
+//            ActionButton(
+//                icon = Icons.Default.Favorite,
+//                count = "12.3K",
+//                contentDescription = "Like"
+//            )
+//            ActionButton(
+//                icon = Icons.Default.Share,
+//                count = "1.2K",
+//                contentDescription = "Share"
+//            )
         }
 
         // Bottom-left user info and description

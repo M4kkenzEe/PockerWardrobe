@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
 
 
 private const val RED_SWEATER =
@@ -36,7 +42,7 @@ fun SweaterScreen() {
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         items(itemsCount) {
-            ClothesCard(imgUrl = RED_SWEATER)
+//            ClotheCard(imgUrl = RED_SWEATER)
         }
 
         items(if (itemsCount % 2 == 0) 2 else 3) {
@@ -50,15 +56,38 @@ fun SweaterScreen() {
 }
 
 @Composable
-internal fun ClothesCard(imgUrl: String = RED_SWEATER) {
+internal fun ClotheCard(imageRequest: ImageRequest) {
     Box(
         modifier = Modifier
-            .size(160.dp)
+            .wrapContentHeight()
             .clip(RoundedCornerShape(20))
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(model = imgUrl, contentDescription = null)
-        Text("Sweater", color = Color.Black)
+        AsyncImage(
+            model = imageRequest,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+        )
     }
 }
+
+//@Composable
+//internal fun ClotheCard1(imageLoader: ImageLoader, imgUrl: String = RED_SWEATER) {
+//    Box(
+//        modifier = Modifier
+//            .size(160.dp)
+//            .clip(RoundedCornerShape(20))
+//            .background(Color.White),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        AsyncImage(
+//            model = imgUrl,
+//            contentDescription = null,
+//            contentScale = ContentScale.Crop,
+//            imageLoader = imageLoader
+//        )
+//        Text("Sweater", color = Color.Black)
+//    }
+//}

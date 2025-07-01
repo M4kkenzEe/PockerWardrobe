@@ -19,7 +19,7 @@ class ProfileRepositoryImpl(
 
     override suspend fun getProfile(): ProfileResponse {
         return try {
-            val response = client.get("$baseUrl/profile") {
+            val response = client.get(baseUrl + ENDPOINT) {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer ${tokenStorage.getToken()}")
             }
@@ -28,5 +28,9 @@ class ProfileRepositoryImpl(
             println("getProfile Failed: ${e.message}")
             ProfileResponse.emptyBody()
         }
+    }
+
+    companion object {
+        const val ENDPOINT = "profile"
     }
 }

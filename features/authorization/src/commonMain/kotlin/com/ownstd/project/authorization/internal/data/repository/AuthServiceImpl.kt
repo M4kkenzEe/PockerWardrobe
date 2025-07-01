@@ -27,7 +27,7 @@ class AuthServiceImpl(
         gender: String
     ): Result<User> {
         return try {
-            val response = client.post("$baseUrl/register") {
+            val response = client.post(baseUrl + REGISTER_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(username, email, password, gender))
             }
@@ -46,7 +46,7 @@ class AuthServiceImpl(
         password: String
     ): Result<String> {
         return try {
-            val response = client.post("$baseUrl/login") {
+            val response = client.post(baseUrl + LOGIN_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(LoginRequest(username, password))
             }
@@ -59,5 +59,10 @@ class AuthServiceImpl(
             println("Login failed: ${e.message}")
             Result.failure(e)
         }
+    }
+
+    companion object {
+        const val REGISTER_URL = "register"
+        const val LOGIN_URL = "login"
     }
 }
