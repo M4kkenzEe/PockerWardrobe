@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.card.internal.presentation.screens.SettingsScreen
-import com.ownstd.project.card.internal.presentation.screens.ShopScreen
+import com.ownstd.project.card.internal.presentation.screens.Wardrobe
 
 @Composable
 internal fun BottomNavigationNavHost(
@@ -26,7 +26,7 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Shop> {
-            ShopScreen()
+            Wardrobe()
         }
 
         composable<BottomNavigationScreens.Profile> {

@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 import com.ownstd.project.pincard.internal.presentation.compose.WardrobeScreen
 
 @Composable
-internal fun ShopScreen(navigateTo: () -> Unit = {}) {
+internal fun Wardrobe(navigateTo: () -> Unit = {}) {
     WardrobeScreen()
 }

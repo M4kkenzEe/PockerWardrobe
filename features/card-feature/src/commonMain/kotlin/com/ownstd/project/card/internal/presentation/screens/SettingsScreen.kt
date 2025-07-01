@@ -7,6 +7,6 @@ import com.ownstd.project.pincard.internal.presentation.compose.WardrobeScreen
 
 @Composable
 internal fun SettingsScreen(navigateTo: () -> Unit = {}) {
-//    ConstructorScreen()
-    ImagePickerApp()
+    ConstructorScreen()
+//    ImagePickerApp()
 }
