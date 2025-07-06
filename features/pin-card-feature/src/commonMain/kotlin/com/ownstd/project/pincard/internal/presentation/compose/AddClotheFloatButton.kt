@@ -91,11 +91,15 @@ fun AddClotheFloatButton(
 
     }
 
-    FloatingActionButton(onClick = { launchGallery = true }, modifier = modifier) {
+    FloatingActionButton(
+        onClick = { launchGallery = true },
+        modifier = modifier
+    ) {
         Text("+", fontSize = 32.sp)
     }
 
     if (imageBitmap != null) {
         onButtonClick(imageBitmap!!)
+        imageBitmap = null
     }
 }

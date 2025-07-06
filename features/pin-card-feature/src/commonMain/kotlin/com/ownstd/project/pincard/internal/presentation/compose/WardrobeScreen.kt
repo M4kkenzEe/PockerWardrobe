@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +20,8 @@ import coil3.compose.LocalPlatformContext
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
+import com.ownstd.project.network.api.NetworkRepository
+import com.ownstd.project.pincard.internal.parseToHost
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import com.ownstd.project.storage.TokenStorage
 import org.koin.compose.koinInject
@@ -35,29 +37,36 @@ fun WardrobeScreen() {
         .set("Authorization", "Bearer ${storage.getToken()}")
         .build()
 
+    val networkRepository: NetworkRepository = koinInject()
+    val baseUrl = networkRepository.baseUrl
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 60.dp)
+            .padding(bottom = 44.dp)
     ) {
-        LazyVerticalGrid(
+
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalItemSpacing = 12.dp
         ) {
             items(clothes) { clothe ->
                 val request = ImageRequest.Builder(context)
-                    .data(clothe.imageUrl)
+                    .data(clothe.imageUrl.parseToHost(baseUrl))
                     .httpHeaders(headers)
                     .build()
+
+                println("imageUrl: ${clothe.imageUrl.parseToHost(baseUrl)}")
 
                 ClotheCard(request)
             }
 
-            items(if (clothes.size % 2 == 0) 2 else 3) {
+            val count = if (clothes.size % 2 == 0) 2 else 3
+            items(count) {
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -68,7 +77,6 @@ fun WardrobeScreen() {
         AddClotheFloatButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 60.dp)
                 .padding(24.dp),
             onButtonClick = { bitmap -> viewModel.loadClothe(bitmap) }
         )
