@@ -4,7 +4,7 @@ import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewMo
 import com.ownstd.project.pincard.internal.data.repository.WardrobeRepositoryImpl
 import com.ownstd.project.pincard.internal.domain.WardrobeRepository
 import com.ownstd.project.pincard.internal.domain.WardrobeUseCase
-import com.ownstd.project.pincard.internal.presentation.viewmodel.ConstructorViewModel
+import com.ownstd.project.pincard.internal.constructor.ConstructorViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
