@@ -26,7 +26,7 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Shop> {
-            Wardrobe()
+            Wardrobe(navController)
         }
 
         composable<BottomNavigationScreens.Profile> {

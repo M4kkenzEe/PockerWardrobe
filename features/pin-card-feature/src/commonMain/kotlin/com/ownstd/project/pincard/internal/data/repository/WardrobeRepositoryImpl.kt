@@ -1,10 +1,9 @@
 package com.ownstd.project.pincard.internal.data.repository
 
 import androidx.compose.ui.graphics.ImageBitmap
-import coil3.Bitmap
 import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.Clothe
-import com.ownstd.project.pincard.internal.domain.WardrobeRepository
+import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
 import com.ownstd.project.storage.TokenStorage
 import io.github.suwasto.capturablecompose.CompressionFormat
 import io.github.suwasto.capturablecompose.toByteArray
@@ -18,10 +17,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.core.writeFully
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 
 class WardrobeRepositoryImpl(
     private val networkRepository: NetworkRepository,
@@ -65,8 +62,24 @@ class WardrobeRepositoryImpl(
         }
     }
 
+    override suspend fun uploadFromUrl(pageUrl: String): Clothe {
+        val response = client.get(baseUrl + ENDPOINT + FROM_URL) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $token")
+            url {
+                parameters.append("url", pageUrl)
+            }
+        }
+        return if (response.status.isSuccess()) {
+            response.body()
+        } else {
+            Clothe.empty()
+        }
+    }
+
     companion object {
         private const val ENDPOINT = "clothes"
+        private const val FROM_URL = "/from_url"
     }
 }
 

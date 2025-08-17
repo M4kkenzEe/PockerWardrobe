@@ -1,9 +1,12 @@
 package com.ownstd.project.card.internal.presentation.screens
 
 import androidx.compose.runtime.Composable
-import com.ownstd.project.pincard.internal.presentation.compose.WardrobeScreen
+import androidx.navigation.NavHostController
+import com.ownstd.project.pincard.internal.presentation.compose.WardrobeMainScreen
+import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavHost
+
 
 @Composable
-internal fun Wardrobe(navigateTo: () -> Unit = {}) {
-    WardrobeScreen()
+internal fun Wardrobe(navController: NavHostController) {
+    WardrobeMainScreen(){}
 }
