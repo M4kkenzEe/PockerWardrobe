@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import kotlinprojecttesting.features.pin_card_feature.generated.resources.Res
-import kotlinprojecttesting.features.pin_card_feature.generated.resources.ggg
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.ggg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -49,7 +49,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
 
-            implementation(project(":features:pin-card-feature"))
+            implementation(project(":features:wardrobe-feature"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

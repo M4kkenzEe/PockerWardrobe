@@ -78,9 +78,8 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
 
-            implementation(project(":features:pin-card-feature"))
+            implementation(project(":features:wardrobe-feature"))
             implementation(project(":features:recommendations-page-screen"))
-            implementation(project(":features:wardrobe-screen"))
             implementation(project(":features:tiktok-feed"))
             implementation(project(":features:authorization"))
             implementation(project(":features:profile"))

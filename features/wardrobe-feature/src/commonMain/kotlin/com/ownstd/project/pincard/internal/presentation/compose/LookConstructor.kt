@@ -3,7 +3,10 @@ package com.ownstd.project.pincard.internal.presentation.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -29,8 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -52,7 +57,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun LookConstructor() {
+fun LookConstructor(backClick: () -> Unit = {}) {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<ConstructorViewModel>()
 
@@ -72,6 +77,7 @@ fun LookConstructor() {
 
     Scaffold(
         modifier = Modifier.padding(bottom = 44.dp),
+        topBar = { SimpleTopBar(backClick) }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -190,3 +196,22 @@ internal fun ClotheItem(
     }
 }
 
+
+@Composable
+fun SimpleTopBar(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(onClick = onClick) {
+            Text(
+                text = "<-",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+    }
+
+}

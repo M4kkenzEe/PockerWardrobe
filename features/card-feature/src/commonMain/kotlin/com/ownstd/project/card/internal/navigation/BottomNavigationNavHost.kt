@@ -10,6 +10,7 @@ import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.card.internal.presentation.screens.SettingsScreen
 import com.ownstd.project.card.internal.presentation.screens.Wardrobe
+import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGraph
 
 @Composable
 internal fun BottomNavigationNavHost(
@@ -36,6 +37,8 @@ internal fun BottomNavigationNavHost(
         composable<BottomNavigationScreens.Outfits> {
             SettingsScreen()
         }
+
+        wardrobeNavGraph(navController)
     }
 }
 
