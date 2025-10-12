@@ -1,4 +1,4 @@
-package com.ownstd.project.pincard.internal.presentation.compose
+package com.ownstd.project.pincard.internal.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,12 +17,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.ownstd.project.pincard.internal.presentation.compose.Looks
+import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
+import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun WardrobeMainScreen(openConstructor: () -> Unit) {
+fun WardrobeMainScreen(
+    openConstructor: (destination: WardrobeNavScreens) -> Unit = {}
+) {
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -34,7 +40,7 @@ fun WardrobeMainScreen(openConstructor: () -> Unit) {
             when (page) {
                 0 -> Wardrobe(wardrobeViewModel)
                 else -> Looks(looksViewModel) {
-                    openConstructor()
+                    openConstructor(WardrobeNavScreens.LookConstructor)
                 }
             }
         }

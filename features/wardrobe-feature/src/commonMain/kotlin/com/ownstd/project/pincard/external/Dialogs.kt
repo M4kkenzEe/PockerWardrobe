@@ -29,8 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinprojecttesting.features.pin_card_feature.generated.resources.Res
-import kotlinprojecttesting.features.pin_card_feature.generated.resources.ggg
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.ggg
 import org.jetbrains.compose.resources.painterResource
 
 @Composable

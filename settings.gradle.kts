@@ -30,9 +30,8 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":features:card-feature")
-include(":features:pin-card-feature")
+include(":features:wardrobe-feature")
 include(":features:recommendations-page-screen")
-include(":features:wardrobe-screen")
 include(":design-system")
 include(":features:tiktok-feed")
 include(":core:database")
