@@ -17,17 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.ownstd.project.pincard.internal.presentation.compose.Looks
 import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
-import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun WardrobeMainScreen(
-    openConstructor: (destination: WardrobeNavScreens) -> Unit = {}
+    openConstructor: () -> Unit = {},
+    openDetails: (url: Int) -> Unit = {},
 ) {
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
@@ -39,13 +38,15 @@ fun WardrobeMainScreen(
         ) { page ->
             when (page) {
                 0 -> Wardrobe(wardrobeViewModel)
-                else -> Looks(looksViewModel) {
-                    openConstructor(WardrobeNavScreens.LookConstructor)
-                }
+                else -> Looks(
+                    viewModel = looksViewModel,
+                    onNavigateToConstructor = openConstructor,
+                    navigateToDetails = openDetails
+                )
             }
         }
         Row(
-            Modifier
+            modifier = Modifier
                 .wrapContentHeight()
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),

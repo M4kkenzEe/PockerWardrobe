@@ -1,9 +1,9 @@
 package com.ownstd.project.pincard.internal.data.repository
 
 import com.ownstd.project.network.api.NetworkRepository
+import com.ownstd.project.pincard.internal.data.model.DraftLook
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
-import com.ownstd.project.pincard.internal.data.model.LookResponse
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.call.body
@@ -25,8 +25,8 @@ class LookRepositoryImpl(
     val client = networkRepository.getClient()
     val baseUrl = networkRepository.baseUrl
     val token = storage.getToken()
-    override suspend fun getLooks(): List<LookResponse> {
-        var response = emptyList<LookResponse>()
+    override suspend fun getLooks(): List<Look> {
+        var response = emptyList<Look>()
         try {
             response = client.get(baseUrl + ENDPOINT) {
                 contentType(ContentType.Application.Json)
@@ -39,7 +39,7 @@ class LookRepositoryImpl(
     }
 
     override suspend fun addLook(
-        look: Look,
+        look: DraftLook,
         image: ByteArray
     ): LookRepositoryResult<Unit> {
         return try {
@@ -62,7 +62,7 @@ class LookRepositoryImpl(
             )
 
 
-            val lookWithImage = LookResponse(
+            val lookWithImage = Look(
                 name = look.name,
                 lookItems = look.lookItems,
                 url = imageUrl
@@ -81,9 +81,23 @@ class LookRepositoryImpl(
         }
     }
 
+    override suspend fun getLookById(lookId: Int): Look? {
+        var response: Look? = null
+        try {
+            response = client.get(baseUrl + ENDPOINT + BY_ID + lookId.toString()) {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR: ${e.message}")
+        }
+        return response
+    }
+
 
     companion object {
         private const val ENDPOINT = "looks"
         private const val ADD_IMAGE = "/uploadImage"
+        private const val BY_ID = "/byId/"
     }
 }

@@ -19,7 +19,11 @@ import androidx.compose.ui.unit.sp
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 
 @Composable
-internal fun Looks(viewModel: LooksViewModel, onNavigateToConstructor: () -> Unit) {
+internal fun Looks(
+    viewModel: LooksViewModel,
+    onNavigateToConstructor: () -> Unit,
+    navigateToDetails: (lookId: Int) -> Unit
+) {
 
     val looksList by viewModel.looks.collectAsState()
 
@@ -37,11 +41,16 @@ internal fun Looks(viewModel: LooksViewModel, onNavigateToConstructor: () -> Uni
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(looksList) { look ->
-                LookCard(look.url)
+                LookCard(
+                    lookUrl = look.url,
+                    onClick = { navigateToDetails(look.id ?: 0) }
+                )
             }
         }
         FloatingActionButton(
-            onClick = { onNavigateToConstructor() },
+            onClick = {
+                onNavigateToConstructor()
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(24.dp)

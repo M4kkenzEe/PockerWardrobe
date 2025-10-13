@@ -2,14 +2,14 @@ package com.ownstd.project.card.internal.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
-import com.ownstd.project.card.internal.presentation.screens.SettingsScreen
-import com.ownstd.project.card.internal.presentation.screens.Wardrobe
+import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGraph
 
 @Composable
@@ -27,15 +27,16 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Shop> {
-            Wardrobe(navController)
+            LaunchedEffect(Unit) {
+                navController.navigate(WardrobeNavScreens.Wardrobe) {
+                    popUpTo(BottomNavigationScreens.Shop()) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         }
 
         composable<BottomNavigationScreens.Profile> {
             ProfileScreen()
-        }
-
-        composable<BottomNavigationScreens.Outfits> {
-            SettingsScreen()
         }
 
         wardrobeNavGraph(navController)

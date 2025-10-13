@@ -8,4 +8,7 @@ sealed class WardrobeNavScreens {
 
     @Serializable
     data object Wardrobe : WardrobeNavScreens()
+
+    @Serializable
+    data class LookDetails(val lookId: Int) : WardrobeNavScreens()
 }
