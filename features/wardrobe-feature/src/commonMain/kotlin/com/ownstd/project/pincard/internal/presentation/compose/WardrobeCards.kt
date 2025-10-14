@@ -1,11 +1,20 @@
 package com.ownstd.project.pincard.internal.presentation.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +52,12 @@ internal fun ClotheCard(imageRequest: ImageRequest) {
 }
 
 @Composable
-internal fun LookCard(lookUrl: String) {
+internal fun LookCard(
+    lookUrl: String,
+    onClick: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onShare: () -> Unit = {}
+) {
     val context = LocalPlatformContext.current
     val storage: TokenStorage = koinInject()
     val headers = NetworkHeaders.Builder()
@@ -52,11 +66,17 @@ internal fun LookCard(lookUrl: String) {
     val networkRepository: NetworkRepository = koinInject()
     val baseUrl = networkRepository.baseUrl
 
+    var dropDownMenuState by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .height(300.dp)
             .clip(RoundedCornerShape(20))
-            .background(Color.White),
+            .background(Color.White)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { dropDownMenuState = true }
+            ),
         contentAlignment = Alignment.Center
     ) {
 
@@ -74,5 +94,29 @@ internal fun LookCard(lookUrl: String) {
             modifier = Modifier
         )
 
+        DropdownMenu(
+            expanded = dropDownMenuState,
+            onDismissRequest = { dropDownMenuState = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    onShare()
+                    dropDownMenuState = false
+                }
+            ) { Text("Поделиться") }
+
+            Divider(
+                modifier = Modifier
+                    .height(1.dp)
+                    .background(Color.Gray)
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    onDelete()
+                    dropDownMenuState = false
+                }
+            ) { Text("Удалить") }
+        }
     }
 }

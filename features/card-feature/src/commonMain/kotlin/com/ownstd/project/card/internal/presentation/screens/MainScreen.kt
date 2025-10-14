@@ -65,7 +65,6 @@ internal fun BottomNavigationBar(navController: NavHostController) {
         val screens = listOf(
             BottomNavigationScreens.Home(),
             BottomNavigationScreens.Shop(),
-            BottomNavigationScreens.Outfits(),
             BottomNavigationScreens.Profile()
         )
         for (item in screens) {

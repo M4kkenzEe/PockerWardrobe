@@ -2,7 +2,7 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ownstd.project.pincard.internal.data.model.LookResponse
+import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -14,7 +14,7 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
         getLooks()
     }
 
-    val looks = MutableStateFlow<List<LookResponse>>(emptyList())
+    val looks = MutableStateFlow<List<Look>>(emptyList())
     fun getLooks() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {

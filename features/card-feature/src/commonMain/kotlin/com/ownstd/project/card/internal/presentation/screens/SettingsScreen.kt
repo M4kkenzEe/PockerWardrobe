@@ -6,5 +6,4 @@ import com.ownstd.project.pincard.internal.presentation.compose.LookConstructor
 @Composable
 internal fun SettingsScreen(navigateTo: () -> Unit = {}) {
     LookConstructor()
-//    ImagePickerApp()
 }

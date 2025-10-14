@@ -8,6 +8,7 @@ import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import com.ownstd.project.pincard.internal.presentation.viewmodel.ConstructorViewModel
+import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -24,6 +25,7 @@ val pinCardModule = module {
     }
 
     viewModel { LooksViewModel(useCase = get()) }
+    viewModel { (lookId: Int) -> LookDetailsViewModel(useCase = get(), lookId = lookId) }
     single { LookUseCase(lookRepository = get()) }
     factory<LookRepository> {
         LookRepositoryImpl(

@@ -3,8 +3,7 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
-import com.ownstd.project.pincard.internal.data.model.Look
-import com.ownstd.project.pincard.internal.data.model.LookResponse
+import com.ownstd.project.pincard.internal.data.model.DraftLook
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
@@ -82,7 +81,7 @@ internal class ConstructorViewModel(
     fun save(image: ByteArray) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = lookUseCase.addLook(
-                look = Look(
+                look = DraftLook(
                     name = "",
                     lookItems = _pickedClotheList.value
                         .sortedBy { it.zIndex }
