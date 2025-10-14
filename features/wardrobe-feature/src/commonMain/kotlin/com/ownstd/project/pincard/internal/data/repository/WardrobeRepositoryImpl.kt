@@ -8,6 +8,7 @@ import com.ownstd.project.storage.TokenStorage
 import io.github.suwasto.capturablecompose.CompressionFormat
 import io.github.suwasto.capturablecompose.toByteArray
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.append
 import io.ktor.client.request.forms.formData
@@ -74,6 +75,17 @@ class WardrobeRepositoryImpl(
             response.body()
         } else {
             Clothe.empty()
+        }
+    }
+
+    override suspend fun deleteClothe(clotheId: Int) {
+        try {
+            client.delete("$baseUrl/$ENDPOINT/$clotheId") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR: ${e.message}")
         }
     }
 

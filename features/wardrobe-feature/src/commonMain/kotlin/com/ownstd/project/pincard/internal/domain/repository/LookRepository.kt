@@ -8,4 +8,5 @@ internal interface LookRepository {
     suspend fun getLooks(): List<Look>
     suspend fun addLook(look: DraftLook, image: ByteArray): LookRepositoryResult<Unit>
     suspend fun getLookById(lookId: Int): Look?
+    suspend fun deleteLook(lookId: Int)
 }

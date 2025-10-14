@@ -43,7 +43,8 @@ internal fun Looks(
             items(looksList) { look ->
                 LookCard(
                     lookUrl = look.url,
-                    onClick = { navigateToDetails(look.id ?: 0) }
+                    onClick = { navigateToDetails(look.id ?: 0) },
+                    onDelete = { viewModel.deleteLook(look.id!!) }
                 )
             }
         }

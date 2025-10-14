@@ -34,12 +34,23 @@ import com.ownstd.project.storage.TokenStorage
 import org.koin.compose.koinInject
 
 @Composable
-internal fun ClotheCard(imageRequest: ImageRequest) {
+internal fun ClotheCard(
+    imageRequest: ImageRequest,
+    onClick: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onShare: () -> Unit = {}
+) {
+    var dropDownMenuState by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(20))
-            .background(Color.White),
+            .background(Color.White)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { dropDownMenuState = true }
+            ),
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
@@ -48,6 +59,30 @@ internal fun ClotheCard(imageRequest: ImageRequest) {
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
         )
+        DropdownMenu(
+            expanded = dropDownMenuState,
+            onDismissRequest = { dropDownMenuState = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    onShare()
+                    dropDownMenuState = false
+                }
+            ) { Text("Поделиться") }
+
+            Divider(
+                modifier = Modifier
+                    .height(1.dp)
+                    .background(Color.Gray)
+            )
+
+            DropdownMenuItem(
+                onClick = {
+                    onDelete()
+                    dropDownMenuState = false
+                }
+            ) { Text("Удалить") }
+        }
     }
 }
 

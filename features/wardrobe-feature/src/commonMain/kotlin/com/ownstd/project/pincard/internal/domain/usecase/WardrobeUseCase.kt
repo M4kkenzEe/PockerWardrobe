@@ -16,4 +16,8 @@ internal class WardrobeUseCase(private val wardrobeRepository: WardrobeRepositor
     suspend fun uploadFromUrl(pageUrl: String): Clothe {
         return wardrobeRepository.uploadFromUrl(pageUrl)
     }
+
+    suspend fun delete(clotheId: Int) {
+        wardrobeRepository.deleteClothe(clotheId)
+    }
 }

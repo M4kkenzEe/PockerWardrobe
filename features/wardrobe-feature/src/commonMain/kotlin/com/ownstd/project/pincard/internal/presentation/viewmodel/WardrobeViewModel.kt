@@ -49,4 +49,11 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
             }
         }
     }
+
+    fun deleteClothe(clotheId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            useCase.delete(clotheId)
+            getClothes()
+        }
+    }
 }

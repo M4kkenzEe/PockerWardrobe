@@ -16,4 +16,8 @@ internal class LookUseCase(private val lookRepository: LookRepository) {
     suspend fun getLookById(lookId: Int): Look? {
         return lookRepository.getLookById(lookId)
     }
+
+    suspend fun deleteLook(lookId: Int) {
+        lookRepository.deleteLook(lookId)
+    }
 }

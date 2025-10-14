@@ -15,7 +15,7 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     }
 
     val looks = MutableStateFlow<List<Look>>(emptyList())
-    fun getLooks() {
+    private fun getLooks() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 useCase.getLooks()
@@ -24,6 +24,13 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
             }.onFailure { exception ->
                 println(exception)
             }
+        }
+    }
+
+    fun deleteLook(lookId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            useCase.deleteLook(lookId)
+            getLooks()
         }
     }
 }

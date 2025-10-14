@@ -7,6 +7,7 @@ import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
@@ -92,6 +93,17 @@ class LookRepositoryImpl(
             println("ERR: ${e.message}")
         }
         return response
+    }
+
+    override suspend fun deleteLook(lookId: Int) {
+        try {
+            client.delete("$baseUrl/$ENDPOINT/$lookId") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR: ${e.message}")
+        }
     }
 
 

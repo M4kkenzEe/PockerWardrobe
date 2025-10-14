@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.LocalPlatformContext
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
@@ -73,9 +74,10 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                     .httpHeaders(headers)
                     .build()
 
-                println("imageUrl: ${clothe.imageUrl.parseToHost(baseUrl)}")
-
-                ClotheCard(request)
+                ClotheCard(
+                    imageRequest = request,
+                    onDelete = { viewModel.deleteClothe(clothe.id!!) }
+                )
             }
 
             val count = if (clothes.size % 2 == 0) 2 else 3
