@@ -108,7 +108,6 @@ internal class ConstructorViewModel(
         }
     }
 
-
     init {
         updateWardrobe()
     }

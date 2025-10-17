@@ -10,12 +10,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
-    init {
-        getLooks()
-    }
-
     val looks = MutableStateFlow<List<Look>>(emptyList())
-    private fun getLooks() {
+    fun getLooks() {
+        println("GGG : getlooks")
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 useCase.getLooks()

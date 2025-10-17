@@ -77,7 +77,9 @@ fun LookConstructor(backClick: () -> Unit = {}) {
 
     Scaffold(
         modifier = Modifier.padding(bottom = 44.dp),
-        topBar = { SimpleTopBar(backClick) }
+        topBar = {
+            SimpleTopBar(onClick = backClick)
+        }
     ) { padding ->
         Box(
             modifier = Modifier
