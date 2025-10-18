@@ -62,10 +62,13 @@ import kotlin.math.roundToInt
 
 @Composable
 fun LookDetailsScreen(
-    lookId: Int,
+    lookId: Int? = null,
+    shareToken: String? = null,
     onBackClick: () -> Unit = {}
 ) {
-    val viewModel: LookDetailsViewModel = koinViewModel { parametersOf(lookId) }
+    val viewModel: LookDetailsViewModel = koinViewModel {
+        parametersOf(lookId, shareToken)
+    }
     val look by viewModel.look.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
@@ -140,7 +143,11 @@ fun LookDetailsScreen(
         LookDetailsTopBar(
             lookName = currentLook.name,
             onBackClick = onBackClick,
-            onAddToWardrobe = { viewModel.addToWardrobe() },
+            onAddToWardrobe = {
+                if (shareToken != null) {
+                    viewModel.addToWardrobe(shareToken)
+                }
+            },
             modifier = Modifier.align(Alignment.TopCenter)
         )
     }

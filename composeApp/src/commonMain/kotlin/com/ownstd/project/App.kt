@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import com.ownstd.project.card.api.RootScreen
 import com.ownstd.project.card.internal.di.cardModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 
 @Composable
@@ -17,7 +18,10 @@ fun App() {
 }
 
 fun initKoin() {
-    startKoin {
-        modules(cardModule)
+    // Check if Koin is already started
+    if (GlobalContext.getKoinApplicationOrNull() == null) {
+        startKoin {
+            modules(cardModule)
+        }
     }
 }

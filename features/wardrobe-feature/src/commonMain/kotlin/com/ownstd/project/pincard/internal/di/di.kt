@@ -25,7 +25,9 @@ val pinCardModule = module {
     }
 
     viewModel { LooksViewModel(useCase = get()) }
-    viewModel { (lookId: Int) -> LookDetailsViewModel(useCase = get(), lookId = lookId) }
+    viewModel { (lookId: Int?, shareToken: String?) ->
+        LookDetailsViewModel(useCase = get(), lookId = lookId, shareToken = shareToken)
+    }
     single { LookUseCase(lookRepository = get()) }
     factory<LookRepository> {
         LookRepositoryImpl(

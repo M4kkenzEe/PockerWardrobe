@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.design_system.BG_GREY_COLOR
 import com.ownstd.project.card.design_system.BLUE_COLOR
 import com.ownstd.project.card.design_system.DARK_GREY_COLOR
@@ -40,13 +43,37 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun MainScreen(navController: NavHostController) {
+internal fun MainScreen(parentNavController: NavHostController) {
+    // Create separate NavController for bottom navigation
+    val bottomNavController = rememberNavController()
+
+    // Get deep link from DeepLinkManager
+    val deepLinkManager = com.ownstd.project.card.internal.deeplink.getDeepLinkManager()
+    val currentDeepLink by deepLinkManager.deepLinkFlow.collectAsState()
+
+    // Remember the INITIAL deep link value to use as startDestination
+    // This prevents NavHost from being recreated when deep link is cleared
+    val initialDeepLink = remember { currentDeepLink }
+
+    // Clear deep link after consuming it (only on first composition with deep link)
+    LaunchedEffect(currentDeepLink) {
+        if (currentDeepLink != null) {
+            // Deep link will be used as startDestination in BottomNavigationNavHost
+            // Clear it after the NavHost is created to prevent re-navigation
+            deepLinkManager.clearDeepLink()
+        }
+    }
+
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = { BottomNavigationBar(bottomNavController) },
         modifier = Modifier.fillMaxSize(),
         backgroundColor = BG_GREY_COLOR
     ) {
-        BottomNavigationNavHost(navController, modifier = Modifier.padding(bottom = 40.dp))
+        BottomNavigationNavHost(
+            navController = bottomNavController,
+            deepLink = initialDeepLink,  // Use the remembered initial value
+            modifier = Modifier.padding(bottom = 40.dp)
+        )
     }
 }
 

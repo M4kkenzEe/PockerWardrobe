@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 
 internal class LookDetailsViewModel(
     private val useCase: LookUseCase,
-    lookId: Int
+    lookId: Int? = null,
+    shareToken: String? = null
 ) : ViewModel() {
 
     private val _look = MutableStateFlow<Look?>(null)
@@ -23,8 +24,14 @@ internal class LookDetailsViewModel(
     val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
-//        loadLookByUrl(lookUrl)
-        loadLookById(lookId)
+        when {
+            lookId != null -> loadLookById(lookId)
+            shareToken != null -> loadLookByShareToken(shareToken)
+            else -> {
+                println("LookDetailsViewModel: Error - either lookId or shareToken must be provided")
+                _isLoading.value = false
+            }
+        }
     }
 
     private fun loadLookById(id: Int) {
@@ -37,42 +44,35 @@ internal class LookDetailsViewModel(
                     _look.value = lookResponse
                 }
             }.onFailure { exception ->
-                println("Error loading look: $exception")
+                println("Error loading look by ID: $exception")
             }.also {
                 _isLoading.value = false
             }
         }
     }
 
-//    private fun loadLookByUrl(url: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            _isLoading.value = true
-//            runCatching {
-//                // Получаем все образы и находим нужный по URL
-//                val looks = useCase.getLooks()
-//                looks.find { it.url == url }
-//            }.onSuccess { lookResponse ->
-//                if (lookResponse != null) {
-//                    _look.value = DraftLook(
-//                        name = lookResponse.name,
-//                        lookItems = lookResponse.lookItems,
-////                        url = lookResponse.url
-//                    )
-//                }
-//            }.onFailure { exception ->
-//                println("Error loading look: $exception")
-//            }.also {
-//                _isLoading.value = false
-//            }
-//        }
-//    }
+    private fun loadLookByShareToken(token: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
+            runCatching {
+                useCase.getLookByToken(token)
+            }.onSuccess { lookResponse ->
+                if (lookResponse != null) {
+                    _look.value = lookResponse
+                }
+            }.onFailure { exception ->
+                println("Error loading look by share token: $exception")
+            }.also {
+                _isLoading.value = false
+            }
+        }
+    }
 
-    fun addToWardrobe() {
+    fun addToWardrobe(token: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentLook = _look.value ?: return@launch
             runCatching {
-                // TODO: Реализовать добавление в гардероб
-                // useCase.addLook(currentLook, byteArray)
+                useCase.addLookByShareToken(token)
                 println("Adding look to wardrobe: ${currentLook.name}")
             }.onSuccess {
                 println("Look successfully added to wardrobe")

@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ownstd.project.card.internal.deeplink.DeepLink
 import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
@@ -15,6 +16,7 @@ import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGr
 @Composable
 internal fun BottomNavigationNavHost(
     navController: NavHostController,
+    deepLink: DeepLink? = null,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -40,6 +42,17 @@ internal fun BottomNavigationNavHost(
         }
 
         wardrobeNavGraph(navController)
+    }
+
+    LaunchedEffect(deepLink) {
+        if (deepLink is DeepLink.Look) {
+            val backStackSize = navController.currentBackStack.value.size
+            if (backStackSize <= 2) {
+                navController.navigate(
+                    WardrobeNavScreens.LookDetails(shareToken = deepLink.shareToken)
+                )
+            }
+        }
     }
 }
 

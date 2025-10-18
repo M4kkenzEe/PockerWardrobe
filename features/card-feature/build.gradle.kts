@@ -78,6 +78,7 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
 
+            implementation(project(":core:storage"))
             implementation(project(":features:wardrobe-feature"))
             implementation(project(":features:recommendations-page-screen"))
             implementation(project(":features:tiktok-feed"))

@@ -14,8 +14,8 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             openConstructor = {
                 navController.navigate(WardrobeNavScreens.LookConstructor)
             },
-            openDetails = { url ->
-                navController.navigate(WardrobeNavScreens.LookDetails(url))
+            openDetails = { lookId ->
+                navController.navigate(WardrobeNavScreens.LookDetails(lookId = lookId))
             }
         )
     }
@@ -26,6 +26,7 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
         val lookDetails: WardrobeNavScreens.LookDetails = backStackEntry.toRoute()
         LookDetailsScreen(
             lookId = lookDetails.lookId,
+            shareToken = lookDetails.shareToken,
             onBackClick = { navController.popBackStack() }
         )
     }

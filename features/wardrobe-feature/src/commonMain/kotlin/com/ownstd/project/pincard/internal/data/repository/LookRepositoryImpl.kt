@@ -4,6 +4,7 @@ import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.DraftLook
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
+import com.ownstd.project.pincard.internal.data.model.SharedLookResponse
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.call.body
@@ -95,6 +96,33 @@ class LookRepositoryImpl(
         return response
     }
 
+    override suspend fun getLookByShareToken(token: String): Look? {
+        return try {
+            val sharedResponse: SharedLookResponse = client.get("$baseUrl$SHARED_ENDPOINT/$token") {
+                contentType(ContentType.Application.Json)
+            }.body()
+            sharedResponse.look
+        } catch (e: Exception) {
+            println("ERR getLookByShareToken: ${e.message}")
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun addLookByShareToken(sharedToken: String) {
+        try {
+            client.post("$baseUrl$SHARES_ENDPOINT/$sharedToken/import") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                setBody("""{"importType":"FULL_LOOK"}""")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR getLookByShareToken: ${e.message}")
+            e.printStackTrace()
+            null
+        }
+    }
+
     override suspend fun deleteLook(lookId: Int) {
         try {
             client.delete("$baseUrl/$ENDPOINT/$lookId") {
@@ -111,5 +139,8 @@ class LookRepositoryImpl(
         private const val ENDPOINT = "looks"
         private const val ADD_IMAGE = "/uploadImage"
         private const val BY_ID = "/byId/"
+
+        private const val SHARED_ENDPOINT = "shared"
+        private const val SHARES_ENDPOINT = "shares"
     }
 }

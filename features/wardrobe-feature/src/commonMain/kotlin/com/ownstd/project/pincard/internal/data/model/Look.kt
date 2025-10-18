@@ -21,22 +21,15 @@ data class Look(
     val lookItems: List<LookItem>? = null
 )
 
-//@Serializable
-//data class LookResponse(
-//    val id: Int,
-//    val name: String,
-//    val url: String
-//)
-//
-//@Serializable
-//data class LookRequest(
-//    val name: String,
-//    val url: String,
-//    val lookItems: List<LookItem>
-//)
-
 @Serializable
 data class DraftLook(
     val name: String,
     val lookItems: List<LookItem>
+)
+
+
+@Serializable
+data class SharedLookResponse(
+    val look: Look,
+    val shareToken: String
 )
