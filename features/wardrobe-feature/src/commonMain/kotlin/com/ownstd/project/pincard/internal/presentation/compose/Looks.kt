@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
+import com.ownstd.project.storage.getClipboardManager
 
 @Composable
 internal fun Looks(
@@ -26,6 +27,7 @@ internal fun Looks(
     navigateToDetails: (lookId: Int) -> Unit
 ) {
     val looksList by viewModel.looks.collectAsState()
+    val clipboardManager = rememberClipboardManager()
 
     Box(
         modifier = Modifier
@@ -44,7 +46,12 @@ internal fun Looks(
                 LookCard(
                     lookUrl = look.url,
                     onClick = { navigateToDetails(look.id ?: 0) },
-                    onDelete = { viewModel.deleteLook(look.id!!) }
+                    onDelete = { viewModel.deleteLook(look.id!!) },
+                    onShare = {
+                        viewModel.shareLook(look.id!!) { shareUrl ->
+                            clipboardManager.copyToClipboard(shareUrl)
+                        }
+                    }
                 )
             }
         }
@@ -60,3 +67,6 @@ internal fun Looks(
         }
     }
 }
+
+@Composable
+expect fun rememberClipboardManager(): com.ownstd.project.storage.ClipboardManager

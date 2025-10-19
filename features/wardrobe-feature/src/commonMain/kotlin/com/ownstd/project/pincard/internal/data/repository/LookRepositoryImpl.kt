@@ -4,6 +4,7 @@ import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.DraftLook
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
+import com.ownstd.project.pincard.internal.data.model.ShareResponse
 import com.ownstd.project.pincard.internal.data.model.SharedLookResponse
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import com.ownstd.project.storage.TokenStorage
@@ -131,6 +132,19 @@ class LookRepositoryImpl(
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")
+        }
+    }
+
+    override suspend fun shareLook(lookId: Int): ShareResponse? {
+        return try {
+            client.post("$baseUrl$ENDPOINT/$lookId/share") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR shareLook: ${e.message}")
+            e.printStackTrace()
+            null
         }
     }
 

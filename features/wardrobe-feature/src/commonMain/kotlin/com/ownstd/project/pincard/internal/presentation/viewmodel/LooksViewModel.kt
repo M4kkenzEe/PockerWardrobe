@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     val looks = MutableStateFlow<List<Look>>(emptyList())
+
     fun getLooks() {
         println("GGG : getlooks")
         viewModelScope.launch(Dispatchers.IO) {
@@ -28,6 +29,20 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             useCase.deleteLook(lookId)
             getLooks()
+        }
+    }
+
+    fun shareLook(lookId: Int, onSuccess: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                useCase.shareLook(lookId)
+            }.onSuccess { response ->
+                response?.let {
+                    onSuccess(it.shareUrl)
+                }
+            }.onFailure { exception ->
+                println("ERR shareLook ViewModel: ${exception.message}")
+            }
         }
     }
 }

@@ -33,3 +33,9 @@ data class SharedLookResponse(
     val look: Look,
     val shareToken: String
 )
+
+@Serializable
+data class ShareResponse(
+    val shareToken: String,
+    val shareUrl: String
+)
