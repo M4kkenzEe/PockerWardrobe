@@ -28,11 +28,13 @@ class WardrobeRepositoryImpl(
 
     val client = networkRepository.getClient()
     val baseUrl = networkRepository.baseUrl
-    val token = storage.getToken()
+
+    private fun getToken(): String? = storage.getToken()
+
     override suspend fun getClothes(): List<Clothe> {
         return client.get(baseUrl + ENDPOINT) {
             contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $token")
+            header("Authorization", "Bearer ${getToken()}")
         }.body()
     }
 
@@ -43,7 +45,7 @@ class WardrobeRepositoryImpl(
 
         client.post(baseUrl + ENDPOINT) {
             contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $token")
+            header("Authorization", "Bearer ${getToken()}")
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -66,7 +68,7 @@ class WardrobeRepositoryImpl(
     override suspend fun uploadFromUrl(pageUrl: String): Clothe {
         val response = client.get(baseUrl + ENDPOINT + FROM_URL) {
             contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $token")
+            header("Authorization", "Bearer ${getToken()}")
             url {
                 parameters.append("url", pageUrl)
             }
@@ -82,7 +84,7 @@ class WardrobeRepositoryImpl(
         try {
             client.delete("$baseUrl/$ENDPOINT/$clotheId") {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")

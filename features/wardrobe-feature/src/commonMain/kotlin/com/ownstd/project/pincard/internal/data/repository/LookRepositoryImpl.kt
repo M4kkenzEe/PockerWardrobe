@@ -27,13 +27,15 @@ class LookRepositoryImpl(
 ) : LookRepository {
     val client = networkRepository.getClient()
     val baseUrl = networkRepository.baseUrl
-    val token = storage.getToken()
+
+    private fun getToken(): String? = storage.getToken()
+
     override suspend fun getLooks(): List<Look> {
         var response = emptyList<Look>()
         try {
             response = client.get(baseUrl + ENDPOINT) {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")
@@ -47,7 +49,7 @@ class LookRepositoryImpl(
     ): LookRepositoryResult<Unit> {
         return try {
             val uploadResponse = client.post(baseUrl + ENDPOINT + ADD_IMAGE) {
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
                 setBody(
                     MultiPartFormDataContent(
                         formData {
@@ -72,7 +74,7 @@ class LookRepositoryImpl(
             )
 
             client.post(baseUrl + ENDPOINT) {
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
                 contentType(ContentType.Application.Json)
                 setBody(lookWithImage)
             }
@@ -89,7 +91,7 @@ class LookRepositoryImpl(
         try {
             response = client.get(baseUrl + ENDPOINT + BY_ID + lookId.toString()) {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")
@@ -114,7 +116,7 @@ class LookRepositoryImpl(
         try {
             client.post("$baseUrl$SHARES_ENDPOINT/$sharedToken/import") {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
                 setBody("""{"importType":"FULL_LOOK"}""")
             }.body()
         } catch (e: Exception) {
@@ -128,7 +130,7 @@ class LookRepositoryImpl(
         try {
             client.delete("$baseUrl/$ENDPOINT/$lookId") {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")
@@ -139,7 +141,7 @@ class LookRepositoryImpl(
         return try {
             client.post("$baseUrl$ENDPOINT/$lookId/share") {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
+                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR shareLook: ${e.message}")

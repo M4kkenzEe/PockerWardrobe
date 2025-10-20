@@ -16,7 +16,7 @@ import org.koin.dsl.module
 val pinCardModule = module {
     viewModel { ConstructorViewModel(wardrobeUseCase = get(), lookUseCase = get()) }
     viewModel { WardrobeViewModel(useCase = get()) }
-    single { WardrobeUseCase(wardrobeRepository = get()) }
+    factory { WardrobeUseCase(wardrobeRepository = get()) }
     factory<WardrobeRepository> {
         WardrobeRepositoryImpl(
             networkRepository = get(),
@@ -28,7 +28,7 @@ val pinCardModule = module {
     viewModel { (lookId: Int?, shareToken: String?) ->
         LookDetailsViewModel(useCase = get(), lookId = lookId, shareToken = shareToken)
     }
-    single { LookUseCase(lookRepository = get()) }
+    factory { LookUseCase(lookRepository = get()) }
     factory<LookRepository> {
         LookRepositoryImpl(
             networkRepository = get(),
