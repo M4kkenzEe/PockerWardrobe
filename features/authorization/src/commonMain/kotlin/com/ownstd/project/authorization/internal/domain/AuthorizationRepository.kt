@@ -10,4 +10,5 @@ interface AuthorizationRepository {
         password: String,
         gender: Gender
     ): Boolean
+    fun logout()
 }

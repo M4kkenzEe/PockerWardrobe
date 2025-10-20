@@ -44,4 +44,9 @@ class AuthorizationRepositoryImpl(
             }
         return result
     }
+
+    override fun logout() {
+        tokenStorage.clearToken()
+        println("Logout successful - token cleared")
+    }
 }

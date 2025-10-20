@@ -59,6 +59,7 @@ kotlin {
 
             implementation(project(":core:network"))
             implementation(project(":core:storage"))
+            implementation(project(":features:authorization"))
 
         }
         commonTest.dependencies {

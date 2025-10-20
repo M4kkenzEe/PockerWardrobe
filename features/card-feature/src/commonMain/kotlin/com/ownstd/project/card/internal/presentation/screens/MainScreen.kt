@@ -34,6 +34,7 @@ import com.ownstd.project.card.design_system.BG_GREY_COLOR
 import com.ownstd.project.card.design_system.BLUE_COLOR
 import com.ownstd.project.card.design_system.DARK_GREY_COLOR
 import com.ownstd.project.card.design_system.GREY_COLOR
+import com.ownstd.project.card.internal.navigation.AppScreens
 import com.ownstd.project.card.internal.navigation.BottomNavigationNavHost
 import com.ownstd.project.card.internal.navigation.BottomNavigationScreens
 import kotlinprojecttesting.features.card_feature.generated.resources.Res
@@ -72,6 +73,13 @@ internal fun MainScreen(parentNavController: NavHostController) {
         BottomNavigationNavHost(
             navController = bottomNavController,
             deepLink = initialDeepLink,  // Use the remembered initial value
+            onLogout = {
+                // Navigate to Authorization screen and clear backstack
+                parentNavController.navigate(AppScreens.Authorization) {
+                    popUpTo(AppScreens.Main) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
             modifier = Modifier.padding(bottom = 40.dp)
         )
     }

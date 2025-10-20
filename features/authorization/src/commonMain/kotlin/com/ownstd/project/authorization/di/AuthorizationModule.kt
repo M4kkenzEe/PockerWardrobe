@@ -4,6 +4,7 @@ import com.ownstd.project.authorization.internal.data.repository.AuthServiceImpl
 import com.ownstd.project.authorization.internal.data.repository.AuthorizationRepositoryImpl
 import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
+import com.ownstd.project.authorization.internal.domain.LogoutUseCase
 import com.ownstd.project.authorization.internal.presentation.AuthorizationViewModel
 import com.ownstd.project.network.api.di.networkModule
 import com.ownstd.project.storage.di.storageModule
@@ -21,6 +22,8 @@ fun authorizationModule(): Module = module {
             tokenStorage = get()
         )
     }
+
+    single { LogoutUseCase(authorizationRepository = get()) }
 
     viewModel<AuthorizationViewModel> { AuthorizationViewModel(authorizationRepository = get()) }
 

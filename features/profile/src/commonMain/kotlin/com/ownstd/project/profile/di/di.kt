@@ -1,5 +1,6 @@
 package com.ownstd.project.profile.di
 
+import com.ownstd.project.authorization.di.authorizationModule
 import com.ownstd.project.network.api.di.networkModule
 import com.ownstd.project.profile.data.ProfileRepositoryImpl
 import com.ownstd.project.profile.domain.ProfileRepository
@@ -9,7 +10,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val profileModule = module {
-    includes(networkModule)
+    includes(networkModule, authorizationModule())
 
     factory<ProfileRepository> {
         ProfileRepositoryImpl(
@@ -19,5 +20,5 @@ val profileModule = module {
     }
     single { ProfileUseCase(repository = get()) }
 
-    viewModel<ProfileViewModel> { ProfileViewModel(profileUseCase = get()) }
+    viewModel<ProfileViewModel> { ProfileViewModel(profileUseCase = get(), logoutUseCase = get()) }
 }

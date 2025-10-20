@@ -4,10 +4,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +30,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(onLogout: () -> Unit = {}) {
     val viewModel: ProfileViewModel = koinViewModel()
     val userState by viewModel.profileState.collectAsState()
     if (userState != null) {
@@ -80,6 +83,22 @@ fun ProfileScreen() {
                     style = MaterialTheme.typography.body2,
                     color = Color.White
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        viewModel.logout()
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Red.copy(alpha = 0.8f),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.6f)
+                ) {
+                    Text("Выйти")
+                }
             }
         }
     } else {

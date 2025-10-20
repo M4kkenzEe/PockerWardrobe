@@ -17,6 +17,7 @@ import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGr
 internal fun BottomNavigationNavHost(
     navController: NavHostController,
     deepLink: DeepLink? = null,
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -38,7 +39,7 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Profile> {
-            ProfileScreen()
+            ProfileScreen(onLogout = onLogout)
         }
 
         wardrobeNavGraph(navController)
