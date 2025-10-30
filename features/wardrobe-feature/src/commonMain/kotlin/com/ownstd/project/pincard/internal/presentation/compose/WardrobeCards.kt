@@ -22,20 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import coil3.size.Precision
-import com.ownstd.project.network.api.NetworkRepository
-import com.ownstd.project.pincard.internal.parseToHost
-import com.ownstd.project.storage.TokenStorage
-import org.koin.compose.koinInject
+import com.ownstd.project.pincard.internal.replaceFragment
 
 @Composable
 internal fun ClotheCard(
-    imageRequest: ImageRequest,
+    clotheUrl: String = "",
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
     onShare: () -> Unit = {}
@@ -54,7 +45,7 @@ internal fun ClotheCard(
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
-            model = imageRequest,
+            model = clotheUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
@@ -93,14 +84,6 @@ internal fun LookCard(
     onDelete: () -> Unit = {},
     onShare: () -> Unit = {}
 ) {
-    val context = LocalPlatformContext.current
-    val storage: TokenStorage = koinInject()
-    val headers = NetworkHeaders.Builder()
-        .set("Authorization", "Bearer ${storage.getToken()}")
-        .build()
-    val networkRepository: NetworkRepository = koinInject()
-    val baseUrl = networkRepository.baseUrl
-
     var dropDownMenuState by remember { mutableStateOf(false) }
 
     Box(
@@ -114,16 +97,8 @@ internal fun LookCard(
             ),
         contentAlignment = Alignment.Center
     ) {
-
-        val request = ImageRequest.Builder(context)
-            .data(lookUrl.parseToHost(baseUrl))
-            .httpHeaders(headers)
-            .crossfade(true)
-            .precision(Precision.EXACT)
-            .build()
-
         AsyncImage(
-            model = request,
+            model = lookUrl.replaceFragment(),
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier

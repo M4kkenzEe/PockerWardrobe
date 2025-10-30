@@ -128,7 +128,7 @@ class LookRepositoryImpl(
 
     override suspend fun deleteLook(lookId: Int) {
         try {
-            client.delete("$baseUrl/$ENDPOINT/$lookId") {
+            client.delete("$baseUrl$ENDPOINT/$lookId") {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer ${getToken()}")
             }.body()

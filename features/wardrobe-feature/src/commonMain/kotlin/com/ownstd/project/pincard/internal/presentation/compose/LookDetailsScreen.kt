@@ -45,17 +45,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.network.NetworkHeaders
-import coil3.network.httpHeaders
-import coil3.request.ImageRequest
-import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookItem
-import com.ownstd.project.pincard.internal.parseToHost
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsViewModel
-import com.ownstd.project.storage.TokenStorage
-import org.koin.compose.koinInject
+import com.ownstd.project.pincard.internal.replaceFragment
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
@@ -241,19 +234,6 @@ private fun ClotheItemInLook(
     lookItem: LookItem,
     onItemClick: () -> Unit = {}
 ) {
-    val storage: TokenStorage = koinInject()
-    val context = LocalPlatformContext.current
-    val headers = NetworkHeaders.Builder()
-        .set("Authorization", "Bearer ${storage.getToken()}")
-        .build()
-    val networkRepository: NetworkRepository = koinInject()
-    val baseUrl = networkRepository.baseUrl
-
-    val request = ImageRequest.Builder(context)
-        .data(lookItem.clothe.imageUrl.parseToHost(baseUrl))
-        .httpHeaders(headers)
-        .build()
-
     Box(
         modifier = Modifier
             .offset { IntOffset(lookItem.x.roundToInt(), lookItem.y.roundToInt()) }
@@ -262,7 +242,7 @@ private fun ClotheItemInLook(
             .clickable { onItemClick() }
     ) {
         AsyncImage(
-            model = request,
+            model = lookItem.clothe.imageUrl.replaceFragment(),
             contentDescription = lookItem.clothe.name,
             contentScale = ContentScale.Fit,
             modifier = Modifier
@@ -307,19 +287,6 @@ private fun ClothesListSection(
 private fun ClotheItemCard(
     clotheItem: LookItem
 ) {
-    val storage: TokenStorage = koinInject()
-    val context = LocalPlatformContext.current
-    val headers = NetworkHeaders.Builder()
-        .set("Authorization", "Bearer ${storage.getToken()}")
-        .build()
-    val networkRepository: NetworkRepository = koinInject()
-    val baseUrl = networkRepository.baseUrl
-
-    val request = ImageRequest.Builder(context)
-        .data(clotheItem.clothe.imageUrl.parseToHost(baseUrl))
-        .httpHeaders(headers)
-        .build()
-
     Box(
         modifier = Modifier
             .wrapContentHeight()
@@ -335,7 +302,7 @@ private fun ClotheItemCard(
             modifier = Modifier.padding(8.dp)
         ) {
             AsyncImage(
-                model = request,
+                model = clotheItem.clothe.imageUrl.replaceFragment(),
                 contentDescription = clotheItem.clothe.name,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier

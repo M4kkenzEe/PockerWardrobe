@@ -82,7 +82,7 @@ class WardrobeRepositoryImpl(
 
     override suspend fun deleteClothe(clotheId: Int) {
         try {
-            client.delete("$baseUrl/$ENDPOINT/$clotheId") {
+            client.delete("$baseUrl$ENDPOINT/$clotheId") {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer ${getToken()}")
             }.body()
