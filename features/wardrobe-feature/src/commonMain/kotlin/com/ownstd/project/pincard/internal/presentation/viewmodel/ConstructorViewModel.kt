@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ConstructorViewModel(
     private val wardrobeUseCase: WardrobeUseCase,
@@ -78,7 +79,7 @@ internal class ConstructorViewModel(
         lastInteractedPhotoId = photoId
     }
 
-    fun save(image: ByteArray) {
+    fun save(image: ByteArray, onSuccess: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = lookUseCase.addLook(
                 look = DraftLook(
@@ -103,7 +104,12 @@ internal class ConstructorViewModel(
                     // Показать ошибку сети
                 }
 
-                else -> println("ADDED")
+                else -> {
+                    println("ADDED")
+                    withContext(Dispatchers.Main) {
+                        onSuccess()
+                    }
+                }
             }
         }
     }

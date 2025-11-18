@@ -20,7 +20,14 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
         )
     }
     composable<WardrobeNavScreens.LookConstructor> {
-        LookConstructor { navController.popBackStack() }
+        LookConstructor(
+            backClick = { navController.popBackStack() },
+            navigateToSavedLooks = {
+                navController.navigate(WardrobeNavScreens.Wardrobe) {
+                    popUpTo(WardrobeNavScreens.LookConstructor) { inclusive = true }
+                }
+            }
+        )
     }
     composable<WardrobeNavScreens.LookDetails> { backStackEntry ->
         val lookDetails: WardrobeNavScreens.LookDetails = backStackEntry.toRoute()
