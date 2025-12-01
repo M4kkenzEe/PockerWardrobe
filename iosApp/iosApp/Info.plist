@@ -66,5 +66,9 @@
             <string>pocketwardrobe</string>
         </dict>
     </array>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleLightContent</string>
 </dict>
 </plist>
