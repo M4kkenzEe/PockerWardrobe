@@ -6,12 +6,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import com.ownstd.project.card.internal.deeplink.DeepLink
-import com.ownstd.project.card.internal.deeplink.DeepLinkManager
+import com.ownstd.project.card.internal.deeplink.getDeepLinkManager
 
 @Composable
 internal actual fun HandleDeepLink(navController: NavHostController) {
-    val deepLinkManager = DeepLinkManager.getInstance()
-    val deepLink by deepLinkManager.deepLinkFlow.collectAsState()
+    val deepLinkManager = getDeepLinkManager()
+    val deepLink: DeepLink? by deepLinkManager.deepLinkFlow.collectAsState(null)
 
     LaunchedEffect(deepLink) {
         deepLink?.let { link ->

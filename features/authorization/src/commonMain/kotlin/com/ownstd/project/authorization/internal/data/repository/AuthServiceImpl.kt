@@ -20,6 +20,10 @@ class AuthServiceImpl(
     private val client = networkRepository.getClient()
     private val baseUrl = networkRepository.baseUrl
 
+    init {
+        println("🔧 AuthServiceImpl initialized with baseUrl: $baseUrl")
+    }
+
     override suspend fun register(
         username: String,
         email: String,
@@ -46,7 +50,9 @@ class AuthServiceImpl(
         password: String
     ): Result<String> {
         return try {
-            val response = client.post(baseUrl + LOGIN_URL) {
+            val fullUrl = baseUrl + LOGIN_URL
+            println("🔧 AuthService.login - attempting login with URL: $fullUrl")
+            val response = client.post(fullUrl) {
                 contentType(ContentType.Application.Json)
                 setBody(LoginRequest(username, password))
             }

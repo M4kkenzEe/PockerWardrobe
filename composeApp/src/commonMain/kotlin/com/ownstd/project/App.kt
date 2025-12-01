@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import com.ownstd.project.card.api.RootScreen
 import com.ownstd.project.card.internal.di.cardModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import org.koin.mp.KoinPlatform
 
 @Composable
 @Preview
@@ -18,8 +18,11 @@ fun App() {
 }
 
 fun initKoin() {
-    // Check if Koin is already started
-    if (GlobalContext.getKoinApplicationOrNull() == null) {
+    // Check if Koin is already started using KoinPlatform (multiplatform-compatible)
+    try {
+        KoinPlatform.getKoin()
+    } catch (e: Exception) {
+        // Koin not started, initialize it
         startKoin {
             modules(cardModule)
         }

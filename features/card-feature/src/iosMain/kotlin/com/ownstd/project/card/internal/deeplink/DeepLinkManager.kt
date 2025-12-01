@@ -13,7 +13,7 @@ actual fun getDeepLinkManager(): DeepLinkManager = DeepLinkManager.getInstance()
  * iOS implementation of DeepLinkManager
  * Singleton instance for managing deep links
  */
-actual class DeepLinkManager {
+actual class DeepLinkManager actual constructor() {
     private val _deepLinkFlow = MutableStateFlow<DeepLink?>(null)
     actual val deepLinkFlow: StateFlow<DeepLink?> = _deepLinkFlow.asStateFlow()
 
@@ -21,14 +21,9 @@ actual class DeepLinkManager {
     actual val pendingDeepLink: StateFlow<DeepLink?> = _pendingDeepLink.asStateFlow()
 
     companion object {
-        @Volatile
-        private var instance: DeepLinkManager? = null
+        private val instance = DeepLinkManager()
 
-        fun getInstance(): DeepLinkManager {
-            return instance ?: synchronized(this) {
-                instance ?: DeepLinkManager().also { instance = it }
-            }
-        }
+        fun getInstance(): DeepLinkManager = instance
     }
 
     /**
