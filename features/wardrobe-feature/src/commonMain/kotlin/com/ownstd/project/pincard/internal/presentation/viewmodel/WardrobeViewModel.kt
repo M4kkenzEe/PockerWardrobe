@@ -22,8 +22,11 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
             runCatching {
                 useCase.getClothes()
             }.onSuccess {
+                println("🎯 [CLOTHES_VM] UseCase returned ${it.size} clothes")
                 clothes.value = it
+                println("🎯 [CLOTHES_VM] StateFlow updated with ${clothes.value.size} clothes")
             }.onFailure { exception ->
+                println("🎯 [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 println(exception)
             }
         }

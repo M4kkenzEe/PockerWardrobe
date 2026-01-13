@@ -18,8 +18,11 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
             runCatching {
                 useCase.getLooks()
             }.onSuccess {
+                println("🎯 [LOOKS_VM] UseCase returned ${it.size} looks")
                 looks.value = it
+                println("🎯 [LOOKS_VM] StateFlow updated with ${looks.value.size} looks")
             }.onFailure { exception ->
+                println("🎯 [LOOKS_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 println(exception)
             }
         }

@@ -29,6 +29,11 @@ internal fun Looks(
     val looksList by viewModel.looks.collectAsState()
     val clipboardManager = rememberClipboardManager()
 
+    DisposableEffect(Unit) {
+        viewModel.getLooks()
+        onDispose { }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()

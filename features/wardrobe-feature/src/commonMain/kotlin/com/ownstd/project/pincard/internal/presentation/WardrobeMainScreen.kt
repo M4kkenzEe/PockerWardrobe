@@ -13,7 +13,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,11 +31,6 @@ fun WardrobeMainScreen(
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
     val pagerState = rememberPagerState(pageCount = { 2 })
-
-    DisposableEffect(Unit) {
-        looksViewModel.getLooks()
-        onDispose {}
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(

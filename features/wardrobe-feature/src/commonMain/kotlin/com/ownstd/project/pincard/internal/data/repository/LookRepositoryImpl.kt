@@ -33,12 +33,25 @@ class LookRepositoryImpl(
     override suspend fun getLooks(): List<Look> {
         var response = emptyList<Look>()
         try {
-            response = client.get(baseUrl + ENDPOINT) {
+            val fullUrl = baseUrl + ENDPOINT
+            println("🌐 [LOOKS_REQUEST] GET $fullUrl")
+            println("🔑 [LOOKS_AUTH] Token: ${getToken()?.take(20)}...")
+
+            val httpResponse = client.get(fullUrl) {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer ${getToken()}")
-            }.body()
+            }
+
+            println("✅ [LOOKS_RESPONSE] Status: ${httpResponse.status.value}")
+            println("📦 [LOOKS_RESPONSE] Headers: ${httpResponse.headers}")
+
+            response = httpResponse.body()
+
+            println("📊 [LOOKS_DATA] Received ${response.size} looks")
+            println("📄 [LOOKS_DATA] Raw data: $response")
         } catch (e: Exception) {
-            println("ERR: ${e.message}")
+            println("❌ [LOOKS_ERROR] ${e::class.simpleName}: ${e.message}")
+            e.printStackTrace()
         }
         return response
     }

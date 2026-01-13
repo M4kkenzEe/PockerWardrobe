@@ -32,10 +32,30 @@ class WardrobeRepositoryImpl(
     private fun getToken(): String? = storage.getToken()
 
     override suspend fun getClothes(): List<Clothe> {
-        return client.get(baseUrl + ENDPOINT) {
-            contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer ${getToken()}")
-        }.body()
+        return try {
+            val fullUrl = baseUrl + ENDPOINT
+            println("🌐 [CLOTHES_REQUEST] GET $fullUrl")
+            println("🔑 [CLOTHES_AUTH] Token: ${getToken()?.take(20)}...")
+
+            val httpResponse = client.get(fullUrl) {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer ${getToken()}")
+            }
+
+            println("✅ [CLOTHES_RESPONSE] Status: ${httpResponse.status.value}")
+            println("📦 [CLOTHES_RESPONSE] Headers: ${httpResponse.headers}")
+
+            val clothes: List<Clothe> = httpResponse.body()
+
+            println("📊 [CLOTHES_DATA] Received ${clothes.size} items")
+            println("📄 [CLOTHES_DATA] Raw data: $clothes")
+
+            clothes
+        } catch (e: Exception) {
+            println("❌ [CLOTHES_ERROR] ${e::class.simpleName}: ${e.message}")
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
     override suspend fun loadClothe(bitmap: ImageBitmap) {
