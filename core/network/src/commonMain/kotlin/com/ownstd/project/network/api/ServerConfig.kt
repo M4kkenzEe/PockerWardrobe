@@ -18,7 +18,7 @@ object ServerConfig {
      * - Localhost: "localhost:8080"
      * - Production: "api.example.com"
      */
-    const val SERVER_HOST = "192.168.0.57:8080"
+    const val SERVER_HOST = "194.87.190.248:80"
 
     /**
      * Base URL for API calls (includes /api/v1/ path)
