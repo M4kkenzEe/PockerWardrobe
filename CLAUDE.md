@@ -118,3 +118,6 @@ Uses **Jetpack Navigation Compose** (multiplatform):
 3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
 4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
 5. **DI**: Регистрируй зависимости в Koin модулях
+6. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
+   - `./ksrc.exe deps --offline` — list available dependencies with sources
+   - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — read source file
