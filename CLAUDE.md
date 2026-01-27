@@ -91,3 +91,30 @@ Uses **Jetpack Navigation Compose** (multiplatform):
 - `commonMain/` - Shared code (UI, business logic)
 - `androidMain/` - Android-specific implementations
 - `iosMain/` - iOS-specific implementations (Ktor Darwin engine)
+
+## Code Guidelines
+
+**IMPORTANT:** При написании кода обязательно следуй правилам и паттернам, описанным в документации:
+
+- **`docs/COMPOSE.md`** - правила верстки UI на Compose:
+  - Использование AsyncImage из Coil для загрузки изображений
+  - Паттерн ViewModel + StateFlow для управления состоянием
+  - Передача событий через callback параметры
+  - Запрет маппинга данных в Composable функциях
+  - Создание Preview функций
+
+- **`docs/NAVIGATION.md`** - архитектура навигации:
+  - Трёхуровневая структура навигации (App → BottomNav → Feature)
+  - Typed routes с @Serializable
+  - Создание Navigation Graph для новых фич
+  - Обработка Deep Links
+
+- **`docs/API.md`** - работа с сетевыми запросами и API
+
+### Ключевые правила
+
+1. **UI код**: Всегда используй паттерны из `docs/COMPOSE.md`
+2. **Навигация**: Следуй структуре из `docs/NAVIGATION.md`
+3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
+4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
+5. **DI**: Регистрируй зависимости в Koin модулях
