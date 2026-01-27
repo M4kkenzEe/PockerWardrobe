@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./ksrc.exe search:*)",
+      "Bash(./ksrc.exe doctor)",
+      "Bash(./ksrc.exe doctor:*)",
+      "Bash(./ksrc.exe deps:*)",
+      "Bash(./ksrc.exe cat:*)"
+    ]
+  }
+}
