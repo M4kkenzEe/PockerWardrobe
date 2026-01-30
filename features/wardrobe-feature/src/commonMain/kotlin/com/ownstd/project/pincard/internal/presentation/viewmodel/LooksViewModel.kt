@@ -7,10 +7,13 @@ import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
-    val looks = MutableStateFlow<List<Look>>(emptyList())
+    private val _looks = MutableStateFlow<List<Look>>(emptyList())
+    val looks: StateFlow<List<Look>> = _looks.asStateFlow()
 
     fun getLooks() {
         println("GGG : getlooks")
@@ -19,8 +22,8 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
                 useCase.getLooks()
             }.onSuccess {
                 println("🎯 [LOOKS_VM] UseCase returned ${it.size} looks")
-                looks.value = it
-                println("🎯 [LOOKS_VM] StateFlow updated with ${looks.value.size} looks")
+                _looks.value = it
+                println("🎯 [LOOKS_VM] StateFlow updated with ${_looks.value.size} looks")
             }.onFailure { exception ->
                 println("🎯 [LOOKS_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 println(exception)

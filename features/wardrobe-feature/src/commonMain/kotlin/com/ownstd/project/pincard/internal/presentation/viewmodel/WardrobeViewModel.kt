@@ -8,6 +8,8 @@ import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,15 +18,16 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
         getClothes()
     }
 
-    val clothes = MutableStateFlow<List<Clothe>>(emptyList())
+    private val _clothes = MutableStateFlow<List<Clothe>>(emptyList())
+    val clothes: StateFlow<List<Clothe>> = _clothes.asStateFlow()
     fun getClothes() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 useCase.getClothes()
             }.onSuccess {
                 println("🎯 [CLOTHES_VM] UseCase returned ${it.size} clothes")
-                clothes.value = it
-                println("🎯 [CLOTHES_VM] StateFlow updated with ${clothes.value.size} clothes")
+                _clothes.value = it
+                println("🎯 [CLOTHES_VM] StateFlow updated with ${_clothes.value.size} clothes")
             }.onFailure { exception ->
                 println("🎯 [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 println(exception)
@@ -44,7 +47,7 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
             runCatching {
                 useCase.uploadFromUrl(url)
             }.onSuccess { clothe ->
-                clothes.update { currentList ->
+                _clothes.update { currentList ->
                     currentList + clothe
                 }
             }.onFailure { exception ->

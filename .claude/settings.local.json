@@ -5,7 +5,8 @@
       "Bash(./ksrc.exe doctor)",
       "Bash(./ksrc.exe doctor:*)",
       "Bash(./ksrc.exe deps:*)",
-      "Bash(./ksrc.exe cat:*)"
+      "Bash(./ksrc.exe cat:*)",
+      "Bash(./gradlew :composeApp:assembleDebug:*)"
     ]
   }
 }

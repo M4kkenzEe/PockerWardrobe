@@ -13,6 +13,7 @@ import com.ownstd.project.pincard.internal.presentation.model.toData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,9 +24,10 @@ internal class ConstructorViewModel(
     private val lookUseCase: LookUseCase
 ) : ViewModel() {
     private val _pickedClotheList = MutableStateFlow<List<LookItemUiState>>(emptyList())
-    val pickedClotheList = _pickedClotheList.asStateFlow()
+    val pickedClotheList: StateFlow<List<LookItemUiState>> = _pickedClotheList.asStateFlow()
 
-    val clotheList = MutableStateFlow<List<Clothe>>(emptyList())
+    private val _clotheList = MutableStateFlow<List<Clothe>>(emptyList())
+    val clotheList: StateFlow<List<Clothe>> = _clotheList.asStateFlow()
 
     private var maxZIndex = 0f
     private var lastInteractedPhotoId: Int? = null
@@ -35,7 +37,7 @@ internal class ConstructorViewModel(
             runCatching {
                 wardrobeUseCase.getClothes()
             }.onSuccess {
-                clotheList.value = it
+                _clotheList.value = it
             }.onFailure { exception ->
                 println(exception)
             }

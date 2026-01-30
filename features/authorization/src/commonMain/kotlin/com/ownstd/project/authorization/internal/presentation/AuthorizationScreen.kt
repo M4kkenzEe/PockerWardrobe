@@ -68,17 +68,13 @@ fun AuthorizationScreen(
             ViewState.LOGIN -> LoginScreen(
                 isError = isError,
                 onLogin = viewModel::loginUser,
-                onSwitchToRegister = {
-                    viewModel.viewState.value = ViewState.REGISTRATION
-                }
+                onSwitchToRegister = viewModel::switchToRegistration
             )
 
             ViewState.REGISTRATION -> RegistrationScreen(
                 isError = isError,
                 onRegister = viewModel::registerUser,
-                onSwitchToLogin = {
-                    viewModel.viewState.value = ViewState.LOGIN
-                }
+                onSwitchToLogin = viewModel::switchToLogin
             )
         }
     }
