@@ -17,7 +17,7 @@ val pinCardModule = module {
     viewModel { ConstructorViewModel(wardrobeUseCase = get(), lookUseCase = get()) }
     viewModel { WardrobeViewModel(useCase = get()) }
     factory { WardrobeUseCase(wardrobeRepository = get()) }
-    factory<WardrobeRepository> {
+    single<WardrobeRepository> {
         WardrobeRepositoryImpl(
             networkRepository = get(),
             storage = get()
@@ -29,7 +29,7 @@ val pinCardModule = module {
         LookDetailsViewModel(useCase = get(), lookId = lookId, shareToken = shareToken)
     }
     factory { LookUseCase(lookRepository = get()) }
-    factory<LookRepository> {
+    single<LookRepository> {
         LookRepositoryImpl(
             networkRepository = get(),
             storage = get()

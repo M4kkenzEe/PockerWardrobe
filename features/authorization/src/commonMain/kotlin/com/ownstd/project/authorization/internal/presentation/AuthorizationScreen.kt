@@ -52,6 +52,8 @@ fun AuthorizationScreen(
     val viewState by viewModel.viewState.collectAsState()
     val isError by viewModel.errorState.collectAsState()
     val isSessionOpen by viewModel.isSessionOpen.collectAsState()
+    val prefillEmail by viewModel.prefillEmail.collectAsState()
+    val prefillPassword by viewModel.prefillPassword.collectAsState()
 
     if (isSessionOpen) {
         openSession()
@@ -66,7 +68,9 @@ fun AuthorizationScreen(
     ) {
         when (viewState) {
             ViewState.LOGIN -> LoginScreen(
-                isError = isError,
+                errorMessage = isError,
+                initialEmail = prefillEmail,
+                initialPassword = prefillPassword,
                 onLogin = viewModel::loginUser,
                 onSwitchToRegister = {
                     viewModel.viewState.value = ViewState.REGISTRATION
@@ -74,7 +78,7 @@ fun AuthorizationScreen(
             )
 
             ViewState.REGISTRATION -> RegistrationScreen(
-                isError = isError,
+                errorMessage = isError,
                 onRegister = viewModel::registerUser,
                 onSwitchToLogin = {
                     viewModel.viewState.value = ViewState.LOGIN
@@ -86,12 +90,14 @@ fun AuthorizationScreen(
 
 @Composable
 fun LoginScreen(
-    isError: Boolean,
+    errorMessage: String?,
+    initialEmail: String = "",
+    initialPassword: String = "",
     onLogin: (String, String) -> Unit,
     onSwitchToRegister: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember(initialEmail) { mutableStateOf(initialEmail) }
+    var password by remember(initialPassword) { mutableStateOf(initialPassword) }
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -186,9 +192,9 @@ fun LoginScreen(
             }
 
             // Ошибка
-            if (isError) {
+            if (errorMessage != null) {
                 Text(
-                    text = "Неверный email или пароль",
+                    text = errorMessage,
                     color = Color.Red,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
@@ -235,7 +241,7 @@ fun LoginScreen(
 
 @Composable
 fun RegistrationScreen(
-    isError: Boolean,
+    errorMessage: String?,
     onRegister: (String, String, String, Gender) -> Unit,
     onSwitchToLogin: () -> Unit
 ) {
@@ -401,9 +407,9 @@ fun RegistrationScreen(
             }
 
             // Ошибка
-            if (isError) {
+            if (errorMessage != null) {
                 Text(
-                    text = "Ошибка регистрации. Проверьте введённые данные",
+                    text = errorMessage,
                     color = Color.Red,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
