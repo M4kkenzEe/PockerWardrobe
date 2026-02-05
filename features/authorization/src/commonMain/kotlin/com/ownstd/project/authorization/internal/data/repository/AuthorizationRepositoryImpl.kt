@@ -4,26 +4,24 @@ import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
 import com.ownstd.project.storage.TokenStorage
-import io.ktor.util.rootCause
 
 class AuthorizationRepositoryImpl(
     private val authService: AuthService,
     private val tokenStorage: TokenStorage
 ) : AuthorizationRepository {
-    override suspend fun loginUser(username: String, password: String): Boolean {
-        var result = false
+    override suspend fun loginUser(username: String, password: String): String? {
+        var errorMessage: String? = null
         authService.login(username, password)
             .onSuccess {
                 tokenStorage.saveToken(it)
-                result = true
                 println("Login successful")
             }
             .onFailure { exception ->
                 println("Login failed: ${exception.message}")
                 tokenStorage.clearToken()
-                result = false
+                errorMessage = mapErrorMessage(exception.message)
             }
-        return result
+        return errorMessage
     }
 
     override suspend fun registerUser(
@@ -31,22 +29,31 @@ class AuthorizationRepositoryImpl(
         email: String,
         password: String,
         gender: Gender
-    ): Boolean {
-        var result = false
+    ): String? {
+        var errorMessage: String? = null
         authService.register(username, email, password, gender.name)
             .onSuccess {
-                result = true
                 println("Registration successful")
             }
             .onFailure { exception ->
                 println("Register failed: ${exception.message}")
-                result = false
+                errorMessage = mapErrorMessage(exception.message)
             }
-        return result
+        return errorMessage
     }
 
     override fun logout() {
         tokenStorage.clearToken()
         println("Logout successful - token cleared")
+    }
+
+    private fun mapErrorMessage(message: String?): String {
+        return when {
+            message == null -> "Неизвестная ошибка"
+            message.contains("already exists", ignoreCase = true) -> "Пользователь с таким именем или email уже существует"
+            message.contains("Invalid credentials", ignoreCase = true) -> "Неверное имя пользователя или пароль"
+            message.contains("Unexpected response", ignoreCase = true) -> "Ошибка сервера: $message"
+            else -> "Не удалось подключиться к серверу"
+        }
     }
 }
