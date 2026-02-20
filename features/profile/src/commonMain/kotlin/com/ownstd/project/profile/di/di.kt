@@ -14,8 +14,7 @@ val profileModule = module {
 
     factory<ProfileRepository> {
         ProfileRepositoryImpl(
-            networkRepository = get(),
-            tokenStorage = get()
+            networkRepository = get()
         )
     }
     single { ProfileUseCase(repository = get()) }

@@ -1,6 +1,6 @@
 package com.ownstd.project.authorization.internal.domain
 
-import com.ownstd.project.authorization.internal.data.model.User
+import com.ownstd.project.authorization.internal.data.model.AuthTokenResponse
 
 interface AuthService {
     suspend fun register(
@@ -8,10 +8,10 @@ interface AuthService {
         email: String,
         password: String,
         gender: String
-    ): Result<User>
+    ): Result<AuthTokenResponse>
 
     suspend fun login(
         username: String,
         password: String
-    ): Result<String> // Возвращает JWT-токен
+    ): Result<AuthTokenResponse>
 }

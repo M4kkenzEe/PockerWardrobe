@@ -8,18 +8,29 @@ internal class TokenStorageImpl(
     private val settings: Settings
 ) : TokenStorage {
     private companion object {
-        const val TOKEN_KEY = "jwt_token"
+        const val KEY_ACCESS_TOKEN  = "session_access_token"
+        const val KEY_REFRESH_TOKEN = "session_refresh_token"
+        const val KEY_EXPIRES_AT    = "session_expires_at"
     }
 
-    override fun saveToken(token: String) {
-        settings[TOKEN_KEY] = token
+    override fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long) {
+        settings[KEY_ACCESS_TOKEN]  = accessToken
+        settings[KEY_REFRESH_TOKEN] = refreshToken
+        settings[KEY_EXPIRES_AT]    = expiresAt
+        println("[TokenStorage] session saved, expiresAt=$expiresAt")
     }
 
-    override fun getToken(): String? {
-        return settings.getStringOrNull(TOKEN_KEY)
-    }
+    override fun getAccessToken(): String? = settings.getStringOrNull(KEY_ACCESS_TOKEN)
 
-    override fun clearToken() {
-        settings.remove(TOKEN_KEY)
+    override fun getRefreshToken(): String? = settings.getStringOrNull(KEY_REFRESH_TOKEN)
+
+    override fun getExpiresAt(): Long? =
+        if (settings.hasKey(KEY_EXPIRES_AT)) settings.getLong(KEY_EXPIRES_AT, 0L) else null
+
+    override fun clearSession() {
+        settings.remove(KEY_ACCESS_TOKEN)
+        settings.remove(KEY_REFRESH_TOKEN)
+        settings.remove(KEY_EXPIRES_AT)
+        println("[TokenStorage] session cleared")
     }
 }

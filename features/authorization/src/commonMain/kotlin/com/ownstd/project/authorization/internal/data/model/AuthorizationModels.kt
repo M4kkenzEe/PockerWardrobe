@@ -11,21 +11,20 @@ data class RegisterRequest(
 )
 
 @Serializable
-data class User(
-    val userId: Long,
-    val username: String,
-    val email: String,
-    val passwordHash: String,
-    val gender: String
-)
-
-@Serializable
 data class LoginRequest(
-    val username: String,
+    val login: String,
     val password: String
 )
 
 @Serializable
-data class LoginResponse(
-    val token: String
+data class AuthTokenResponse(
+    val accessToken: String,
+    val refreshToken: String,
+    val expiresAt: Long,
+    val userId: Long
+)
+
+@Serializable
+data class LogoutRequest(
+    val refreshToken: String
 )

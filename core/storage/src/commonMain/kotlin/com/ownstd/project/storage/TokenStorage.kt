@@ -1,7 +1,9 @@
 package com.ownstd.project.storage
 
 interface TokenStorage {
-    fun saveToken(token: String)
-    fun getToken(): String?
-    fun clearToken()
+    fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long)
+    fun getAccessToken(): String?
+    fun getRefreshToken(): String?
+    fun getExpiresAt(): Long?
+    fun clearSession()
 }
