@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
-import com.ownstd.project.storage.TokenStorage
 import io.github.suwasto.capturablecompose.CompressionFormat
 import io.github.suwasto.capturablecompose.toByteArray
 import io.ktor.client.call.body
@@ -13,7 +12,6 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.append
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -23,32 +21,25 @@ import io.ktor.utils.io.core.writeFully
 
 class WardrobeRepositoryImpl(
     private val networkRepository: NetworkRepository,
-    private val storage: TokenStorage
 ) : WardrobeRepository {
 
     val client = networkRepository.getClient()
     val baseUrl = networkRepository.baseUrl
 
-    private fun getToken(): String? = storage.getToken()
-
     override suspend fun getClothes(): List<Clothe> {
         return try {
             val fullUrl = baseUrl + ENDPOINT
             println("🌐 [CLOTHES_REQUEST] GET $fullUrl")
-            println("🔑 [CLOTHES_AUTH] Token: ${getToken()?.take(20)}...")
 
             val httpResponse = client.get(fullUrl) {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer ${getToken()}")
             }
 
             println("✅ [CLOTHES_RESPONSE] Status: ${httpResponse.status.value}")
-            println("📦 [CLOTHES_RESPONSE] Headers: ${httpResponse.headers}")
 
             val clothes: List<Clothe> = httpResponse.body()
 
             println("📊 [CLOTHES_DATA] Received ${clothes.size} items")
-            println("📄 [CLOTHES_DATA] Raw data: $clothes")
 
             clothes
         } catch (e: Exception) {
@@ -65,7 +56,6 @@ class WardrobeRepositoryImpl(
 
         client.post(baseUrl + ENDPOINT) {
             contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer ${getToken()}")
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -81,14 +71,12 @@ class WardrobeRepositoryImpl(
                     }
                 )
             )
-
         }
     }
 
     override suspend fun uploadFromUrl(pageUrl: String): Clothe {
         val response = client.get(baseUrl + ENDPOINT + FROM_URL) {
             contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer ${getToken()}")
             url {
                 parameters.append("url", pageUrl)
             }
@@ -104,7 +92,6 @@ class WardrobeRepositoryImpl(
         try {
             client.delete("$baseUrl$ENDPOINT/$clotheId") {
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer ${getToken()}")
             }.body()
         } catch (e: Exception) {
             println("ERR: ${e.message}")
@@ -116,4 +103,3 @@ class WardrobeRepositoryImpl(
         private const val FROM_URL = "/from_url"
     }
 }
-

@@ -19,19 +19,15 @@ internal fun AppNavHost(
 ) {
     val tokenStorage: TokenStorage = koinInject()
 
-    // Проверяем авторизацию при создании NavHost
-    // Проверка выполняется только один раз при инициализации для определения startDestination
-    val token = tokenStorage.getToken()
+    val token = tokenStorage.getAccessToken()
     val isAuthorized = !token.isNullOrEmpty()
 
-    // Динамически определяем startDestination в зависимости от авторизации
     val startDestination = if (isAuthorized) {
         AppScreens.Main
     } else {
         AppScreens.Authorization
     }
 
-    // Handle deep links from DeepLinkManager
     HandleDeepLink(navController)
 
     NavHost(
@@ -43,11 +39,7 @@ internal fun AppNavHost(
             AuthorizationScreen(
                 openSession = {
                     navController.navigate(AppScreens.Main) {
-                        // Удаляем Authorization из стека
-                        popUpTo(AppScreens.Authorization) {
-                            inclusive = true
-                        }
-                        // Предотвращаем создание дубликата Main, если он уже есть
+                        popUpTo(AppScreens.Authorization) { inclusive = true }
                         launchSingleTop = true
                     }
                 }

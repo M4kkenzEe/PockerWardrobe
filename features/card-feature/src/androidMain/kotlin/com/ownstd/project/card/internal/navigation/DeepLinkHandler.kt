@@ -18,25 +18,21 @@ internal actual fun HandleDeepLink(navController: NavHostController) {
     val pendingDeepLink by deepLinkManager.pendingDeepLink.collectAsState()
     val tokenStorage: TokenStorage = koinInject()
 
-    // Handle new deep links
     LaunchedEffect(deepLink) {
         deepLink?.let { link ->
             Log.d("DeepLinkHandler", "Handling deep link: $link")
 
-            // Check if user is authorized
-            val token = tokenStorage.getToken()
+            val token = tokenStorage.getAccessToken()
             val isAuthorized = !token.isNullOrEmpty()
 
             when (link) {
                 is DeepLink.Look -> {
                     if (isAuthorized) {
                         Log.d("DeepLinkHandler", "User is authorized, deep link will be used as startDestination in BottomNavigationNavHost")
-                        // User is already authorized
                         // Deep link stays active and will be consumed by MainScreen/BottomNavigationNavHost as startDestination
                         // MainScreen will clear the deep link after using it
                     } else {
                         Log.d("DeepLinkHandler", "User is not authorized, saving as pending deep link")
-                        // User is not authorized - save as pending
                         deepLinkManager.setPendingDeepLink(link)
                         deepLinkManager.clearDeepLink()
                     }
@@ -45,16 +41,13 @@ internal actual fun HandleDeepLink(navController: NavHostController) {
         }
     }
 
-    // Handle pending deep links after authorization
     LaunchedEffect(pendingDeepLink) {
-        val token = tokenStorage.getToken()
+        val token = tokenStorage.getAccessToken()
         if (!token.isNullOrEmpty() && pendingDeepLink != null) {
             Log.d("DeepLinkHandler", "Applying pending deep link after authorization: $pendingDeepLink")
 
-            // Применяем pending deep link
             deepLinkManager.applyPendingDeepLink()
 
-            // Проверяем, находимся ли мы на Authorization экране
             val currentRoute = navController.currentBackStackEntry?.destination?.route
             Log.d("DeepLinkHandler", "Current route: $currentRoute")
 
