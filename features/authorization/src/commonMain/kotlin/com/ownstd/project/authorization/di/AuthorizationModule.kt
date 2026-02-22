@@ -23,7 +23,7 @@ fun authorizationModule(): Module = module {
         )
     }
 
-    single { LogoutUseCase(authorizationRepository = get()) }
+    single { LogoutUseCase(authorizationRepository = get(), networkRepository = get()) }
 
     viewModel<AuthorizationViewModel> { AuthorizationViewModel(authorizationRepository = get()) }
 
