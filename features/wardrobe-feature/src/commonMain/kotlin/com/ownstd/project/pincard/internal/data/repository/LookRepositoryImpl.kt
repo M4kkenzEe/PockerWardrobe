@@ -101,7 +101,7 @@ class LookRepositoryImpl(
 
     override suspend fun getLookByShareToken(token: String): Look? {
         return try {
-            val sharedResponse: SharedLookResponse = client.get("$baseUrl$SHARED_ENDPOINT/$token") {
+            val sharedResponse: SharedLookResponse = client.get("$baseUrl$SHARE_ENDPOINT/$token") {
                 contentType(ContentType.Application.Json)
             }.body()
             sharedResponse.look
@@ -114,14 +114,13 @@ class LookRepositoryImpl(
 
     override suspend fun addLookByShareToken(sharedToken: String) {
         try {
-            client.post("$baseUrl$SHARES_ENDPOINT/$sharedToken/import") {
+            client.post("$baseUrl$SHARE_ENDPOINT/$sharedToken/import") {
                 contentType(ContentType.Application.Json)
                 setBody("""{"importType":"FULL_LOOK"}""")
             }.body()
         } catch (e: Exception) {
             println("ERR getLookByShareToken: ${e.message}")
             e.printStackTrace()
-            null
         }
     }
 
@@ -151,7 +150,6 @@ class LookRepositoryImpl(
         private const val ENDPOINT = "looks"
         private const val ADD_IMAGE = "/uploadImage"
         private const val BY_ID = "/byId/"
-        private const val SHARED_ENDPOINT = "shared"
-        private const val SHARES_ENDPOINT = "shares"
+        private const val SHARE_ENDPOINT = "share"
     }
 }
