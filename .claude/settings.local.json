@@ -5,7 +5,10 @@
       "Bash(./ksrc.exe doctor)",
       "Bash(./ksrc.exe doctor:*)",
       "Bash(./ksrc.exe deps:*)",
-      "Bash(./ksrc.exe cat:*)"
+      "Bash(./ksrc.exe cat:*)",
+      "Bash(jar tf:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs"
     ]
   }
 }
