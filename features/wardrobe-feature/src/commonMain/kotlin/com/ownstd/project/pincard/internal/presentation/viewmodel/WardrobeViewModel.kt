@@ -22,20 +22,27 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
             runCatching {
                 useCase.getClothes()
             }.onSuccess {
-                println("🎯 [CLOTHES_VM] UseCase returned ${it.size} clothes")
                 clothes.value = it
-                println("🎯 [CLOTHES_VM] StateFlow updated with ${clothes.value.size} clothes")
+                println("🎯 [CLOTHES_VM] Loaded ${it.size} clothes")
             }.onFailure { exception ->
-                println("🎯 [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
-                println(exception)
+                println("❌ [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
+                exception.printStackTrace()
             }
         }
     }
 
     fun loadClothe(bitmap: ImageBitmap) {
         viewModelScope.launch(Dispatchers.IO) {
-            useCase.loadClothe(bitmap)
-            getClothes()
+            println("🖼️ [VM_UPLOAD] Starting loadClothe")
+            runCatching {
+                useCase.loadClothe(bitmap)
+            }.onSuccess {
+                println("✅ [VM_UPLOAD] loadClothe completed, refreshing list")
+                getClothes()
+            }.onFailure { exception ->
+                println("❌ [VM_UPLOAD_ERROR] ${exception::class.simpleName}: ${exception.message}")
+                exception.printStackTrace()
+            }
         }
     }
 
