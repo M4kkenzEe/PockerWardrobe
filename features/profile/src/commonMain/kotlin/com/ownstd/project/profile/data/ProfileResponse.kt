@@ -19,6 +19,8 @@ fun ProfileResponse.toUser(): User {
         name = name,
         email = email,
         gender = Gender.valueOf(gender),
+        username = email.substringBefore("@"),
+        avatarUrl = "",
     )
 }
 

@@ -8,6 +8,9 @@ import com.ownstd.project.tiktok_feed.presentation.ui.TikTokFeedScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun ProfileScreen(onLogout: () -> Unit = {}) {
-    ProfileScreen(onLogout = onLogout)
+internal fun ProfileScreen(
+    onLogout: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+) {
+    ProfileScreen(onLogout = onLogout, onOpenSettings = onOpenSettings)
 }

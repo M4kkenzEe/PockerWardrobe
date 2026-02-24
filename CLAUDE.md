@@ -1,100 +1,100 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Этот файл содержит инструкции для Claude Code (claude.ai/code) при работе с кодом в данном репозитории.
 
-## Build Commands
+## Команды сборки
 
 ```bash
-# Build Android
+# Сборка Android
 ./gradlew :composeApp:assembleDebug
 
-# Build iOS framework
+# Сборка iOS фреймворка
 ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
-# Clean and rebuild
+# Очистка и пересборка
 ./gradlew clean build
 
-# Run tests
+# Запуск тестов
 ./gradlew test
 
-# Run specific module tests
+# Запуск тестов конкретного модуля
 ./gradlew :features:card-feature:test
 ./gradlew :core:network:test
 ```
 
-For iOS app development, open `iosApp/` in Xcode after building the framework.
+Для разработки iOS-приложения откройте `iosApp/` в Xcode после сборки фреймворка.
 
-## Architecture Overview
+## Обзор архитектуры
 
-This is a **Kotlin Multiplatform** (KMP) project targeting Android and iOS, using **Compose Multiplatform** for shared UI.
+Это проект на **Kotlin Multiplatform** (KMP), нацеленный на Android и iOS, с использованием **Compose Multiplatform** для общего UI.
 
-### Module Structure
+### Структура модулей
 
 ```
-├── composeApp/          # Main application entry point
-├── core/                # Shared infrastructure modules
-│   ├── database/        # Room database (KSP for codegen)
-│   ├── network/         # Ktor HTTP client
-│   └── storage/         # Token storage (multiplatform-settings)
-├── features/            # Feature modules following Clean Architecture
-│   ├── card-feature/    # Root navigation and main screen orchestration
-│   ├── wardrobe-feature/# Wardrobe/clothing management (pincard domain)
-│   ├── authorization/   # Auth flow
-│   ├── profile/         # User profile
+├── composeApp/          # Основная точка входа приложения
+├── core/                # Общие инфраструктурные модули
+│   ├── database/        # Room база данных (KSP для кодогенерации)
+│   ├── network/         # Ktor HTTP клиент
+│   └── storage/         # Хранилище токенов (multiplatform-settings)
+├── features/            # Модули фич по принципам Clean Architecture
+│   ├── card-feature/    # Корневая навигация и оркестрация главного экрана
+│   ├── wardrobe-feature/# Управление гардеробом/одеждой (домен pincard)
+│   ├── authorization/   # Флоу авторизации
+│   ├── profile/         # Профиль пользователя
 │   ├── recommendations-page-screen/
 │   └── tiktok-feed/
-└── iosApp/              # iOS application entry point (SwiftUI)
+└── iosApp/              # Точка входа iOS-приложения (SwiftUI)
 ```
 
-### Feature Module Pattern
+### Паттерн модуля фичи
 
-Each feature follows **Clean Architecture** with internal/external visibility:
+Каждая фича следует **Clean Architecture** с разделением на internal/external:
 
 ```
 feature/
-├── di/              # Koin module definition
+├── di/              # Определение Koin-модуля
 ├── internal/
-│   ├── data/        # Repository implementations, DTOs
-│   ├── domain/      # Repository interfaces, use cases
-│   └── presentation/# ViewModels, screens, composables
-└── external/        # Public APIs exposed to other modules
+│   ├── data/        # Реализации репозиториев, DTO
+│   ├── domain/      # Интерфейсы репозиториев, use cases
+│   └── presentation/# ViewModels, экраны, composables
+└── external/        # Публичные API, доступные другим модулям
 ```
 
-### Dependency Injection
+### Внедрение зависимостей
 
-Uses **Koin** for DI. Each feature exposes a Koin module:
-- `cardModule` (card-feature) - root module that includes others
+Используется **Koin** для DI. Каждая фича предоставляет Koin-модуль:
+- `cardModule` (card-feature) — корневой модуль, включающий остальные
 - `pinCardModule` (wardrobe-feature)
 - `authorizationModule()` (authorization)
 - `profileModule` (profile)
 
-Koin initialization happens in `App.kt` via `initKoin()`.
+Инициализация Koin происходит в `App.kt` через `initKoin()`.
 
-### Navigation
+### Навигация
 
-Uses **Jetpack Navigation Compose** (multiplatform):
-- `AppNavHost` handles root navigation (Authorization → Main)
-- `BottomNavigationNavHost` handles tab navigation within Main
-- Deep linking supported via `DeepLinkManager`
+Используется **Jetpack Navigation Compose** (multiplatform):
+- `AppNavHost` управляет корневой навигацией (Authorization → Main)
+- `BottomNavigationNavHost` управляет навигацией по вкладкам внутри Main
+- Deep linking поддерживается через `DeepLinkManager`
 
-### Key Technical Stack
+### Основной технологический стек
 
 - **UI**: Compose Multiplatform
 - **DI**: Koin 4.x
-- **Networking**: Ktor 3.x with kotlinx.serialization
-- **Local Storage**: Room (database), multiplatform-settings (preferences)
-- **Image Loading**: Coil 3.x
-- **Async**: Kotlin Coroutines
+- **Сеть**: Ktor 3.x с kotlinx.serialization
+- **Локальное хранилище**: Room (база данных), multiplatform-settings (настройки)
+- **Загрузка изображений**: Coil 3.x
+- **Асинхронность**: Kotlin Coroutines
 
-### Platform Source Sets
+### Платформенные наборы исходников
 
-- `commonMain/` - Shared code (UI, business logic)
-- `androidMain/` - Android-specific implementations
-- `iosMain/` - iOS-specific implementations (Ktor Darwin engine)
+- `commonMain/` — общий код (UI, бизнес-логика)
+- `androidMain/` — Android-специфичные реализации
+- `iosMain/` — iOS-специфичные реализации (Ktor Darwin engine)
 
-## Code Guidelines
+## Правила написания кода
 
-**IMPORTANT:** При написании кода обязательно следуй правилам и паттернам, описанным в документации:
+**ВАЖНО:** При написании кода обязательно следуй правилам и паттернам, описанным в документации:
 
 - **`docs/COMPOSE.md`** - правила верстки UI на Compose:
   - Использование AsyncImage из Coil для загрузки изображений
@@ -118,6 +118,6 @@ Uses **Jetpack Navigation Compose** (multiplatform):
 3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
 4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
 5. **DI**: Регистрируй зависимости в Koin модулях
-6. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
-   - `./ksrc.exe deps --offline` — list available dependencies with sources
-   - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — read source file
+6. **Исследование зависимостей**: Используй `./ksrc.exe` (в корне проекта) для изучения исходников Kotlin/Gradle библиотек:
+   - `./ksrc.exe deps --offline` — список доступных зависимостей с исходниками
+   - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — чтение файла с исходниками

@@ -349,12 +349,49 @@ fun WardrobeMainScreen(
 
 ## Preview функции
 
-Для каждого экрана рекомендуется создавать Preview функции.
+**ВАЖНО:** Preview — **обязательное требование** для каждого экрана и каждого переиспользуемого виджета.
+
+- Экраны — минимум один Preview с mock-данными, без ViewModel
+- Виджеты (отдельные composable-компоненты) — Preview для каждого публичного/переиспользуемого компонента
+- Preview функции всегда `private` и размещаются в том же файле, что и сам composable
+- Имя: `<НазваниеКомпонента>Preview`
+
+### Preview для экранов
+
+Экраны принимают данные через параметры (не через ViewModel), поэтому Preview вызывает composable напрямую с mock-данными:
 
 ```kotlin
-import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@Preview(showBackground = true)
+@Preview
+@Composable
+private fun ProfileScreenPreview() {
+    ProfileScreen(
+        user = User(
+            name = "Sophia Laurent",
+            email = "sophia@example.com",
+            gender = Gender.FEMALE,
+            username = "sophia.style",
+            outfitsCount = 42,
+            clothesCount = 167,
+            sharedCount = 28,
+        ),
+        onLogout = {},
+        onOpenSettings = {}
+    )
+}
+```
+
+> Если экран принимает ViewModel через koinViewModel(), создаётся отдельная stateless-перегрузка, которую и покрывает Preview — подробнее в разделе «Паттерн ViewModel + StateFlow».
+
+> **Важно:** В `commonMain` используется `org.jetbrains.compose.ui.tooling.preview.Preview` — эта аннотация без параметров. Параметры `showBackground`, `backgroundColor`, `name` доступны только в `androidx`-версии (Android-only) и в commonMain не работают.
+
+### Preview для виджетов
+
+Каждый переиспользуемый composable-компонент имеет собственный Preview:
+
+```kotlin
+@Preview
 @Composable
 private fun ClotheCardPreview() {
     ClotheCard(
@@ -365,15 +402,36 @@ private fun ClotheCardPreview() {
     )
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun WardrobePreview() {
-    // Для preview можно использовать mock данные
-    val mockClothes = listOf(
-        Clothe(id = 1, imageUrl = "url1"),
-        Clothe(id = 2, imageUrl = "url2")
+private fun ProfileStatItemPreview() {
+    ProfileStatItem(count = 42, label = "Образов")
+}
+```
+
+### Несколько состояний одного компонента
+
+Если компонент имеет визуально разные состояния — создавайте отдельный Preview для каждого:
+
+```kotlin
+@Preview
+@Composable
+private fun ProfileSettingsRowWithSubtitlePreview() {
+    ProfileSettingsRow(
+        icon = Icons.Default.Edit,
+        title = "Размеры",
+        subtitle = "EU 42 · S"
     )
-    // Preview content
+}
+
+@Preview
+@Composable
+private fun ProfileSettingsRowNoSubtitlePreview() {
+    ProfileSettingsRow(
+        icon = Icons.Default.Notifications,
+        title = "Уведомления",
+        subtitle = null
+    )
 }
 ```
 

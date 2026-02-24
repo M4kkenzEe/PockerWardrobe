@@ -8,7 +8,8 @@
       "Bash(./ksrc.exe cat:*)",
       "Bash(jar tf:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "Bash(C:/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe/ksrc.exe cat \"org.jetbrains.compose.ui:ui-tooling-preview:1.8.0!/commonMain/androidx/compose/ui/tooling/preview/Preview.kt\")"
     ]
   }
 }
