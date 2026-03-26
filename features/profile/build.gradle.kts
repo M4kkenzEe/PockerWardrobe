@@ -32,9 +32,6 @@ kotlin {
 
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.androidx.material.icons)
-        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -64,8 +61,13 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
 
+            //moko-resources
+            implementation(libs.moko.resources)
+            implementation(libs.moko.resources.compose)
+
             implementation(project(":core:network"))
             implementation(project(":core:storage"))
+            implementation(project(":core:resources"))
             implementation(project(":features:authorization"))
 
         }

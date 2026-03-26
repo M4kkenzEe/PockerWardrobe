@@ -12,7 +12,6 @@ androidx-core-ktx = "1.13.1"
 androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.9.1"
 androidx-material = "1.12.0"
-androidx-material-icons = "1.7.8"
 androidx-test-junit = "1.2.1"
 coilCompose = "3.0.0-rc01"
 compose-plugin = "1.8.2"
@@ -25,6 +24,7 @@ voyager = "1.1.0-beta02"
 koin = "4.1.0"
 mviKotlin = "3.0.2"
 moko-mvvm = "0.13.1"
+moko-resources = "0.25.0"
 coil3 = "3.0.0-alpha06"
 ktor = "3.1.0"
 coroutinesVersion = "1.10.2"
@@ -48,7 +48,8 @@ androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-androidx-material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "androidx-material-icons" }
+moko-resources = { group = "dev.icerock.moko", name = "resources", version.ref = "moko-resources" }
+moko-resources-compose = { group = "dev.icerock.moko", name = "resources-compose", version.ref = "moko-resources" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
@@ -120,3 +121,4 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 #Room
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "androidx-room" }
+mokoResources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko-resources" }

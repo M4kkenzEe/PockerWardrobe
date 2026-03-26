@@ -19,9 +19,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ownstd.project.core.resources.MR
+import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 private val SettingsBackgroundColor = Color(0xFFF5F4F2)
@@ -61,7 +60,7 @@ fun ProfileSettingsScreen(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    painter = painterResource(MR.images.arrow_left),
                     contentDescription = "Назад",
                     tint = SettingsTextPrimary
                 )
@@ -92,7 +91,7 @@ fun ProfileSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    painter = painterResource(MR.images.bell),
                     contentDescription = null,
                     tint = SettingsTextSecondary,
                     modifier = Modifier.size(22.dp)
