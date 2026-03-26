@@ -20,7 +20,6 @@ import com.ownstd.project.pincard.external.rememberGalleryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AddClotheFloatButton(
@@ -58,9 +57,11 @@ fun AddClotheFloatButton(
 
     val galleryManager = rememberGalleryManager {
         coroutineScope.launch {
+            println("🖼️ [GALLERY] SharedImage received: ${if (it != null) "not null" else "null"}")
             val bitmap = withContext(Dispatchers.Default) {
                 it?.toImageBitmap()
             }
+            println("🖼️ [GALLERY] toImageBitmap result: ${if (bitmap != null) "success" else "null"}")
             imageBitmap = bitmap
         }
     }

@@ -14,6 +14,7 @@ import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -50,27 +51,42 @@ class WardrobeRepositoryImpl(
     }
 
     override suspend fun loadClothe(bitmap: ImageBitmap) {
-        val imageBytes = bitmap.toByteArray(
-            CompressionFormat.PNG, 100
-        )
+        val imageBytes = bitmap.toByteArray(CompressionFormat.JPEG, IMAGE_QUALITY)
 
-        client.post(baseUrl + ENDPOINT) {
-            contentType(ContentType.Application.Json)
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("name", "")
-                        append("storeUrl", "")
-                        append(
-                            key = "image",
-                            filename = "clothing_image.png",
-                            contentType = ContentType.Image.PNG
-                        ) {
-                            writeFully(imageBytes)
+        println("📤 [UPLOAD_START] POST ${baseUrl + ENDPOINT}")
+        println("📦 [UPLOAD_BYTES] ${imageBytes.size} bytes (~${imageBytes.size / 1024} KB)")
+
+        try {
+            val response = client.post(baseUrl + ENDPOINT) {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("name", "")
+                            append("storeUrl", "")
+                            append(
+                                key = "image",
+                                filename = "clothing_image.jpg",
+                                contentType = ContentType.Image.JPEG
+                            ) {
+                                writeFully(imageBytes)
+                            }
                         }
-                    }
+                    )
                 )
-            )
+            }
+
+            println("📥 [UPLOAD_RESPONSE] HTTP ${response.status.value} ${response.status.description}")
+
+            if (!response.status.isSuccess()) {
+                val errorBody = response.bodyAsText()
+                println("❌ [UPLOAD_ERROR] Server error body: $errorBody")
+            } else {
+                println("✅ [UPLOAD_SUCCESS] Photo uploaded successfully")
+            }
+        } catch (e: Exception) {
+            println("❌ [UPLOAD_EXCEPTION] ${e::class.simpleName}: ${e.message}")
+            e.printStackTrace()
         }
     }
 
@@ -94,12 +110,13 @@ class WardrobeRepositoryImpl(
                 contentType(ContentType.Application.Json)
             }.body()
         } catch (e: Exception) {
-            println("ERR: ${e.message}")
+            println("❌ [DELETE_ERROR] ${e::class.simpleName}: ${e.message}")
         }
     }
 
     companion object {
         private const val ENDPOINT = "clothes"
         private const val FROM_URL = "/from_url"
+        private const val IMAGE_QUALITY = 80
     }
 }
