@@ -113,6 +113,12 @@ feature/
   - Создание Navigation Graph для новых фич
   - Обработка Deep Links
 
+- **`docs/RESOURCES.md`** - работа с ресурсами (moko-resources):
+  - Структура модуля `core/resources` (images, strings, fonts)
+  - Форматы файлов: SVG для векторов, PNG@1x/2x/3x для растра
+  - Использование `MR.images.*` вместо Material Icons
+  - Подключение модуля к фичам
+
 - **`docs/API.md`** - работа с сетевыми запросами и API
 
 ### Ключевые правила
@@ -122,6 +128,7 @@ feature/
 3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
 4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
 5. **DI**: Регистрируй зависимости в Koin модулях
-6. **Исследование зависимостей**: Используй `./ksrc.exe` (в корне проекта) для изучения исходников Kotlin/Gradle библиотек:
+6. **ЗАПРЕЩЕНО использовать Material Icons** (`androidx.compose.material.icons`, `Icons.Default.*`, `Icons.Filled.*` и т.д.). Все иконки берутся **только** из `MR.images.*` через moko-resources (модуль `core:resources`). См. `docs/RESOURCES.md`
+7. **Исследование зависимостей**: Используй `./ksrc.exe` (в корне проекта) для изучения исходников Kotlin/Gradle библиотек:
    - `./ksrc.exe deps --offline` — список доступных зависимостей с исходниками
    - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — чтение файла с исходниками
