@@ -113,11 +113,12 @@ feature/
   - Создание Navigation Graph для новых фич
   - Обработка Deep Links
 
-- **`docs/RESOURCES.md`** - работа с ресурсами (moko-resources):
-  - Структура модуля `core/resources` (images, strings, fonts)
-  - Форматы файлов: SVG для векторов, PNG@1x/2x/3x для растра
-  - Использование `MR.images.*` вместо Material Icons
-  - Подключение модуля к фичам
+- **`docs/RESOURCES.md`** - ресурсы и Theme (moko-resources + core/compose):
+  - Структура модулей `core/resources` (images, colors, strings, fonts) и `core/compose` (Theme)
+  - Цветовые токены: `Theme.colors.background.*`, `Theme.colors.label.*`, `Theme.colors.accent.*`, `Theme.colors.stroke.*`, `Theme.colors.component.*`
+  - Типографика: `Theme.typography.h1`...`Theme.typography.tiny` (Inter, 10 уровней)
+  - Справочник цветовой палитры Light/Dark
+  - Запреты: нет хардкоду цветов, fontSize, Material Icons
 
 - **`docs/API.md`** - работа с сетевыми запросами и API
 
@@ -128,7 +129,11 @@ feature/
 3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
 4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
 5. **DI**: Регистрируй зависимости в Koin модулях
-6. **ЗАПРЕЩЕНО использовать Material Icons** (`androidx.compose.material.icons`, `Icons.Default.*`, `Icons.Filled.*` и т.д.). Все иконки берутся **только** из `MR.images.*` через moko-resources (модуль `core:resources`). См. `docs/RESOURCES.md`
+6. **Ресурсы и тема**: Следуй правилам из `docs/RESOURCES.md`:
+   - **ЗАПРЕЩЕНО** использовать Material Icons — только `MR.images.*`
+   - **ЗАПРЕЩЕНО** хардкодить цвета `Color(0xFF...)` — только `Theme.colors.*`
+   - **ЗАПРЕЩЕНО** хардкодить `fontSize`/`fontWeight` — только `Theme.typography.*`
+   - Оборачивай экраны в `AppTheme {}` для доступа к теме
 7. **Исследование зависимостей**: Используй `./ksrc.exe` (в корне проекта) для изучения исходников Kotlin/Gradle библиотек:
    - `./ksrc.exe deps --offline` — список доступных зависимостей с исходниками
    - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — чтение файла с исходниками

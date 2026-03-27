@@ -19,7 +19,15 @@
       "Bash(for f:*)",
       "Bash(do sed:*)",
       "Bash(done)",
-      "Bash(./gradlew :features:profile:compileDebugKotlinAndroid)"
+      "Bash(./gradlew :features:profile:compileDebugKotlinAndroid)",
+      "Bash(xargs grep:*)",
+      "Bash(find \"C:/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe\" -name \"*.kt\" -type f -exec grep -l \"fontSize\\\\|fontWeight\\\\|TextStyle\" {})",
+      "Bash(mkdir -p core/compose/src/commonMain/kotlin/com/ownstd/project/core/compose/theme/design_tokens)",
+      "Bash(mkdir -p core/compose/src/commonMain/kotlin/com/ownstd/project/core/compose/theme/typography)",
+      "Bash(mkdir -p core/compose/src/androidMain/kotlin)",
+      "Bash(mkdir -p core/compose/src/iosMain/kotlin)",
+      "Bash(find F:/Work/startup/clothis_design/ -iname *.ttf -o -iname *.otf -o -iname *.woff -o -iname *.woff2)",
+      "Bash(./gradlew :core:compose:assembleDebug)"
     ]
   }
 }
