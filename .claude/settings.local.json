@@ -27,7 +27,19 @@
       "Bash(mkdir -p core/compose/src/androidMain/kotlin)",
       "Bash(mkdir -p core/compose/src/iosMain/kotlin)",
       "Bash(find F:/Work/startup/clothis_design/ -iname *.ttf -o -iname *.otf -o -iname *.woff -o -iname *.woff2)",
-      "Bash(./gradlew :core:compose:assembleDebug)"
+      "Bash(./gradlew :core:compose:assembleDebug)",
+      "Bash(for dir:*)",
+      "Bash(do echo:*)",
+      "Read(//c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe/**)",
+      "Bash(grep -r \"clothe1\\\\|shopping_cart\\\\|img_profile\\\\|categorie_card\" /c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe --include=*.kt)",
+      "Bash(grep -r Res. /c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe --include=*.kt)",
+      "Bash(find /c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe -path \"*/src/commonMain/composeResources\" -type d -exec find {} -type f)",
+      "Bash(find /c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe/features -path */src/commonMain/composeResources/* -type f -exec wc -l {} +)",
+      "Bash(find C:/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe -path */src/*/composeResources -type d)",
+      "Bash(git checkout:*)",
+      "Bash(./gradlew :features:recommendations-page-screen:clean)",
+      "Bash(./gradlew :features:recommendations-page-screen:compileDebugKotlinAndroid)",
+      "Bash(ls -la gradle*.properties)"
     ]
   }
 }
