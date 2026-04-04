@@ -30,6 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.ownstd.project.card.design_system.BG_GREY_COLOR
+import com.ownstd.project.card.design_system.BLUE_COLOR
+import com.ownstd.project.card.design_system.DARK_GREY_COLOR
+import com.ownstd.project.card.design_system.GREY_COLOR
 import com.ownstd.project.card.internal.navigation.AppScreens
 import com.ownstd.project.card.internal.navigation.BottomNavigationNavHost
 import com.ownstd.project.card.internal.navigation.BottomNavigationScreens
@@ -38,11 +42,6 @@ import kotlinprojecttesting.features.card_feature.generated.resources.shopping_c
 import kotlinprojecttesting.features.card_feature.generated.resources.shopping_cart_enabled
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-
-private val DARK_GREY_COLOR = Color(0xFF2F3033)
-private val GREY_COLOR = Color(0xFF9AA0A6)
-private val BLUE_COLOR = Color(0xFF8AB4F8)
-private val BG_GREY_COLOR = Color(0xFF27272B)
 
 @Composable
 internal fun MainScreen(parentNavController: NavHostController) {

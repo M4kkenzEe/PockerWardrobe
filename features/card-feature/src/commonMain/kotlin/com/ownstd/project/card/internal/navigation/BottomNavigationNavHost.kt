@@ -12,8 +12,6 @@ import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGraph
-import com.ownstd.project.profile.presentation.ProfileNavScreens
-import com.ownstd.project.profile.presentation.ProfileSettingsScreen
 
 @Composable
 internal fun BottomNavigationNavHost(
@@ -41,17 +39,7 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Profile> {
-            ProfileScreen(
-                onLogout = onLogout,
-                onOpenSettings = { navController.navigate(ProfileNavScreens.Settings) }
-            )
-        }
-
-        composable<ProfileNavScreens.Settings> {
-            ProfileSettingsScreen(
-                onBack = { navController.popBackStack() },
-                onLogout = onLogout
-            )
+            ProfileScreen(onLogout = onLogout)
         }
 
         wardrobeNavGraph(navController)

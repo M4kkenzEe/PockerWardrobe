@@ -8,12 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
+import com.ownstd.project.card.design_system.DARK_GREY_COLOR
 import com.ownstd.project.card.internal.deeplink.DeepLinkManager
-
-private val DARK_GREY_COLOR = Color(0xFF2F3033)
 
 class MainActivity : ComponentActivity() {
     private val deepLinkManager = DeepLinkManager.getInstance()
