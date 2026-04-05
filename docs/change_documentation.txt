@@ -1,3 +1,0 @@
-1) Для 09_navigation.md давай определим с тобой как мы будет строить навигацию для всех экранов, реализацию смотри в /Users/alex/Documents/Work/android/gazprom/zenit/zenit/common/core/deeplink/src/commonMain/kotlin/ru/gid/zenit/core/deeplink
-2) MyItemsScreen - MainClothisScreen
-3) Навигационные маршруты (по модулям) в конфиги sealed класса сделаем
