@@ -6,9 +6,8 @@
 
 - Дизайн: `F:\Work\startup\clothis_design` (React/TypeScript прототип)
 - Основные заметки по продукту: `keynotes.md` (в папке дизайна)
-- Оригинальный Figma-файл: https://www.figma.com/design/1HrPBshVbtCywUH0OT1XUg/AI-Fashion-Style-App
 
-## Архитектурные изменения (из change_documentation.txt)
+## Архитектурные изменения
 
 Ключевые решения принятые для нового цикла разработки:
 
