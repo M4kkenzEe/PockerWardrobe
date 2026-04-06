@@ -21,7 +21,7 @@ features/outfit_constructor/src/commonMain/.../
 │           │   ├── OutfitConstructorIntent.kt
 │           │   └── OutfitConstructorSideEffect.kt
 │           ├── OutfitConstructorStore.kt
-│           ├── OutfitConstructorContainer.kt
+│           ├── OutfitConstructorViewModel.kt
 │           └── OutfitConstructorScreen.kt
 └── external/
     ├── OutfitConstructorRoutes.kt
@@ -143,8 +143,8 @@ sealed class OutfitConstructorSideEffect {
 // internal/data/dto/AddLookRequest.kt
 @Serializable
 data class AddLookRequest(
-    val name: String,
-    val clotheIds: List<Int>,
+    @SerialName("name") val name: String,
+    @SerialName("clothe_ids") val clotheIds: List<Int>,
 )
 ```
 

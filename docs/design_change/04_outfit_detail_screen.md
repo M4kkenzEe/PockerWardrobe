@@ -15,7 +15,7 @@ features/outfit/src/commonMain/.../
 │       │   ├── OutfitDetailIntent.kt
 │       │   └── OutfitDetailSideEffect.kt
 │       ├── OutfitDetailStore.kt
-│       ├── OutfitDetailContainer.kt
+│       ├── OutfitDetailViewModel.kt
 │       └── OutfitDetailScreen.kt
 └── external/
     └── OutfitRoutes.kt  # OutfitDetail маршрут

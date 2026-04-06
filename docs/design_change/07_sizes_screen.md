@@ -16,7 +16,7 @@ features/profile/src/commonMain/.../
             │   ├── SizesIntent.kt
             │   └── SizesSideEffect.kt
             ├── SizesStore.kt
-            ├── SizesContainer.kt
+            ├── SizesViewModel.kt
             └── SizesScreen.kt
 ```
 
@@ -139,12 +139,12 @@ sealed class SizesSideEffect {
 // internal/data/dto/UserSizesDto.kt
 @Serializable
 data class UserSizesDto(
-    val primarySize: String? = null,
-    val height: Float? = null,
-    val weight: Float? = null,
-    val chest: Float? = null,
-    val waist: Float? = null,
-    val hips: Float? = null,
+    @SerialName("primary_size") val primarySize: String? = null,
+    @SerialName("height") val height: Float? = null,
+    @SerialName("weight") val weight: Float? = null,
+    @SerialName("chest") val chest: Float? = null,
+    @SerialName("waist") val waist: Float? = null,
+    @SerialName("hips") val hips: Float? = null,
 )
 ```
 

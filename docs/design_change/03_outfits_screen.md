@@ -25,7 +25,7 @@ features/outfit/src/commonMain/.../
 │           │   ├── OutfitIntent.kt
 │           │   └── OutfitSideEffect.kt
 │           ├── OutfitStore.kt
-│           ├── OutfitContainer.kt
+│           ├── OutfitViewModel.kt
 │           └── OutfitScreen.kt
 └── external/
     ├── OutfitRoutes.kt
@@ -126,21 +126,21 @@ sealed class OutfitSideEffect {
 // internal/data/dto/LookDto.kt
 @Serializable
 data class LookDto(
-    val id: Int? = null,
-    val name: String,
-    val url: String,
-    val lookItems: List<LookItemDto>? = null,
-    val style: String? = null,
-    val tags: List<String>? = null,
+    @SerialName("id") val id: Int? = null,
+    @SerialName("name") val name: String,
+    @SerialName("url") val url: String,
+    @SerialName("look_items") val lookItems: List<LookItemDto>? = null,
+    @SerialName("style") val style: String? = null,
+    @SerialName("tags") val tags: List<String>? = null,
 )
 
 @Serializable
 data class LookItemDto(
-    val id: Int,
-    val clotheId: Int,
-    val imageUrl: String,
-    val name: String? = null,
-    val category: String? = null,
+    @SerialName("id") val id: Int,
+    @SerialName("clothe_id") val clotheId: Int,
+    @SerialName("image_url") val imageUrl: String,
+    @SerialName("name") val name: String? = null,
+    @SerialName("category") val category: String? = null,
 )
 ```
 

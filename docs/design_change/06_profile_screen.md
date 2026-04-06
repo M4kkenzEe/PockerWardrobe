@@ -27,7 +27,7 @@ features/profile/src/commonMain/.../
 │       │   │   ├── ProfileIntent.kt
 │       │   │   └── ProfileSideEffect.kt
 │       │   ├── ProfileStore.kt
-│       │   ├── ProfileContainer.kt
+│       │   ├── ProfileViewModel.kt
 │       │   └── ProfileScreen.kt
 │       └── detail/                      # Экраны открываемые из профиля
 │           ├── editProfile/
@@ -36,7 +36,7 @@ features/profile/src/commonMain/.../
 │           │   │   ├── EditProfileIntent.kt
 │           │   │   └── EditProfileSideEffect.kt
 │           │   ├── EditProfileStore.kt
-│           │   ├── EditProfileContainer.kt
+│           │   ├── EditProfileViewModel.kt
 │           │   └── EditProfileScreen.kt
 │           └── sizes/                   ← описан в 07_sizes_screen.md
 │               ├── interactionModel/
@@ -44,7 +44,7 @@ features/profile/src/commonMain/.../
 │               │   ├── SizesIntent.kt
 │               │   └── SizesAction.kt
 │               ├── SizesStore.kt
-│               ├── SizesContainer.kt
+│               ├── SizesViewModel.kt
 │               └── SizesScreen.kt
 └── external/
     ├── ProfileRoutes.kt
@@ -174,23 +174,23 @@ sealed class EditProfileSideEffect {
 // internal/data/dto/UserDto.kt
 @Serializable
 data class UserDto(
-    val id: Int,
-    val name: String,
-    val email: String,
-    val username: String,
-    val gender: String? = null,
-    val avatarUrl: String? = null,
-    val outfitsCount: Int = 0,
-    val clothesCount: Int = 0,
-    val sharedCount: Int = 0,
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("email") val email: String,
+    @SerialName("username") val username: String,
+    @SerialName("gender") val gender: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("outfits_count") val outfitsCount: Int = 0,
+    @SerialName("clothes_count") val clothesCount: Int = 0,
+    @SerialName("shared_count") val sharedCount: Int = 0,
 )
 
 // internal/data/dto/UpdateProfileRequest.kt
 @Serializable
 data class UpdateProfileRequest(
-    val name: String? = null,
-    val username: String? = null,
-    val gender: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("username") val username: String? = null,
+    @SerialName("gender") val gender: String? = null,
 )
 ```
 

@@ -16,7 +16,7 @@ features/wardrobe/src/commonMain/.../
 │       │   │   ├── ItemDetailIntent.kt
 │       │   │   └── ItemDetailSideEffect.kt
 │       │   ├── ItemDetailStore.kt
-│       │   ├── ItemDetailContainer.kt
+│       │   ├── ItemDetailViewModel.kt
 │       │   └── ItemDetailScreen.kt
 │       └── itemEdit/
 │           ├── interactionModel/
@@ -24,7 +24,7 @@ features/wardrobe/src/commonMain/.../
 │           │   ├── ItemEditIntent.kt
 │           │   └── ItemEditSideEffect.kt
 │           ├── ItemEditStore.kt
-│           ├── ItemEditContainer.kt
+│           ├── ItemEditViewModel.kt
 │           └── ItemEditScreen.kt
 └── external/
     └── WardrobeRoutes.kt  # ItemDetail, ItemEdit маршруты
@@ -182,16 +182,16 @@ sealed class ItemEditSideEffect {
 // internal/data/dto/ClotheUpdateRequest.kt
 @Serializable
 data class ClotheUpdateRequest(
-    val name: String? = null,
-    val category: String? = null,
-    val material: String? = null,
-    val fit: String? = null,
-    val styles: List<String>? = null,
-    val season: List<String>? = null,
-    val color: String? = null,
-    val brand: String? = null,
-    val size: String? = null,
-    val marketplaceLinks: List<String>? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("category") val category: String? = null,
+    @SerialName("material") val material: String? = null,
+    @SerialName("fit") val fit: String? = null,
+    @SerialName("styles") val styles: List<String>? = null,
+    @SerialName("season") val season: List<String>? = null,
+    @SerialName("color") val color: String? = null,
+    @SerialName("brand") val brand: String? = null,
+    @SerialName("size") val size: String? = null,
+    @SerialName("marketplace_links") val marketplaceLinks: List<String>? = null,
 )
 ```
 

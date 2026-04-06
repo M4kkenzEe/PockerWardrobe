@@ -73,3 +73,4 @@
 9. [Изменения навигации](./09_navigation.md)
 10. [Системные компоненты](./10_system_components.md)
 11. [Clean Architecture + FlowMVI](./11_architecture_flowmvi.md)
+12. [Paging — постраничная загрузка](./12_paging.md)

@@ -38,7 +38,7 @@ features/<feature-name>/
 │       │   │   ├── FeatureIntent.kt
 │       │   │   └── FeatureSideEffect.kt
 │       │   ├── FeatureStore.kt
-│       │   ├── FeatureContainer.kt
+│       │   ├── FeatureViewModel.kt
 │       │   └── FeatureScreen.kt
 │       └── detail/                   # Экраны-деталки (если есть)
 │           ├── featureDetail/        # отдельный подпакет на каждую фичу внутри detail
@@ -47,7 +47,7 @@ features/<feature-name>/
 │           │   │   ├── FeatureDetailIntent.kt
 │           │   │   └── FeatureDetailSideEffect.kt
 │           │   ├── FeatureDetailStore.kt
-│           │   ├── FeatureDetailContainer.kt
+│           │   ├── FeatureDetailViewModel.kt
 │           │   └── FeatureDetailScreen.kt
 │           └── featureEdit/
 │               ├── interactionModel/
@@ -55,7 +55,7 @@ features/<feature-name>/
 │               │   ├── FeatureEditIntent.kt
 │               │   └── FeatureEditSideEffect.kt
 │               ├── FeatureEditStore.kt
-│               ├── FeatureEditContainer.kt
+│               ├── FeatureEditViewModel.kt
 │               └── FeatureEditScreen.kt
 └── external/
     ├── FeatureRoutes.kt              # @Serializable маршруты (ключи навигации)
@@ -117,20 +117,22 @@ fun <T : Any> SideEffect<T>.handle(
 Объекты передачи данных — строго соответствуют JSON от API. Аннотированы `@Serializable`.  
 Для мутирующих запросов (PATCH/POST) — отдельные request-классы.
 
+Каждое поле обязательно помечается `@SerialName` с точным ключом из JSON — даже если имя совпадает с camelCase. Это защищает от молчаливой поломки при переименовании поля в коде.
+
 ```kotlin
 // internal/data/dto/FeatureDto.kt
 @Serializable
 data class FeatureDto(
-    val id: Int,
-    val name: String,
-    val optionalField: String? = null,
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("optional_field") val optionalField: String? = null,
 )
 
 // internal/data/dto/FeatureUpdateRequest.kt
 @Serializable
 data class FeatureUpdateRequest(
-    val name: String? = null,
-    val optionalField: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("optional_field") val optionalField: String? = null,
 )
 ```
 
@@ -226,7 +228,7 @@ class DeleteItemUseCase(private val repository: FeatureRepository) {
 | `Intent` | `sealed interface : MVIIntent` | Действия от пользователя → поступают в Store |
 | `SideEffect` | `sealed class` | Разовые события → навигация, тосты, открытие URL |
 | `Store` | `IStore<S, I, Nothing>` | Получает Intent, обновляет State, вызывает `onSideEffect` |
-| `Container` | `ViewModel` | Владеет Store и `_sideEffect: MutableSharedFlow` |
+| `ViewModel` | `ViewModel` | Владеет Store и `_sideEffect: MutableSharedFlow` |
 
 ### Правила
 
@@ -234,7 +236,7 @@ class DeleteItemUseCase(private val repository: FeatureRepository) {
 - `Intent` — всё что пользователь может сделать с экраном.
 - `SideEffect` — одноразовые события. Не хранятся в State.
 - Store — не знает о Composable и Android-специфике. Тип Action в FlowMVI = `Nothing`.
-- Container — владеет `_sideEffect` и передаёт `{ _sideEffect.tryEmit(it) }` в Store.
+- ViewModel — владеет `_sideEffect` и передаёт `{ _sideEffect.tryEmit(it) }` в Store.
 
 ---
 
@@ -322,11 +324,11 @@ fun wardrobeStore(
 
 ---
 
-### Container — владеет `_sideEffect`
+### ViewModel — владеет `_sideEffect`
 
 ```kotlin
-// internal/presentation/list/WardrobeContainer.kt
-class WardrobeContainer(
+// internal/presentation/list/WardrobeViewModel.kt
+class WardrobeViewModel(
     getClothesUseCase: GetClothesUseCase,
     deleteClotheUseCase: DeleteClotheUseCase,
 ) : ViewModel() {
@@ -353,7 +355,7 @@ fun WardrobeScreen(
     onNavigateToDetail: (clotheId: Int) -> Unit,
     onShowAddSheet: () -> Unit,
 ) {
-    val container = koinViewModel<WardrobeContainer>()
+    val container = koinViewModel<WardrobeViewModel>()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -419,7 +421,7 @@ is ItemDetailIntent.DeleteCancelled ->
 // Composable
 @Composable
 fun ItemDetailScreen(onBack: () -> Unit, onNavigateToEdit: (Int) -> Unit) {
-    val container = koinViewModel<ItemDetailContainer>()
+    val container = koinViewModel<ItemDetailViewModel>()
     val scope = rememberCoroutineScope()
 
     container.sideEffect.handle { effect ->
@@ -497,17 +499,21 @@ container.sideEffect.handle { effect ->
 ```kotlin
 // di/WardrobeModule.kt
 val wardrobeModule = module {
-    factory<WardrobeRepository> { WardrobeRepositoryImpl(get()) }
-    factory { GetClothesUseCase(get()) }
-    factory { DeleteClotheUseCase(get()) }
-    factory { GetClotheByIdUseCase(get()) }
-    factory { UpdateClotheUseCase(get()) }
+    // single — Repository и Use Case stateless/держат только синглтоны, пересоздавать не нужно
+    single<WardrobeRepository> { WardrobeRepositoryImpl(get()) }
+    single { GetClothesUseCase(get()) }
+    single { DeleteClotheUseCase(get()) }
+    single { GetClotheByIdUseCase(get()) }
+    single { UpdateClotheUseCase(get()) }
 
-    viewModel { WardrobeContainer(get(), get()) }
-    viewModel { ItemDetailContainer(get(), get(), get()) }
-    viewModel { ItemEditContainer(get()) }
+    // viewModel — lifecycle управляется Koin + AndroidX, не трогать
+    viewModel { WardrobeViewModel(get(), get()) }
+    viewModel { ItemDetailViewModel(get(), get(), get()) }
+    viewModel { ItemEditViewModel(get()) }
 }
 ```
+
+**Правило DI:** `single` — Repository и Use Case. `factory` не использовать: Use Case держит только синглтоны, пересоздавать каждый раз нет смысла.
 
 ---
 
@@ -515,7 +521,7 @@ val wardrobeModule = module {
 
 1. **Store** не импортирует ничего из `android.*`, `androidx.*`.
 2. **Store** получает `onSideEffect` лямбдой — не знает о `MutableSharedFlow`.
-3. **Container** владеет `_sideEffect` и передаёт `{ _sideEffect.tryEmit(it) }` в Store.
+3. **ViewModel** владеет `_sideEffect` и передаёт `{ _sideEffect.tryEmit(it) }` в Store.
 4. **Навигация** — через callback-параметры Composable (`onBack`, `onNavigateToDetail`), вызываемые из `.handle { }`.
 5. **SideEffect** — только одноразовые события. Постоянное состояние — в `State`.
 6. **Composable** не вызывает бизнес-логику напрямую — только `container.store.intent(...)`.
