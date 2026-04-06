@@ -251,20 +251,24 @@ override suspend fun getClotheOutfits(clotheId: Int): List<Look> =
 ```kotlin
 // internal/domain/usecase/GetClotheByIdUseCase.kt
 class GetClotheByIdUseCase(private val repository: WardrobeRepository) {
-    suspend operator fun invoke(clotheId: Int): Result<ClotheDetail> =
-        runCatching { repository.getClotheById(clotheId) }
-}
-
-// internal/domain/usecase/UpdateClotheUseCase.kt
-class UpdateClotheUseCase(private val repository: WardrobeRepository) {
-    suspend operator fun invoke(clotheId: Int, clothe: ClotheDetail): Result<ClotheDetail> =
-        runCatching { repository.updateClothe(clotheId, clothe) }
+    operator fun invoke(clotheId: Int): Flow<Outcome<ClotheDetail>> = flow {
+        emit(Outcome.Success(repository.getClotheById(clotheId)))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
 // internal/domain/usecase/GetClotheOutfitsUseCase.kt
 class GetClotheOutfitsUseCase(private val repository: WardrobeRepository) {
-    suspend operator fun invoke(clotheId: Int): Result<List<Look>> =
-        runCatching { repository.getClotheOutfits(clotheId) }
+    operator fun invoke(clotheId: Int): Flow<Outcome<List<Look>>> = flow {
+        val looks = repository.getClotheOutfits(clotheId)
+        if (looks.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(looks))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
+}
+
+// internal/domain/usecase/UpdateClotheUseCase.kt — Command UseCase
+class UpdateClotheUseCase(private val repository: WardrobeRepository) {
+    suspend operator fun invoke(clotheId: Int, clothe: ClotheDetail): Result<ClotheDetail> =
+        runCatching { repository.updateClothe(clotheId, clothe) }
 }
 ```
 

@@ -188,11 +188,12 @@ override suspend fun updateUserSizes(sizes: UserSizes): UserSizes =
 ```kotlin
 // internal/domain/usecase/GetUserSizesUseCase.kt
 class GetUserSizesUseCase(private val repository: ProfileRepository) {
-    suspend operator fun invoke(): Result<UserSizes> =
-        runCatching { repository.getUserSizes() }
+    operator fun invoke(): Flow<Outcome<UserSizes>> = flow {
+        emit(Outcome.Success(repository.getUserSizes()))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
-// internal/domain/usecase/UpdateUserSizesUseCase.kt
+// internal/domain/usecase/UpdateUserSizesUseCase.kt — Command UseCase
 class UpdateUserSizesUseCase(private val repository: ProfileRepository) {
     suspend operator fun invoke(sizes: UserSizes): Result<UserSizes> =
         runCatching { repository.updateUserSizes(sizes) }

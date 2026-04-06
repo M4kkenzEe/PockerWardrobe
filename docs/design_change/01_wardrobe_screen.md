@@ -210,11 +210,14 @@ class WardrobeRepositoryImpl(
 ```kotlin
 // internal/domain/usecase/GetClothesUseCase.kt
 class GetClothesUseCase(private val repository: WardrobeRepository) {
-    suspend operator fun invoke(): Result<List<Clothe>> =
-        runCatching { repository.getClothes() }
+    operator fun invoke(): Flow<Outcome<List<Clothe>>> = flow {
+        val clothes = repository.getClothes()
+        if (clothes.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(clothes))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
-// internal/domain/usecase/DeleteClotheUseCase.kt
+// internal/domain/usecase/DeleteClotheUseCase.kt — Command UseCase
 class DeleteClotheUseCase(private val repository: WardrobeRepository) {
     suspend operator fun invoke(id: Int): Result<Unit> =
         runCatching { repository.deleteClothe(id) }

@@ -69,6 +69,50 @@ features/<feature-name>/
 
 ---
 
+## Outcome — утилита
+
+`Outcome<T>` — базовый sealed class для результата Query UseCase. Размещается в `core/compose`.  
+Устраняет дублирование `sealed class GetXxxResult` в каждом UseCase.
+
+```kotlin
+// core/compose/src/commonMain/.../foundation/Outcome.kt
+
+sealed class Outcome<out T> {
+    data class Success<out T>(val data: T) : Outcome<T>()
+    data object Empty : Outcome<Nothing>()
+    data class Error(val message: String) : Outcome<Nothing>()
+}
+```
+
+Query UseCase возвращает `Flow<Outcome<T>>`:
+
+```kotlin
+class GetItemsUseCase(private val repository: FeatureRepository) {
+    operator fun invoke(): Flow<Outcome<List<FeatureModel>>> = flow {
+        val items = repository.getItems()
+        if (items.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(items))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
+}
+```
+
+Store маппит `Outcome` в State:
+
+```kotlin
+getItemsUseCase().collect { result ->
+    when (result) {
+        is Outcome.Success -> updateState { copy(items = result.data, isLoading = false) }
+        is Outcome.Empty   -> updateState { copy(isLoading = false, isEmpty = true) }
+        is Outcome.Error   -> {
+            updateState { copy(isLoading = false) }
+            onSideEffect(FeatureSideEffect.ShowError(result.message))
+        }
+    }
+}
+```
+
+---
+
 ## SideEffect — утилита
 
 SideEffect — кастомная обёртка над `MutableSharedFlow`, размещается в `core/compose`.  
@@ -184,20 +228,36 @@ class FeatureRepositoryImpl(
 
 **Правила RepositoryImpl:**
 - Не содержит бизнес-логики — только вызов API и маппинг.
-- Обработка ошибок — на уровне Use Case (`runCatching`), не здесь.
+- Обработка ошибок — на уровне Use Case, не здесь.
 - Кэширование (если нужно) — через отдельный `LocalDataSource`, не в репозитории напрямую.
 
 ### Use Cases
 
-Каждый Use Case — один класс, один метод `invoke`. Оборачивает результат в `Result<T>`.
+Каждый Use Case — один класс, один метод `invoke`. Содержит бизнес-логику: обработку пустых состояний, ошибок, трансформаций. Store — чистый презентер, только маппит результат UseCase в State.
+
+Два типа Use Case:
+
+#### Query UseCase (наблюдение / загрузка данных)
+
+Возвращает `Flow<Outcome<T>>`. Логика пустого состояния и ошибок — внутри UseCase.  
+Индивидуальные `sealed class GetXxxResult` не нужны — используется базовый `Outcome<T>`.
 
 ```kotlin
 // internal/domain/usecase/GetItemsUseCase.kt
 class GetItemsUseCase(private val repository: FeatureRepository) {
-    suspend operator fun invoke(): Result<List<FeatureModel>> =
-        runCatching { repository.getItems() }
+    operator fun invoke(): Flow<Outcome<List<FeatureModel>>> = flow {
+        val items = repository.getItems()
+        if (items.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(items))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
+```
 
+#### Command UseCase (мутация: update, delete, create)
+
+Возвращает `Result<T>` через `suspend fun`. Одноразовая операция без наблюдения.
+
+```kotlin
 // internal/domain/usecase/UpdateItemUseCase.kt
 class UpdateItemUseCase(private val repository: FeatureRepository) {
     suspend operator fun invoke(id: Int, item: FeatureModel): Result<FeatureModel> =
@@ -212,9 +272,10 @@ class DeleteItemUseCase(private val repository: FeatureRepository) {
 ```
 
 **Правила Use Case:**
-- Всегда возвращает `Result<T>` — Store обрабатывает `onSuccess` / `onFailure`.
 - Один Use Case = одна операция. Не объединять несколько операций в один класс.
-- Может содержать простую бизнес-логику (валидация, трансформация) — в отличие от репозитория.
+- Query UseCase владеет бизнес-логикой: пустые состояния, маппинг ошибок — здесь, не в Store.
+- Store не вызывает `fold` / `onSuccess` / `onFailure` с бизнес-условиями — только маппит sealed-результат в State.
+- Command UseCase возвращает `Result<T>` — Store обрабатывает `onSuccess` / `onFailure` только для навигации и показа ошибки.
 
 ---
 
@@ -290,15 +351,19 @@ fun wardrobeStore(
         when (intent) {
             is WardrobeIntent.LoadClothes -> {
                 updateState { copy(isLoading = true) }
-                getClothesUseCase().fold(
-                    onSuccess = { clothes ->
-                        updateState { copy(clothes = clothes, isLoading = false, isEmpty = clothes.isEmpty()) }
-                    },
-                    onFailure = { e ->
-                        updateState { copy(isLoading = false) }
-                        onSideEffect(WardrobeSideEffect.ShowError(e.message ?: "Ошибка загрузки"))
+                // Store — чистый презентер: только маппит Outcome в State
+                getClothesUseCase().collect { result ->
+                    when (result) {
+                        is Outcome.Success ->
+                            updateState { copy(clothes = result.data, isLoading = false, isEmpty = false) }
+                        is Outcome.Empty ->
+                            updateState { copy(isLoading = false, isEmpty = true) }
+                        is Outcome.Error -> {
+                            updateState { copy(isLoading = false) }
+                            onSideEffect(WardrobeSideEffect.ShowError(result.message))
+                        }
                     }
-                )
+                }
             }
             is WardrobeIntent.ItemClicked ->
                 onSideEffect(WardrobeSideEffect.NavigateToDetail(intent.clotheId))
@@ -307,6 +372,7 @@ fun wardrobeStore(
                 onSideEffect(WardrobeSideEffect.ShowAddBottomSheet)
 
             is WardrobeIntent.DeleteClothe -> {
+                // Command UseCase — Result<T>, Store обрабатывает только навигацию/ошибку
                 deleteClotheUseCase(intent.id).fold(
                     onSuccess = { send(WardrobeIntent.LoadClothes) },
                     onFailure = { e -> onSideEffect(WardrobeSideEffect.ShowError(e.message ?: "Ошибка удаления")) }

@@ -184,11 +184,14 @@ class OutfitConstructorRepositoryImpl(
 ```kotlin
 // internal/domain/usecase/GetClothesUseCase.kt
 class GetClothesUseCase(private val repository: OutfitConstructorRepository) {
-    suspend operator fun invoke(): Result<List<Clothe>> =
-        runCatching { repository.getClothes() }
+    operator fun invoke(): Flow<Outcome<List<Clothe>>> = flow {
+        val clothes = repository.getClothes()
+        if (clothes.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(clothes))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
-// internal/domain/usecase/AddLookUseCase.kt
+// internal/domain/usecase/AddLookUseCase.kt — Command UseCase
 class AddLookUseCase(private val repository: OutfitConstructorRepository) {
     suspend operator fun invoke(look: DraftLook, image: ByteArray): Result<Look> =
         runCatching { repository.addLook(look, image) }

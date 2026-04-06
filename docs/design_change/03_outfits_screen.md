@@ -197,17 +197,20 @@ class OutfitRepositoryImpl(
 ```kotlin
 // internal/domain/usecase/GetLooksUseCase.kt
 class GetLooksUseCase(private val repository: OutfitRepository) {
-    suspend operator fun invoke(): Result<List<Look>> =
-        runCatching { repository.getLooks() }
+    operator fun invoke(): Flow<Outcome<List<Look>>> = flow {
+        val looks = repository.getLooks()
+        if (looks.isEmpty()) emit(Outcome.Empty)
+        else emit(Outcome.Success(looks))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
-// internal/domain/usecase/DeleteLookUseCase.kt
+// internal/domain/usecase/DeleteLookUseCase.kt — Command UseCase
 class DeleteLookUseCase(private val repository: OutfitRepository) {
     suspend operator fun invoke(id: Int): Result<Unit> =
         runCatching { repository.deleteLook(id) }
 }
 
-// internal/domain/usecase/ShareLookUseCase.kt
+// internal/domain/usecase/ShareLookUseCase.kt — Command UseCase
 class ShareLookUseCase(private val repository: OutfitRepository) {
     suspend operator fun invoke(id: Int): Result<String> =
         runCatching { repository.shareLook(id) }

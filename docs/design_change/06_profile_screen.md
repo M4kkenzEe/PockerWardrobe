@@ -248,11 +248,12 @@ class ProfileRepositoryImpl(
 ```kotlin
 // internal/domain/usecase/GetProfileUseCase.kt
 class GetProfileUseCase(private val repository: ProfileRepository) {
-    suspend operator fun invoke(): Result<User> =
-        runCatching { repository.getProfile() }
+    operator fun invoke(): Flow<Outcome<User>> = flow {
+        emit(Outcome.Success(repository.getProfile()))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
-// internal/domain/usecase/UpdateProfileUseCase.kt
+// internal/domain/usecase/UpdateProfileUseCase.kt — Command UseCase
 class UpdateProfileUseCase(private val repository: ProfileRepository) {
     suspend operator fun invoke(
         name: String,
@@ -263,7 +264,7 @@ class UpdateProfileUseCase(private val repository: ProfileRepository) {
     }
 }
 
-// internal/domain/usecase/LogoutUseCase.kt
+// internal/domain/usecase/LogoutUseCase.kt — Command UseCase
 class LogoutUseCase(private val repository: ProfileRepository) {
     suspend operator fun invoke(): Result<Unit> =
         runCatching { repository.logout() }

@@ -115,8 +115,9 @@ DTO и маппер для `Look` / `LookItem` — определены в `03_o
 ```kotlin
 // internal/domain/usecase/GetLookByIdUseCase.kt
 class GetLookByIdUseCase(private val repository: OutfitRepository) {
-    suspend operator fun invoke(lookId: Int): Result<Look> =
-        runCatching { repository.getLookById(lookId) }
+    operator fun invoke(lookId: Int): Flow<Outcome<Look>> = flow {
+        emit(Outcome.Success(repository.getLookById(lookId)))
+    }.catch { e -> emit(Outcome.Error(e.message ?: "Ошибка загрузки")) }
 }
 
 // internal/domain/usecase/DeleteLookUseCase.kt  — см. 03_outfits_screen.md
