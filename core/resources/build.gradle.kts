@@ -47,7 +47,7 @@ kotlin {
 
 android {
     namespace = "com.ownstd.project.core.resources"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }

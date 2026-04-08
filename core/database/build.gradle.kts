@@ -53,7 +53,7 @@ kotlin {
             implementation(libs.koin.compose)
 
             // Room
-            implementation(libs.androidx.paging.common)
+            implementation(libs.paging.common)
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
         }

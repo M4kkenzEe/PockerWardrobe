@@ -438,7 +438,7 @@ fun WardrobeScreen(
         }
     }
 
-    val state by container.store.state.collectAsState()
+    val state by container.store.subscribe()
 
     WardrobeContent(
         state = state,
@@ -498,7 +498,7 @@ fun ItemDetailScreen(onBack: () -> Unit, onNavigateToEdit: (Int) -> Unit) {
         }
     }
 
-    val state by container.store.state.collectAsState()
+    val state by container.store.subscribe()
 
     if (state.showDeleteDialog) {
         DeleteConfirmDialog(

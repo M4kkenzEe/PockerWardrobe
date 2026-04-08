@@ -35,9 +35,16 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
+            implementation(compose.components.uiToolingPreview)
 
             implementation(libs.moko.resources)
             implementation(libs.moko.resources.compose)
+
+            implementation(libs.flowmvi.core)
+            implementation(libs.flowmvi.compose)
+
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
 
             implementation(project(":core:resources"))
         }
@@ -49,7 +56,7 @@ kotlin {
 
 android {
     namespace = "com.ownstd.project.core.compose"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }

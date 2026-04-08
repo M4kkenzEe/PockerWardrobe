@@ -65,9 +65,15 @@ kotlin {
             implementation(libs.moko.resources)
             implementation(libs.moko.resources.compose)
 
+            implementation(libs.flowmvi.core)
+            implementation(libs.flowmvi.compose)
+
+            implementation(libs.navigation3.runtime)
+
             implementation(project(":core:network"))
             implementation(project(":core:storage"))
             implementation(project(":core:resources"))
+            implementation(project(":core:compose"))
             implementation(project(":features:authorization"))
 
         }
@@ -79,7 +85,7 @@ kotlin {
 
 android {
     namespace = "com.ownstd.project.profile"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }

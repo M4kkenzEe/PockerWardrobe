@@ -1,7 +1,7 @@
 [versions]
 activityKtx = "1.9.3"
 agp = "8.9.1"
-android-compileSdk = "35"
+android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "34"
 ktlint = "12.1.2"
@@ -25,6 +25,8 @@ koin = "4.1.0"
 mviKotlin = "3.0.2"
 moko-mvvm = "0.13.1"
 moko-resources = "0.25.0"
+flowmvi = "3.1.0"
+navigation3 = "1.0.0-alpha02"
 coil3 = "3.0.0-alpha06"
 ktor = "3.1.0"
 coroutinesVersion = "1.10.2"
@@ -35,8 +37,7 @@ accompanist-permissions = "0.32.0"
 androidx-room = "2.7.1"
 ksp = "2.2.0-2.0.2"
 sqlite = "2.5.1"
-pagingComposeAndroid = "3.3.6"
-androidx-paging = "3.3.6"
+paging = "3.3.2"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -98,9 +99,20 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
+#FlowMVI
+flowmvi-core       = { module = "pro.respawn.flowmvi:core",       version.ref = "flowmvi" }
+flowmvi-compose    = { module = "pro.respawn.flowmvi:compose",    version.ref = "flowmvi" }
+flowmvi-savedstate = { module = "pro.respawn.flowmvi:savedstate", version.ref = "flowmvi" }
+
+#Navigation 3
+navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+navigation3-ui      = { module = "androidx.navigation3:navigation3-ui",      version.ref = "navigation3" }
+
+#Paging KMP
+paging-common  = { module = "androidx.paging:paging-common",  version.ref = "paging" }
+paging-compose = { module = "androidx.paging:paging-compose",  version.ref = "paging" }
+
 #Room
-androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "androidx-paging" }
-androidx-paging-compose-android = { group = "androidx.paging", name = "paging-compose-android", version.ref = "pagingComposeAndroid" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
