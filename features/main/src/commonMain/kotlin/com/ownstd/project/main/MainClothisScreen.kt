@@ -3,6 +3,7 @@ package com.ownstd.project.main
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -51,7 +52,8 @@ fun MainClothisScreen(backStack: SnapshotStateList<NavKey>) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .navigationBarsPadding(),
         ) {
             TabSwitcher(
                 tabs = listOf("Одежда", "Образы"),
