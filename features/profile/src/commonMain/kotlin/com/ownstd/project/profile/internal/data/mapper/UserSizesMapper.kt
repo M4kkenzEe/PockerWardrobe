@@ -1,9 +1,9 @@
 package com.ownstd.project.profile.internal.data.mapper
 
 import com.ownstd.project.profile.internal.data.dto.UserSizesDto
-import com.ownstd.project.profile.internal.domain.model.UserSizes
+import com.ownstd.project.profile.internal.domain.model.UserSizesModel
 
-internal fun UserSizesDto.toUserSizes(): UserSizes = UserSizes(
+internal fun UserSizesDto.toUserSizes(): UserSizesModel = UserSizesModel(
     primarySize = primarySize,
     height = height,
     weight = weight,
@@ -12,7 +12,7 @@ internal fun UserSizesDto.toUserSizes(): UserSizes = UserSizes(
     hips = hips,
 )
 
-internal fun UserSizes.toDto(): UserSizesDto = UserSizesDto(
+internal fun UserSizesModel.toDto(): UserSizesDto = UserSizesDto(
     primarySize = primarySize,
     height = height,
     weight = weight,

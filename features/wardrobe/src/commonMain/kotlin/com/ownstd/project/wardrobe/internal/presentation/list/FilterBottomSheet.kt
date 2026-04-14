@@ -33,16 +33,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ownstd.project.core.compose.components.AppBottomSheet
 import com.ownstd.project.core.compose.theme.Theme
-import com.ownstd.project.wardrobe.internal.domain.model.FilterOptions
-import com.ownstd.project.wardrobe.internal.domain.model.SortOrder
+import com.ownstd.project.wardrobe.internal.domain.model.FilterOptionsModel
+import com.ownstd.project.wardrobe.internal.domain.model.SortOrderModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private val SEASONS = listOf("Весна", "Лето", "Осень", "Зима")
 
 private val SORT_OPTIONS = listOf(
-    SortOrder.BY_DATE to "По дате",
-    SortOrder.BY_NAME to "По имени",
-    SortOrder.BY_CATEGORY to "По категории",
+    SortOrderModel.BY_DATE to "По дате",
+    SortOrderModel.BY_NAME to "По имени",
+    SortOrderModel.BY_CATEGORY to "По категории",
 )
 
 private data class ColorOption(val name: String, val value: Color)
@@ -65,8 +65,8 @@ private val COLOR_OPTIONS = listOf(
 @Composable
 internal fun FilterBottomSheet(
     visible: Boolean,
-    currentOptions: FilterOptions,
-    onApply: (FilterOptions) -> Unit,
+    currentOptions: FilterOptionsModel,
+    onApply: (FilterOptionsModel) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var draft by remember(visible) { mutableStateOf(currentOptions) }
@@ -146,7 +146,7 @@ internal fun FilterBottomSheet(
         ) {
             if (draft.isActive) {
                 TextButton(
-                    onClick = { draft = FilterOptions() },
+                    onClick = { draft = FilterOptionsModel() },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(
@@ -241,7 +241,7 @@ private fun ColorCircle(
 private fun FilterBottomSheetPreview() {
     FilterBottomSheet(
         visible = true,
-        currentOptions = FilterOptions(seasons = listOf("Лето")),
+        currentOptions = FilterOptionsModel(seasons = listOf("Лето")),
         onApply = {},
         onDismiss = {},
     )

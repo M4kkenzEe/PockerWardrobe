@@ -43,8 +43,8 @@ import com.ownstd.project.core.compose.components.TagChip
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
 import dev.icerock.moko.resources.compose.painterResource
-import com.ownstd.project.outfit.internal.domain.model.Look
-import com.ownstd.project.outfit.internal.domain.model.LookItem
+import com.ownstd.project.outfit.internal.domain.model.LookModel
+import com.ownstd.project.outfit.internal.domain.model.LookItemModel
 import com.ownstd.project.outfit.internal.presentation.detail.interactionModel.OutfitDetailIntent
 import com.ownstd.project.outfit.internal.presentation.detail.interactionModel.OutfitDetailSideEffect
 import com.ownstd.project.outfit.internal.presentation.detail.interactionModel.OutfitDetailState
@@ -251,14 +251,14 @@ private fun OutfitDetailScreenPreview() {
     OutfitDetailContent(
         state = OutfitDetailState(
             isLoading = false,
-            look = Look(
+            look = LookModel(
                 id = 1,
                 name = "Офисный образ",
                 url = "",
                 tags = listOf("Пальто", "Брюки", "Кеды"),
                 lookItems = listOf(
-                    LookItem(id = 1, clotheId = 10, imageUrl = "", name = "Пальто", category = "Верх"),
-                    LookItem(id = 2, clotheId = 11, imageUrl = "", name = "Брюки", category = "Низ"),
+                    LookItemModel(id = 1, clotheId = 10, imageUrl = "", name = "Пальто", category = "Верх"),
+                    LookItemModel(id = 2, clotheId = 11, imageUrl = "", name = "Брюки", category = "Низ"),
                 ),
             ),
         ),

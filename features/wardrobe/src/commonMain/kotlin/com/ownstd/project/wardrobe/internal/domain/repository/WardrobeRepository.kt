@@ -1,15 +1,15 @@
 package com.ownstd.project.wardrobe.internal.domain.repository
 
-import com.ownstd.project.wardrobe.internal.domain.model.Clothe
-import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetail
-import com.ownstd.project.wardrobe.internal.domain.model.Look
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel
+import com.ownstd.project.wardrobe.internal.domain.model.LookModel
 
 interface WardrobeRepository {
-    suspend fun getClothes(): List<Clothe>
-    suspend fun getClotheById(clotheId: Int): ClotheDetail
-    suspend fun updateClothe(clotheId: Int, clothe: ClotheDetail): ClotheDetail
+    suspend fun getClothes(): List<ClotheModel>
+    suspend fun getClotheById(clotheId: Int): ClotheDetailModel
+    suspend fun updateClothe(clotheId: Int, clothe: ClotheDetailModel): ClotheDetailModel
     suspend fun deleteClothe(id: Int)
-    suspend fun getClotheOutfits(clotheId: Int): List<Look>
-    suspend fun uploadClothe(imageBytes: ByteArray): Clothe
-    suspend fun uploadFromUrl(url: String): Clothe
+    suspend fun getClotheOutfits(clotheId: Int): List<LookModel>
+    suspend fun uploadClothe(imageBytes: ByteArray): ClotheModel
+    suspend fun uploadFromUrl(url: String): ClotheModel
 }

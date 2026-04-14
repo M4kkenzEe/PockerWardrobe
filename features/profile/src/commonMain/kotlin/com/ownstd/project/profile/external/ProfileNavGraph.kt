@@ -27,6 +27,7 @@ fun ProfileNavGraph(
 ) {
     when (key) {
         is ProfileMain -> ProfileScreen(
+            onBack = onBack,
             onNavigateToEdit = { /* handled via backStack in AppNavHost */ },
             onNavigateToSizes = { /* handled via backStack in AppNavHost */ },
             onNavigateToAuth = onNavigateToAuth,

@@ -3,11 +3,11 @@ package com.ownstd.project.wardrobe.internal.data.mapper
 import com.ownstd.project.wardrobe.internal.data.dto.ClotheDto
 import com.ownstd.project.wardrobe.internal.data.dto.ClotheUpdateRequest
 import com.ownstd.project.wardrobe.internal.data.dto.LookDto
-import com.ownstd.project.wardrobe.internal.domain.model.Clothe
-import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetail
-import com.ownstd.project.wardrobe.internal.domain.model.Look
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel
+import com.ownstd.project.wardrobe.internal.domain.model.LookModel
 
-fun ClotheDto.toClothe(): Clothe = Clothe(
+fun ClotheDto.toClothe(): ClotheModel = ClotheModel(
     id = id,
     name = name,
     imageUrl = imageUrl,
@@ -22,7 +22,7 @@ fun ClotheDto.toClothe(): Clothe = Clothe(
         ?: emptyList(),
 )
 
-fun ClotheDto.toClotheDetail(): ClotheDetail = ClotheDetail(
+fun ClotheDto.toClotheDetail(): ClotheDetailModel = ClotheDetailModel(
     id = id,
     name = name,
     imageUrl = imageUrl,
@@ -41,7 +41,7 @@ fun ClotheDto.toClotheDetail(): ClotheDetail = ClotheDetail(
     createdAt = createdAt,
 )
 
-fun ClotheDetail.toUpdateRequest(): ClotheUpdateRequest = ClotheUpdateRequest(
+fun ClotheDetailModel.toUpdateRequest(): ClotheUpdateRequest = ClotheUpdateRequest(
     name = name,
     category = category,
     material = material,
@@ -54,7 +54,7 @@ fun ClotheDetail.toUpdateRequest(): ClotheUpdateRequest = ClotheUpdateRequest(
     marketplaceLinks = marketplaceLinks.ifEmpty { null },
 )
 
-fun LookDto.toLook(): Look = Look(
+fun LookDto.toLook(): LookModel = LookModel(
     id = id,
     name = name,
     imageUrl = imageUrl,

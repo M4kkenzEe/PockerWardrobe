@@ -44,7 +44,7 @@ import com.ownstd.project.core.compose.components.SizeSelector
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetail
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemEdit.interactionModel.ItemEditIntent
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemEdit.interactionModel.ItemEditSideEffect
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemEdit.interactionModel.ItemEditState
@@ -145,7 +145,7 @@ private fun ItemEditLoading(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ItemEditForm(
-    clothe: ClotheDetail,
+    clothe: ClotheDetailModel,
     isSaving: Boolean,
     modifier: Modifier = Modifier,
     onIntent: (ItemEditIntent) -> Unit,
@@ -414,7 +414,7 @@ private fun AddLinkButton(onClick: () -> Unit) {
 
 // region Previews
 
-private fun previewClothe() = ClotheDetail(
+private fun previewClothe() = ClotheDetailModel(
     id = 1,
     name = "Белая льняная рубашка",
     imageUrl = "",

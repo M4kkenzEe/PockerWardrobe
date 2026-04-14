@@ -43,7 +43,7 @@ import com.ownstd.project.core.compose.components.SkeletonCard
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.wardrobe.internal.domain.model.Clothe
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
 import com.ownstd.project.wardrobe.internal.presentation.list.interactionModel.WardrobeIntent
 import com.ownstd.project.wardrobe.internal.presentation.list.interactionModel.WardrobeSideEffect
 import com.ownstd.project.wardrobe.internal.presentation.list.interactionModel.WardrobeState
@@ -321,7 +321,7 @@ private fun WardrobeSkeletonGrid() {
 
 // region Previews
 
-private fun previewClothe(id: Int, name: String, category: String) = Clothe(
+private fun previewClothe(id: Int, name: String, category: String) = ClotheModel(
     id = id,
     name = name,
     imageUrl = "",

@@ -1,6 +1,6 @@
 package com.ownstd.project.wardrobe.internal.domain.model
 
-data class Clothe(
+data class ClotheModel(
     val id: Int?,
     val name: String,
     val imageUrl: String,

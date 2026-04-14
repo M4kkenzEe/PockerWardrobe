@@ -36,7 +36,7 @@ import com.ownstd.project.core.compose.components.SkeletonCard
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.outfit.internal.domain.model.Look
+import com.ownstd.project.outfit.internal.domain.model.LookModel
 import com.ownstd.project.outfit.internal.presentation.list.interactionModel.OutfitIntent
 import com.ownstd.project.outfit.internal.presentation.list.interactionModel.OutfitSideEffect
 import com.ownstd.project.outfit.internal.presentation.list.interactionModel.OutfitState
@@ -229,8 +229,8 @@ private fun OutfitScreenNormalPreview() {
         state = OutfitState(
             isLoading = false,
             looks = listOf(
-                Look(id = 1, name = "Офисный образ", url = ""),
-                Look(id = 2, name = "Casual выходной", url = ""),
+                LookModel(id = 1, name = "Офисный образ", url = ""),
+                LookModel(id = 2, name = "Casual выходной", url = ""),
             ),
         ),
         snackbarHostState = remember { SnackbarHostState() },

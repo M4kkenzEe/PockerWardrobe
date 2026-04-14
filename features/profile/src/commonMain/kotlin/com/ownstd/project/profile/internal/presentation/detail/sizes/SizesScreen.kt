@@ -38,7 +38,7 @@ import com.ownstd.project.core.compose.components.SettingRow
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.profile.internal.domain.model.UserSizes
+import com.ownstd.project.profile.internal.domain.model.UserSizesModel
 import com.ownstd.project.profile.internal.presentation.detail.sizes.interactionModel.SizeField
 import com.ownstd.project.profile.internal.presentation.detail.sizes.interactionModel.SizeRegion
 import com.ownstd.project.profile.internal.presentation.detail.sizes.interactionModel.SizesIntent
@@ -301,7 +301,7 @@ private fun EditFieldDialog(
 }
 
 // Helpers
-private fun UserSizes.fieldValue(field: SizeField): Float? = when (field) {
+private fun UserSizesModel.fieldValue(field: SizeField): Float? = when (field) {
     SizeField.HEIGHT -> height
     SizeField.WEIGHT -> weight
     SizeField.CHEST  -> chest
@@ -309,7 +309,7 @@ private fun UserSizes.fieldValue(field: SizeField): Float? = when (field) {
     SizeField.HIPS   -> hips
 }
 
-private fun UserSizes.toRegionSize(region: SizeRegion, type: String): String? {
+private fun UserSizesModel.toRegionSize(region: SizeRegion, type: String): String? {
     // Placeholder — actual conversion would use CLOTHING_SIZES table
     return primarySize
 }
@@ -320,7 +320,7 @@ private fun SizesScreenPreview() {
     SizesContent(
         state = SizesState(
             isLoading = false,
-            sizes = UserSizes(primarySize = "S", height = 168f, weight = 58f),
+            sizes = UserSizesModel(primarySize = "S", height = 168f, weight = 58f),
         ),
         onBack = {},
         onIntent = {},

@@ -1,6 +1,6 @@
 package com.ownstd.project.profile.internal.domain.model
 
-data class UserSizes(
+data class UserSizesModel(
     val primarySize: String? = null,
     val height: Float? = null,
     val weight: Float? = null,

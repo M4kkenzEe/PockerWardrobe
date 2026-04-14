@@ -1,7 +1,7 @@
 package com.ownstd.project.profile.internal.presentation.detail.sizes
 
 import com.ownstd.project.core.compose.foundation.Outcome
-import com.ownstd.project.profile.internal.domain.model.UserSizes
+import com.ownstd.project.profile.internal.domain.model.UserSizesModel
 import com.ownstd.project.profile.internal.domain.usecase.GetUserSizesUseCase
 import com.ownstd.project.profile.internal.domain.usecase.UpdateUserSizesUseCase
 import com.ownstd.project.profile.internal.presentation.detail.sizes.interactionModel.SizeField
@@ -52,9 +52,9 @@ internal fun sizesStore(
                 updateState { copy(editingField = null) }
 
             is SizesIntent.SaveField -> {
-                var updated = UserSizes()
+                var updated = UserSizesModel()
                 updateState {
-                    val current = sizes ?: UserSizes()
+                    val current = sizes ?: UserSizesModel()
                     updated = when (sizesIntent.field) {
                         SizeField.HEIGHT -> current.copy(height = sizesIntent.value)
                         SizeField.WEIGHT -> current.copy(weight = sizesIntent.value)

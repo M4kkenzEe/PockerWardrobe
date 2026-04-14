@@ -51,8 +51,8 @@ import com.ownstd.project.core.compose.components.TagChip
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetail
-import com.ownstd.project.wardrobe.internal.domain.model.Look
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel
+import com.ownstd.project.wardrobe.internal.domain.model.LookModel
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemDetail.interactionModel.ItemDetailIntent
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemDetail.interactionModel.ItemDetailSideEffect
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemDetail.interactionModel.ItemDetailState
@@ -157,8 +157,8 @@ private fun ItemDetailLoading(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ItemDetailBody(
-    clothe: ClotheDetail,
-    relatedLooks: List<Look>,
+    clothe: ClotheDetailModel,
+    relatedLooks: List<LookModel>,
     modifier: Modifier = Modifier,
     onIntent: (ItemDetailIntent) -> Unit,
 ) {
@@ -364,7 +364,7 @@ private fun DetailRow(
 
 @Composable
 private fun LookChip(
-    look: Look,
+    look: LookModel,
     onClick: () -> Unit,
 ) {
     Row(
@@ -436,7 +436,7 @@ private fun DeleteConfirmDialog(
 
 // region Previews
 
-private fun previewClotheDetail() = ClotheDetail(
+private fun previewClotheDetail() = ClotheDetailModel(
     id = 1,
     name = "Белая льняная рубашка",
     imageUrl = "",
@@ -459,7 +459,7 @@ private fun ItemDetailScreenPreview() {
     ItemDetailContent(
         state = ItemDetailState(
             clothe = previewClotheDetail(),
-            relatedLooks = listOf(Look(1, "Осенний образ"), Look(2, "Минимал Стиль")),
+            relatedLooks = listOf(LookModel(1, "Осенний образ"), LookModel(2, "Минимал Стиль")),
             isLoading = false,
         ),
         snackbarHostState = SnackbarHostState(),

@@ -50,7 +50,7 @@ import com.ownstd.project.core.compose.components.ItemCard
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.outfitconstructor.internal.domain.model.Clothe
+import com.ownstd.project.outfitconstructor.internal.domain.model.ClotheModel
 import com.ownstd.project.outfitconstructor.internal.presentation.root.interactionModel.CanvasItem
 import com.ownstd.project.outfitconstructor.internal.presentation.root.interactionModel.OutfitConstructorIntent
 import com.ownstd.project.outfitconstructor.internal.presentation.root.interactionModel.OutfitConstructorSideEffect
@@ -392,7 +392,7 @@ private fun OutfitConstructorEmptyPreview() {
 @Preview
 @Composable
 private fun OutfitConstructorWithItemsPreview() {
-    val clothe = Clothe(id = 1, name = "Пальто", imageUrl = "", category = "Верх")
+    val clothe = ClotheModel(id = 1, name = "Пальто", imageUrl = "", category = "Верх")
     OutfitConstructorContent(
         state = OutfitConstructorState(
             canvasItems = listOf(

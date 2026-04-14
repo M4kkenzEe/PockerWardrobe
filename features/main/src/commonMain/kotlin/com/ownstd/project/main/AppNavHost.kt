@@ -2,7 +2,6 @@ package com.ownstd.project.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -101,6 +100,7 @@ fun AppNavHost() {
             // Profile
             entry<ProfileMain> {
                 ProfileScreen(
+                    onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
                     onNavigateToEdit = { backStack.add(EditProfile) },
                     onNavigateToSizes = { backStack.add(Sizes) },
                     onNavigateToAuth = {

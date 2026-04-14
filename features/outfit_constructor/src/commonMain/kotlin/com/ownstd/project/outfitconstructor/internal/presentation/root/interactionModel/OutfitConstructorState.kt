@@ -1,10 +1,10 @@
 package com.ownstd.project.outfitconstructor.internal.presentation.root.interactionModel
 
-import com.ownstd.project.outfitconstructor.internal.domain.model.Clothe
+import com.ownstd.project.outfitconstructor.internal.domain.model.ClotheModel
 import pro.respawn.flowmvi.api.MVIState
 
 data class CanvasItem(
-    val clothe: Clothe,
+    val clothe: ClotheModel,
     val x: Float,
     val y: Float,
     val scale: Float = 1f,
@@ -13,7 +13,7 @@ data class CanvasItem(
 
 data class OutfitConstructorState(
     val canvasItems: List<CanvasItem> = emptyList(),
-    val availableClothes: List<Clothe> = emptyList(),
+    val availableClothes: List<ClotheModel> = emptyList(),
     val activeCategory: String? = null,
     val isPickerVisible: Boolean = false,
     val isLoadingClothes: Boolean = false,
@@ -22,7 +22,7 @@ data class OutfitConstructorState(
     val selectedItem: CanvasItem? get() = canvasItems.firstOrNull { it.isSelected }
     val canSave: Boolean get() = canvasItems.isNotEmpty()
 
-    val filteredClothes: List<Clothe>
+    val filteredClothes: List<ClotheModel>
         get() = if (activeCategory != null) {
             availableClothes.filter { it.category == activeCategory }
         } else {
