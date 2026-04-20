@@ -1,7 +1,7 @@
 package com.ownstd.project.outfitconstructor.internal.presentation.root
 
 import com.ownstd.project.core.compose.foundation.Outcome
-import com.ownstd.project.outfitconstructor.internal.domain.model.DraftLook
+import com.ownstd.project.outfitconstructor.internal.domain.model.DraftLookModel
 import com.ownstd.project.outfitconstructor.internal.domain.usecase.AddLookUseCase
 import com.ownstd.project.outfitconstructor.internal.domain.usecase.GetClothesUseCase
 import com.ownstd.project.outfitconstructor.internal.presentation.root.interactionModel.CanvasItem
@@ -127,7 +127,7 @@ fun outfitConstructorStore(
                 }
                 if (capturedItems.isNotEmpty()) {
                     val imageBytes = intent.captureCanvas()
-                    val draft = DraftLook(
+                    val draft = DraftLookModel(
                         name = "Образ",
                         clotheIds = capturedItems.mapNotNull { it.clothe.id },
                     )

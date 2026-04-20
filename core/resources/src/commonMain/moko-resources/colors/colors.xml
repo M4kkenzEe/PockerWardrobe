@@ -1,98 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Background -->
-    <color name="colorBackground_light">#FFF4F4F4</color>
-    <color name="colorBackground_dark">#FF080808</color>
+    <color name="colorBackground_light">#F4F4F4</color>
+    <color name="colorBackground_dark">#080808</color>
 
     <!-- Surface -->
-    <color name="colorSurface_light">#FFF5F5F2</color>
-    <color name="colorSurface_dark">#FF111111</color>
+    <color name="colorSurface_light">#F5F5F2</color>
+    <color name="colorSurface_dark">#111111</color>
 
     <!-- Surface Alt -->
-    <color name="colorSurfaceAlt_light">#FFEEEEEB</color>
-    <color name="colorSurfaceAlt_dark">#FF181818</color>
+    <color name="colorSurfaceAlt_light">#EEEEEB</color>
+    <color name="colorSurfaceAlt_dark">#181818</color>
 
     <!-- Text -->
-    <color name="colorText_light">#FF1A1A1A</color>
-    <color name="colorText_dark">#FFEFEFEF</color>
+    <color name="colorText_light">#1A1A1A</color>
+    <color name="colorText_dark">#EFEFEF</color>
 
     <!-- Text Sub -->
-    <color name="colorTextSub_light">#FF7A7A7A</color>
-    <color name="colorTextSub_dark">#FF606060</color>
+    <color name="colorTextSub_light">#7A7A7A</color>
+    <color name="colorTextSub_dark">#606060</color>
 
     <!-- Text Muted -->
-    <color name="colorTextMuted_light">#FFB0B0B0</color>
-    <color name="colorTextMuted_dark">#FF333333</color>
+    <color name="colorTextMuted_light">#B0B0B0</color>
+    <color name="colorTextMuted_dark">#333333</color>
 
     <!-- Accent -->
-    <color name="colorAccent_light">#FF1A1A1A</color>
-    <color name="colorAccent_dark">#FFEFEFEF</color>
+    <color name="colorAccent_light">#1A1A1A</color>
+    <color name="colorAccent_dark">#EFEFEF</color>
 
     <!-- Accent Fg (text on accent) -->
-    <color name="colorAccentFg_light">#FFFFFFFF</color>
-    <color name="colorAccentFg_dark">#FF080808</color>
+    <color name="colorAccentFg_light">#FFFFFF</color>
+    <color name="colorAccentFg_dark">#080808</color>
 
     <!-- Accent Subtle -->
-    <color name="colorAccentSubtle_light">#FFF0F0EE</color>
-    <color name="colorAccentSubtle_dark">#FF1A1A1A</color>
+    <color name="colorAccentSubtle_light">#F0F0EE</color>
+    <color name="colorAccentSubtle_dark">#1A1A1A</color>
 
     <!-- Border -->
-    <color name="colorBorder_light">#FFE8E8E5</color>
-    <color name="colorBorder_dark">#FF1E1E1E</color>
+    <color name="colorBorder_light">#E8E8E5</color>
+    <color name="colorBorder_dark">#1E1E1E</color>
 
     <!-- Chip -->
-    <color name="colorChip_light">#FFF0F0EE</color>
-    <color name="colorChip_dark">#FF181818</color>
+    <color name="colorChip_light">#F0F0EE</color>
+    <color name="colorChip_dark">#181818</color>
 
     <!-- Chip Fg -->
-    <color name="colorChipFg_light">#FF7A7A7A</color>
-    <color name="colorChipFg_dark">#FF606060</color>
+    <color name="colorChipFg_light">#7A7A7A</color>
+    <color name="colorChipFg_dark">#606060</color>
 
     <!-- Chip Active -->
-    <color name="colorChipActive_light">#FF1A1A1A</color>
-    <color name="colorChipActive_dark">#FFEFEFEF</color>
+    <color name="colorChipActive_light">#1A1A1A</color>
+    <color name="colorChipActive_dark">#EFEFEF</color>
 
     <!-- Chip Active Fg -->
-    <color name="colorChipActiveFg_light">#FFFFFFFF</color>
-    <color name="colorChipActiveFg_dark">#FF080808</color>
+    <color name="colorChipActiveFg_light">#FFFFFF</color>
+    <color name="colorChipActiveFg_dark">#080808</color>
 
     <!-- Nav -->
-    <color name="colorNav_light">#FFFFFFFF</color>
-    <color name="colorNav_dark">#FF080808</color>
+    <color name="colorNav_light">#FFFFFF</color>
+    <color name="colorNav_dark">#080808</color>
 
     <!-- Nav Border -->
-    <color name="colorNavBorder_light">#FFF0F0EE</color>
-    <color name="colorNavBorder_dark">#FF181818</color>
+    <color name="colorNavBorder_light">#F0F0EE</color>
+    <color name="colorNavBorder_dark">#181818</color>
 
     <!-- Nav Active -->
-    <color name="colorNavActive_light">#FF1A1A1A</color>
-    <color name="colorNavActive_dark">#FFEFEFEF</color>
+    <color name="colorNavActive_light">#1A1A1A</color>
+    <color name="colorNavActive_dark">#EFEFEF</color>
 
     <!-- Nav Inactive -->
-    <color name="colorNavInactive_light">#FFC8C8C8</color>
-    <color name="colorNavInactive_dark">#FF363636</color>
+    <color name="colorNavInactive_light">#C8C8C8</color>
+    <color name="colorNavInactive_dark">#363636</color>
 
     <!-- FAB -->
-    <color name="colorFab_light">#FF1A1A1A</color>
-    <color name="colorFab_dark">#FFEFEFEF</color>
+    <color name="colorFab_light">#1A1A1A</color>
+    <color name="colorFab_dark">#EFEFEF</color>
 
     <!-- FAB Fg -->
-    <color name="colorFabFg_light">#FFFFFFFF</color>
-    <color name="colorFabFg_dark">#FF080808</color>
+    <color name="colorFabFg_light">#FFFFFF</color>
+    <color name="colorFabFg_dark">#080808</color>
 
     <!-- Skeleton -->
-    <color name="colorSkeleton_light">#FFEFEFED</color>
-    <color name="colorSkeleton_dark">#FF1A1A1A</color>
+    <color name="colorSkeleton_light">#EFEFED</color>
+    <color name="colorSkeleton_dark">#1A1A1A</color>
 
     <!-- Tag -->
-    <color name="colorTag_light">#FFF0F0EE</color>
-    <color name="colorTag_dark">#FF1A1A1A</color>
+    <color name="colorTag_light">#F0F0EE</color>
+    <color name="colorTag_dark">#1A1A1A</color>
 
     <!-- Tag Fg -->
-    <color name="colorTagFg_light">#FF7A7A7A</color>
-    <color name="colorTagFg_dark">#FF606060</color>
+    <color name="colorTagFg_light">#7A7A7A</color>
+    <color name="colorTagFg_dark">#606060</color>
 
     <!-- Error/Destructive -->
-    <color name="colorError">#FFD4183D</color>
-    <color name="colorErrorFg">#FFFFFFFF</color>
+    <color name="colorError">#D4183D</color>
+    <color name="colorErrorFg">#FFFFFF</color>
 </resources>

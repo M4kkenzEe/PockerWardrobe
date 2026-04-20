@@ -1,6 +1,6 @@
 package com.ownstd.project.profile.internal.domain.model
 
-data class User(
+data class UserModel(
     val id: Int,
     val name: String,
     val email: String,

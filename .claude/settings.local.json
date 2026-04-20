@@ -85,7 +85,9 @@
       "Bash(./gradlew :features:main:compileDebugKotlinAndroid)",
       "Bash(./gradlew :composeApp:compileDebugKotlinAndroid)",
       "Bash(xargs sed:*)",
-      "Bash(./gradlew :androidApp:assembleDebug)"
+      "Bash(./gradlew :androidApp:assembleDebug)",
+      "Bash(grep -r \"TODO\\\\|FIXME\\\\|XXX\" /c/RealWorking/SonataSoft/clothis-mobile/PockerWardrobe/features/outfit* --include=\"*.kt\")",
+      "Bash(xargs -0 grep -l \"^class\\\\|^data class\\\\|^object\\\\|^interface\\\\|^sealed class\\\\|^enum class\")"
     ]
   }
 }

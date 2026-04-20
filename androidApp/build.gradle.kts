@@ -51,6 +51,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
+            implementation(project(":core:mockdata"))
+
             //koin
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

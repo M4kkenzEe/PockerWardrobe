@@ -1,12 +1,12 @@
 package com.ownstd.project.profile.internal.domain.repository
 
-import com.ownstd.project.profile.internal.domain.model.User
-import com.ownstd.project.profile.internal.domain.model.UserSizes
+import com.ownstd.project.profile.internal.domain.model.UserModel
+import com.ownstd.project.profile.internal.domain.model.UserSizesModel
 
-internal interface ProfileRepository {
-    suspend fun getProfile(): User
-    suspend fun updateProfile(name: String, username: String, gender: String?): User
-    suspend fun getUserSizes(): UserSizes
-    suspend fun updateUserSizes(sizes: UserSizes): UserSizes
+interface ProfileRepository {
+    suspend fun getProfile(): UserModel
+    suspend fun updateProfile(name: String, username: String, gender: String?): UserModel
+    suspend fun getUserSizes(): UserSizesModel
+    suspend fun updateUserSizes(sizes: UserSizesModel): UserSizesModel
     suspend fun logout()
 }

@@ -1,6 +1,6 @@
 package com.ownstd.project.profile.internal.domain.usecase
 
-import com.ownstd.project.profile.internal.domain.model.User
+import com.ownstd.project.profile.internal.domain.model.UserModel
 import com.ownstd.project.profile.internal.domain.repository.ProfileRepository
 
 internal class UpdateProfileUseCase(private val repository: ProfileRepository) {
@@ -8,7 +8,7 @@ internal class UpdateProfileUseCase(private val repository: ProfileRepository) {
         name: String,
         username: String,
         gender: String?,
-    ): Result<User> = runCatching {
+    ): Result<UserModel> = runCatching {
         repository.updateProfile(name, username, gender)
     }
 }

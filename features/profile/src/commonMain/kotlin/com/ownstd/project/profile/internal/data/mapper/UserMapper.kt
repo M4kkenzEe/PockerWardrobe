@@ -2,9 +2,9 @@ package com.ownstd.project.profile.internal.data.mapper
 
 import com.ownstd.project.profile.internal.data.dto.UpdateProfileRequest
 import com.ownstd.project.profile.internal.data.dto.UserDto
-import com.ownstd.project.profile.internal.domain.model.User
+import com.ownstd.project.profile.internal.domain.model.UserModel
 
-internal fun UserDto.toUser(): User = User(
+internal fun UserDto.toUser(): UserModel = UserModel(
     id = id,
     name = name,
     email = email,
@@ -16,7 +16,7 @@ internal fun UserDto.toUser(): User = User(
     sharedCount = sharedCount,
 )
 
-internal fun User.toUpdateRequest(): UpdateProfileRequest = UpdateProfileRequest(
+internal fun UserModel.toUpdateRequest(): UpdateProfileRequest = UpdateProfileRequest(
     name = name,
     username = username,
     gender = gender,

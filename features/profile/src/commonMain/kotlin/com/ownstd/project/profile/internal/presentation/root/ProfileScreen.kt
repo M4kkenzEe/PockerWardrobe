@@ -37,7 +37,7 @@ import com.ownstd.project.core.compose.components.StatsRow
 import com.ownstd.project.core.compose.foundation.handle
 import com.ownstd.project.core.compose.theme.Theme
 import com.ownstd.project.core.resources.MR
-import com.ownstd.project.profile.internal.domain.model.User
+import com.ownstd.project.profile.internal.domain.model.UserModel
 import com.ownstd.project.profile.internal.presentation.root.interactionModel.ProfileIntent
 import com.ownstd.project.profile.internal.presentation.root.interactionModel.ProfileSideEffect
 import com.ownstd.project.profile.internal.presentation.root.interactionModel.ProfileState
@@ -48,6 +48,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ProfileScreen(
+    onBack: () -> Unit,
     onNavigateToEdit: () -> Unit,
     onNavigateToSizes: () -> Unit,
     onNavigateToAuth: () -> Unit,
@@ -69,6 +70,7 @@ fun ProfileScreen(
 
     ProfileContent(
         state = state,
+        onBack = onBack,
         onIntent = { viewModel.store.intent(it) },
     )
 }
@@ -76,6 +78,7 @@ fun ProfileScreen(
 @Composable
 private fun ProfileContent(
     state: ProfileState,
+    onBack: () -> Unit,
     onIntent: (ProfileIntent) -> Unit,
 ) {
     Column(
@@ -83,7 +86,7 @@ private fun ProfileContent(
             .fillMaxSize()
             .background(Theme.colors.background.primary),
     ) {
-        AppTopBar(title = "Профиль")
+        AppTopBar(title = "Профиль", onBack = onBack)
 
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -262,7 +265,7 @@ private fun ProfileScreenPreview() {
     ProfileContent(
         state = ProfileState(
             isLoading = false,
-            user = User(
+            user = UserModel(
                 id = 1,
                 name = "Алиса",
                 email = "alice@example.com",
@@ -272,6 +275,7 @@ private fun ProfileScreenPreview() {
                 sharedCount = 28,
             ),
         ),
+        onBack = {},
         onIntent = {},
     )
 }
@@ -281,6 +285,7 @@ private fun ProfileScreenPreview() {
 private fun ProfileScreenLoadingPreview() {
     ProfileContent(
         state = ProfileState(isLoading = true),
+        onBack = {},
         onIntent = {},
     )
 }

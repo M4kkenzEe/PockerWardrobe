@@ -106,7 +106,7 @@ fun itemEditStore(
                 onSideEffect(ItemEditSideEffect.NavigateBack)
 
             is ItemEditIntent.SaveClicked -> {
-                var capturedClothe: com.ownstd.project.wardrobe.internal.domain.model.ClotheDetail? = null
+                var capturedClothe: com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel? = null
                 updateState { capturedClothe = clothe; this }
                 val clotheToSave = capturedClothe ?: return@reduce
                 val clotheIdToSave = clotheToSave.id ?: return@reduce

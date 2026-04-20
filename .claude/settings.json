@@ -1,4 +1,16 @@
 {
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "command -v python > /dev/null 2>&1 && python -c \"import json; content=open('CLAUDE.md', encoding='utf-8').read(); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': content}}))\" || echo '{\"systemMessage\": \"Python не установлен — SessionStart hook пропущен\"}'"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "ksrc@respawn-tools": true
   }

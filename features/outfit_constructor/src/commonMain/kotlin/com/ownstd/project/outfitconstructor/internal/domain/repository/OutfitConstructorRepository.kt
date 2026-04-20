@@ -1,9 +1,9 @@
 package com.ownstd.project.outfitconstructor.internal.domain.repository
 
-import com.ownstd.project.outfitconstructor.internal.domain.model.Clothe
-import com.ownstd.project.outfitconstructor.internal.domain.model.DraftLook
+import com.ownstd.project.outfitconstructor.internal.domain.model.ClotheModel
+import com.ownstd.project.outfitconstructor.internal.domain.model.DraftLookModel
 
 interface OutfitConstructorRepository {
-    suspend fun getClothes(): List<Clothe>
-    suspend fun addLook(look: DraftLook, image: ByteArray)
+    suspend fun getClothes(): List<ClotheModel>
+    suspend fun addLook(look: DraftLookModel, image: ByteArray)
 }

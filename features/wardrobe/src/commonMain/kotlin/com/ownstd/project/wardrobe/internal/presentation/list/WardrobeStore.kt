@@ -1,9 +1,9 @@
 package com.ownstd.project.wardrobe.internal.presentation.list
 
 import com.ownstd.project.core.compose.foundation.Outcome
-import com.ownstd.project.wardrobe.internal.domain.model.Clothe
-import com.ownstd.project.wardrobe.internal.domain.model.FilterOptions
-import com.ownstd.project.wardrobe.internal.domain.model.SortOrder
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
+import com.ownstd.project.wardrobe.internal.domain.model.FilterOptionsModel
+import com.ownstd.project.wardrobe.internal.domain.model.SortOrderModel
 import com.ownstd.project.wardrobe.internal.domain.usecase.DeleteClotheUseCase
 import com.ownstd.project.wardrobe.internal.domain.usecase.GetClothesUseCase
 import com.ownstd.project.wardrobe.internal.presentation.list.interactionModel.WardrobeIntent
@@ -105,10 +105,10 @@ fun wardrobeStore(
     }
 }
 
-private fun List<Clothe>.applyFilter(
+private fun List<ClotheModel>.applyFilter(
     category: String?,
-    options: FilterOptions,
-): List<Clothe> {
+    options: FilterOptionsModel,
+): List<ClotheModel> {
     var result = this
     if (category != null) result = result.filter { it.category == category }
     if (options.seasons.isNotEmpty()) result = result.filter { c ->
@@ -118,9 +118,9 @@ private fun List<Clothe>.applyFilter(
         c.color != null && c.color in options.colors
     }
     result = when (options.sortOrder) {
-        SortOrder.BY_NAME -> result.sortedBy { it.name }
-        SortOrder.BY_CATEGORY -> result.sortedBy { it.category }
-        SortOrder.BY_DATE -> result
+        SortOrderModel.BY_NAME -> result.sortedBy { it.name }
+        SortOrderModel.BY_CATEGORY -> result.sortedBy { it.category }
+        SortOrderModel.BY_DATE -> result
     }
     return result
 }
