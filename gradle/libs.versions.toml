@@ -26,7 +26,7 @@ mviKotlin = "3.0.2"
 moko-mvvm = "0.13.1"
 moko-resources = "0.25.0"
 flowmvi = "3.1.0"
-navigation3 = "1.0.0-alpha02"
+navigation3 = "1.1.0-alpha01"
 coil3 = "3.0.0-alpha06"
 ktor = "3.1.0"
 coroutinesVersion = "1.10.2"
@@ -106,7 +106,7 @@ flowmvi-savedstate = { module = "pro.respawn.flowmvi:savedstate", version.ref = 
 
 #Navigation 3
 navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
-navigation3-ui      = { module = "androidx.navigation3:navigation3-ui",      version.ref = "navigation3" }
+navigation3-ui      = { module = "org.jetbrains.androidx.navigation3:navigation3-ui",      version.ref = "navigation3" }
 
 #Paging KMP
 paging-common  = { module = "androidx.paging:paging-common",  version.ref = "paging" }

@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation3.runtime.NavBackStack
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
@@ -30,7 +30,7 @@ import dev.icerock.moko.resources.compose.painterResource
 private enum class MainTab { CLOTHING, OUTFITS }
 
 @Composable
-fun MainClothisScreen(backStack: SnapshotStateList<NavKey>) {
+fun MainClothisScreen(backStack: NavBackStack<NavKey>) {
     var activeTab by rememberSaveable { mutableStateOf(MainTab.CLOTHING) }
 
     Scaffold(

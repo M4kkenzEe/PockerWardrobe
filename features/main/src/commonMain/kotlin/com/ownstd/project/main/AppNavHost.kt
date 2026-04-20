@@ -3,7 +3,6 @@ package com.ownstd.project.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -48,11 +47,7 @@ fun AppNavHost() {
 
     NavDisplay(
         backStack = backStack,
-        onBack = { count ->
-            repeat(count) {
-                if (backStack.size > 1) backStack.removeAt(backStack.size - 1)
-            }
-        },
+        onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
         entryProvider = entryProvider {
             entry<AppRoutes.Auth> {
                 AuthorizationScreen(
