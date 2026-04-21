@@ -3,10 +3,10 @@ package com.ownstd.project.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.serialization.SavedStateConfiguration
 import com.ownstd.project.authorization.internal.presentation.AuthorizationScreen
 import com.ownstd.project.core.deeplink.DeepLinkManager
 import com.ownstd.project.core.deeplink.DeeplinkPathParser
@@ -25,10 +25,46 @@ import com.ownstd.project.wardrobe.external.WardrobeRoutes
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemDetail.ItemDetailScreen
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemEdit.ItemEditScreen
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+
+/**
+ * Конфигурация сериализации для NavBackStack.
+ *
+ * В KMP-порте Navigation 3 reflection-based сериализация ключей работает только на Android.
+ * Для iOS/JVM/native нужно явно зарегистрировать все подтипы NavKey через полиморфный
+ * SerializersModule, иначе rememberNavBackStack(...) не компилируется в commonMain
+ * (см. ошибку: "expected SavedStateConfiguration").
+ *
+ * Когда добавляете новый маршрут (новый NavKey), обязательно добавьте его сюда.
+ */
+private val navBackStackConfig = SavedStateConfiguration {
+    serializersModule = SerializersModule {
+        polymorphic(NavKey::class) {
+            // App-level
+            subclass(AppRoutes.Auth::class, AppRoutes.Auth.serializer())
+            subclass(AppRoutes.Main::class, AppRoutes.Main.serializer())
+            // Wardrobe
+            subclass(WardrobeRoutes.Main::class, WardrobeRoutes.Main.serializer())
+            subclass(WardrobeRoutes.ItemDetail::class, WardrobeRoutes.ItemDetail.serializer())
+            subclass(WardrobeRoutes.ItemEdit::class, WardrobeRoutes.ItemEdit.serializer())
+            // Outfit
+            subclass(OutfitRoutes.OutfitMain::class, OutfitRoutes.OutfitMain.serializer())
+            subclass(OutfitRoutes.OutfitDetail::class, OutfitRoutes.OutfitDetail.serializer())
+            // Outfit constructor
+            subclass(OutfitConstructorRoute::class, OutfitConstructorRoute.serializer())
+            // Profile
+            subclass(ProfileMain::class, ProfileMain.serializer())
+            subclass(EditProfile::class, EditProfile.serializer())
+            subclass(Sizes::class, Sizes.serializer())
+        }
+    }
+}
 
 @Composable
 fun AppNavHost() {
-    val backStack = rememberNavBackStack(AppRoutes.Auth)
+    val backStack = rememberNavBackStack(navBackStackConfig, AppRoutes.Auth)
 
     LaunchedEffect(Unit) {
         DeepLinkManager.pendingDeeplink.filterNotNull().collect { uri ->
