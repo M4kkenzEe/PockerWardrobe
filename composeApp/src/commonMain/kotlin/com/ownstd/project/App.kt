@@ -9,6 +9,7 @@ import com.ownstd.project.main.di.mainModule
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
+import kotlin.concurrent.Volatile
 
 @Composable
 @Preview

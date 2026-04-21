@@ -453,4 +453,3 @@ fun RegistrationScreen(
         }
     }
 }
-
