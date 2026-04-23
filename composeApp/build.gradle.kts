@@ -27,6 +27,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            binaryOption("bundleId", "com.ownstd.project.composeapp")
         }
     }
 
@@ -98,3 +99,10 @@ android {
     }
 }
 
+// Workaround: moko-resources references removed/moved Kotlin compiler internal classes
+// (KonanTarget.IOS_ARM32, KotlinLibraryLayoutImpl) when processing iOS test targets.
+afterEvaluate {
+    tasks.matching { it.name.startsWith("generateMR") && it.name.contains("Test") }.configureEach {
+        enabled = false
+    }
+}

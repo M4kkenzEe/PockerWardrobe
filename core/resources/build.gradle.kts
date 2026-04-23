@@ -60,3 +60,11 @@ android {
 multiplatformResources {
     resourcesPackage.set("com.ownstd.project.core.resources")
 }
+
+// Workaround: moko-resources references the removed KonanTarget.IOS_ARM32 (dropped in Kotlin 2.0)
+// when generating resources for iOS test compilations. These tasks are never needed for building.
+afterEvaluate {
+    tasks.matching { it.name.startsWith("generateMR") && it.name.contains("Test") }.configureEach {
+        enabled = false
+    }
+}
