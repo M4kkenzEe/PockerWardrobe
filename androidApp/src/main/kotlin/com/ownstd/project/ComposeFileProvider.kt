@@ -10,7 +10,9 @@ class ComposeFileProvider : FileProvider(R.xml.path_provider) {
     companion object {
         fun getImageUri(context: Context): Uri {
             val tempFile = File.createTempFile(
-                "picture_${System.currentTimeMillis()}", ".png", context.cacheDir
+                "picture_${System.currentTimeMillis()}",
+                ".png",
+                context.cacheDir,
             ).apply {
                 createNewFile()
             }

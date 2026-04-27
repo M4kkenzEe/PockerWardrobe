@@ -10,9 +10,11 @@ plugins {
 }
 
 kotlin {
-    tasks.create("testClasses")
+    android {
+        namespace = "com.ownstd.project.wardrobe"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = 24
 
-    androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -20,7 +22,6 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach { iosTarget ->
@@ -34,14 +35,14 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.activity.compose)
-            implementation(compose.preview)
+            implementation(libs.compose.ui.tooling.preview)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.ui)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.ui.tooling.preview)
 
             // viewmodel
             implementation(libs.androidx.lifecycle.viewmodel)
@@ -82,17 +83,5 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-    }
-}
-
-android {
-    namespace = "com.ownstd.project.wardrobe"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }

@@ -1,83 +1,117 @@
+#region Versions
 [versions]
-activityKtx = "1.9.3"
-agp = "8.9.1"
-android-compileSdk = "36"
+#region Build
+activityKtx = "1.13.0"
+agp = "9.1.1"
+android-compileSdk = "37"
 android-minSdk = "24"
-android-targetSdk = "34"
-ktlint = "12.1.2"
-androidx-activityCompose = "1.9.1"
-androidx-appcompat = "1.7.0"
-androidx-constraintlayout = "2.1.4"
-androidx-core-ktx = "1.13.1"
-androidx-espresso-core = "3.6.1"
-androidx-lifecycle = "2.10.0"
-androidx-material = "1.12.0"
-androidx-test-junit = "1.2.1"
-coilCompose = "3.0.0-rc01"
-compose-plugin = "1.10.3"
-junit = "4.13.2"
+android-targetSdk = "37"
+ktlint = "14.2.0"
 kotlin = "2.3.20"
 jetbrainsKotlinJvm = "2.3.20"
-compose-navigation = "2.9.2"
-multiplatformSettings = "1.3.0"
-voyager = "1.1.0-beta02"
-koin = "4.1.0"
-mviKotlin = "3.0.2"
-moko-mvvm = "0.13.1"
-moko-resources = "0.26.3"
-
-flowmvi = "3.1.0"
-navigation3 = "1.1.0-alpha01"
-coil3 = "3.0.0-alpha06"
-ktor = "3.1.0"
-coroutinesVersion = "1.10.2"
-dateTimeVersion = "0.6.0"
-accompanist-permissions = "0.32.0"
-
-#Room
-androidx-room = "2.7.1"
 ksp = "2.3.6"
-sqlite = "2.5.1"
-paging = "3.3.2"
+#endregion Build
 
+#region AndroidX
+androidx-activityCompose = "1.13.0"
+androidx-appcompat = "1.7.1"
+androidx-constraintlayout = "2.2.1"
+androidx-core-ktx = "1.18.0"
+androidx-espresso-core = "3.7.0"
+androidx-lifecycle = "2.10.0"
+androidx-material = "1.13.0"
+androidx-test-junit = "1.3.0"
+compose-navigation = "2.9.2"
+navigation3 = "1.1.0-rc01"
+androidx-room = "2.8.4"
+sqlite = "2.6.2"
+paging = "3.4.2"
+#endregion AndroidX
+
+#region Compose
+compose-plugin = "1.10.3"
+accompanist-permissions = "0.37.3"
+#endregion Compose
+
+#region KotlinX
+coroutinesVersion = "1.10.2"
+dateTimeVersion = "0.7.1"
+#endregion KotlinX
+
+#region DI
+koin = "4.2.1"
+#endregion DI
+
+#region Network
+ktor = "3.4.2"
+#endregion Network
+
+#region Images
+coilCompose = "3.4.0"
+coil3 = "3.0.0-alpha06"
+#endregion Images
+
+#region Architecture
+flowmvi = "3.2.1"
+mviKotlin = "4.3.0"
+moko-mvvm = "0.16.1"
+voyager = "1.1.0-beta03"
+#endregion Architecture
+
+#region Resources
+moko-resources = "0.26.3"
+#endregion Resources
+
+#region Storage
+multiplatformSettings = "1.3.0"
+#endregion Storage
+
+#region Test
+junit = "4.13.2"
+#endregion Test
+#endregion Versions
+
+#region Libraries
 [libraries]
+#region AndroidX
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core-ktx" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-junit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso-core" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
-moko-resources = { group = "dev.icerock.moko", name = "resources", version.ref = "moko-resources" }
-moko-resources-compose = { group = "dev.icerock.moko", name = "resources-compose", version.ref = "moko-resources" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation" }
+#endregion AndroidX
+
+#region Kotlin
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesVersion" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "dateTimeVersion" }
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
+#endregion Kotlin
 
-#navigation
-compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "compose-navigation" }
-
-#koin
+#region DI
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
 koin-compose-viewmodel-navigation = { group = "io.insert-koin", name = "koin-compose-viewmodel-navigation", version.ref = "koin" }
+#endregion DI
 
+#region Storage
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 multiplatform-settings-noarg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
+#endregion Storage
+
+#region Architecture
 mviKotlin-main = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-main", version.ref = "mviKotlin" }
 mviKotlin-logging = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-logging", version.ref = "mviKotlin" }
-
 mokoMvvm = { group = "dev.icerock.moko", name = "mvvm-core", version.ref = "moko-mvvm" }
 
-#voyager
 voyager-koin = { group = "cafe.adriel.voyager", name = "voyager-koin", version.ref = "voyager" }
 voyager-navigator = { group = "cafe.adriel.voyager", name = "voyager-navigator", version.ref = "voyager" }
 voyager-screenmodel = { group = "cafe.adriel.voyager", name = "voyager-screenmodel", version.ref = "voyager" }
@@ -86,11 +120,12 @@ voyager-tab = { group = "cafe.adriel.voyager", name = "voyager-tab-navigator", v
 voyager-transitions = { group = "cafe.adriel.voyager", name = "voyager-transitions", version.ref = "voyager" }
 voyager-lifecycleKmp = { group = "cafe.adriel.voyager", name = "voyager-lifecycle-kmp", version.ref = "voyager" }
 
-#coil
-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
-coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+flowmvi-core       = { module = "pro.respawn.flowmvi:core",       version.ref = "flowmvi" }
+flowmvi-compose    = { module = "pro.respawn.flowmvi:compose",    version.ref = "flowmvi" }
+flowmvi-savedstate = { module = "pro.respawn.flowmvi:savedstate", version.ref = "flowmvi" }
+#endregion Architecture
 
-#ktor
+#region Network
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -99,39 +134,79 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+#endregion Network
 
-#FlowMVI
-flowmvi-core       = { module = "pro.respawn.flowmvi:core",       version.ref = "flowmvi" }
-flowmvi-compose    = { module = "pro.respawn.flowmvi:compose",    version.ref = "flowmvi" }
-flowmvi-savedstate = { module = "pro.respawn.flowmvi:savedstate", version.ref = "flowmvi" }
+#region Images
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+#endregion Images
 
-#Navigation 3
+#region Compose Multiplatform
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-plugin" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-plugin" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-plugin" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-plugin" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "compose-plugin" }
+compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-plugin" }
+#endregion Compose Multiplatform
+
+#region Navigation 3
 navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 navigation3-ui      = { module = "org.jetbrains.androidx.navigation3:navigation3-ui",      version.ref = "navigation3" }
+#endregion Navigation 3
 
-#Paging KMP
+#region Paging KMP
 paging-common  = { module = "androidx.paging:paging-common",  version.ref = "paging" }
 paging-compose = { module = "androidx.paging:paging-compose",  version.ref = "paging" }
+#endregion Paging KMP
 
-#Room
+#region Room
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+#endregion Room
 
+#region Resources
+moko-resources = { group = "dev.icerock.moko", name = "resources", version.ref = "moko-resources" }
+moko-resources-compose = { group = "dev.icerock.moko", name = "resources-compose", version.ref = "moko-resources" }
+#endregion Resources
 
+#region Test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+#endregion Test
+#endregion Libraries
+
+#region Plugins
 [plugins]
+#region Android
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+#endregion Android
+
+#region Compose
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+#endregion Compose
+
+#region Kotlin
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+#endregion Kotlin
+
+#region Quality
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+#endregion Quality
 
-
-#Room
+#region Room
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "androidx-room" }
+#endregion Room
+
+#region Resources
 mokoResources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko-resources" }
+#endregion Resources
+#endregion Plugins
