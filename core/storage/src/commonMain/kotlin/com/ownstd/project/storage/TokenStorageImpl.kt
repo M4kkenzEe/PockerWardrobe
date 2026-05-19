@@ -27,6 +27,9 @@ internal class TokenStorageImpl(
     override fun getExpiresAt(): Long? =
         if (settings.hasKey(KEY_EXPIRES_AT)) settings.getLong(KEY_EXPIRES_AT, 0L) else null
 
+    override fun hasSession(): Boolean =
+        !getAccessToken().isNullOrBlank() && !getRefreshToken().isNullOrBlank()
+
     override fun clearSession() {
         settings.remove(KEY_ACCESS_TOKEN)
         settings.remove(KEY_REFRESH_TOKEN)

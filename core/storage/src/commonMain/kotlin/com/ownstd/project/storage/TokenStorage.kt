@@ -5,5 +5,6 @@ interface TokenStorage {
     fun getAccessToken(): String?
     fun getRefreshToken(): String?
     fun getExpiresAt(): Long?
+    fun hasSession(): Boolean
     fun clearSession()
 }

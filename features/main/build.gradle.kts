@@ -55,6 +55,7 @@ kotlin {
             implementation(project(":core:compose"))
             implementation(project(":core:resources"))
             implementation(project(":core:deeplink"))
+            implementation(project(":core:storage"))
             implementation(project(":features:authorization"))
             implementation(project(":features:wardrobe"))
             implementation(project(":features:outfit"))

@@ -2,6 +2,7 @@ package com.ownstd.project.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -21,6 +22,7 @@ import com.ownstd.project.profile.external.Sizes
 import com.ownstd.project.profile.internal.presentation.detail.editProfile.EditProfileScreen
 import com.ownstd.project.profile.internal.presentation.detail.sizes.SizesScreen
 import com.ownstd.project.profile.internal.presentation.root.ProfileScreen
+import com.ownstd.project.storage.TokenStorage
 import com.ownstd.project.wardrobe.external.WardrobeRoutes
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemDetail.ItemDetailScreen
 import com.ownstd.project.wardrobe.internal.presentation.detail.itemEdit.ItemEditScreen
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import org.koin.compose.koinInject
 
 /**
  * Конфигурация сериализации для NavBackStack.
@@ -64,7 +67,11 @@ private val navBackStackConfig = SavedStateConfiguration {
 
 @Composable
 fun AppNavHost() {
-    val backStack = rememberNavBackStack(navBackStackConfig, AppRoutes.Auth)
+    val tokenStorage: TokenStorage = koinInject()
+    val startDestination = remember {
+        if (tokenStorage.hasSession()) AppRoutes.Main else AppRoutes.Auth
+    }
+    val backStack = rememberNavBackStack(navBackStackConfig, startDestination)
 
     LaunchedEffect(Unit) {
         DeepLinkManager.pendingDeeplink.filterNotNull().collect { uri ->
@@ -89,8 +96,7 @@ fun AppNavHost() {
             entry<AppRoutes.Auth> {
                 AuthorizationScreen(
                     openSession = {
-                        if (backStack.isNotEmpty()) backStack.removeAt(0)
-                        backStack.add(AppRoutes.Main)
+                        AppRouteManager.replaceWith(backStack, AppRoutes.Main)
                     }
                 )
             }
@@ -137,8 +143,7 @@ fun AppNavHost() {
                     onNavigateToEdit = { backStack.add(EditProfile) },
                     onNavigateToSizes = { backStack.add(Sizes) },
                     onNavigateToAuth = {
-                        if (backStack.isNotEmpty()) backStack.removeAt(0)
-                        backStack.add(AppRoutes.Auth)
+                        AppRouteManager.replaceWith(backStack, AppRoutes.Auth)
                     },
                 )
             }
