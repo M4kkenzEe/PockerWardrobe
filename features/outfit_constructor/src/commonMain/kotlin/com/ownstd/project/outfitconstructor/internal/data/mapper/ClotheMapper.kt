@@ -6,6 +6,6 @@ import com.ownstd.project.outfitconstructor.internal.domain.model.ClotheModel
 fun ClotheDto.toClothe(): ClotheModel = ClotheModel(
     id = id,
     name = name,
-    imageUrl = imageUrl,
+    imageUrl = imageUrl.orEmpty(),
     category = category,
 )

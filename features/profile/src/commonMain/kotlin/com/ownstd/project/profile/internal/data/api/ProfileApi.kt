@@ -17,23 +17,23 @@ internal class ProfileApi(private val networkRepository: NetworkRepository) {
     private val client get() = networkRepository.getClient()
 
     suspend fun getProfile(): UserDto =
-        client.get("$baseUrl/profile") {
+        client.get("${baseUrl}profile") {
             contentType(ContentType.Application.Json)
         }.body()
 
     suspend fun updateProfile(request: UpdateProfileRequest): UserDto =
-        client.patch("$baseUrl/profile") {
+        client.patch("${baseUrl}profile") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
 
     suspend fun getUserSizes(): UserSizesDto =
-        client.get("$baseUrl/user/sizes") {
+        client.get("${baseUrl}user/sizes") {
             contentType(ContentType.Application.Json)
         }.body()
 
     suspend fun updateUserSizes(dto: UserSizesDto): UserSizesDto =
-        client.patch("$baseUrl/user/sizes") {
+        client.patch("${baseUrl}user/sizes") {
             contentType(ContentType.Application.Json)
             setBody(dto)
         }.body()

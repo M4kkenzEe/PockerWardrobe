@@ -10,14 +10,14 @@ fun LookDto.toLook(): LookModel = LookModel(
     name = name,
     url = url,
     lookItems = lookItems?.map { it.toLookItemModel() },
-    style = style,
-    tags = tags,
+    style = null,
+    tags = null,
 )
 
 fun LookItemDto.toLookItemModel(): LookItemModel = LookItemModel(
-    id = id,
-    clotheId = clotheId,
-    imageUrl = imageUrl,
-    name = name.orEmpty(),
-    category = category,
+    id = clothe.id ?: 0,
+    clotheId = clothe.id ?: 0,
+    imageUrl = clothe.imageUrl.orEmpty(),
+    name = clothe.name,
+    category = clothe.category,
 )

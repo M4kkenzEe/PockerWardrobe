@@ -20,7 +20,7 @@ class OutfitApi(
         }.body()
 
     suspend fun getLookById(id: Int): LookDto =
-        client.get("$baseUrl$ENDPOINT/$id") {
+        client.get("$baseUrl$ENDPOINT/byId/$id") {
             contentType(ContentType.Application.Json)
         }.body()
 

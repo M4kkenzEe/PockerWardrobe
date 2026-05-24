@@ -21,7 +21,7 @@ class OutfitRepositoryImpl(
     }
 
     override suspend fun shareLook(id: Int): String =
-        api.shareLook(id).url
+        api.shareLook(id).shareUrl
 
     override suspend fun addLook(look: DraftLookModel, image: ByteArray): LookModel {
         // TODO: реализуется в OutfitConstructor (шаг [10])

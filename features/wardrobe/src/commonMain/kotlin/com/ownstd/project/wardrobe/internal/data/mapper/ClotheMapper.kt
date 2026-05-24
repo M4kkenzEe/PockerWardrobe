@@ -10,35 +10,31 @@ import com.ownstd.project.wardrobe.internal.domain.model.LookModel
 fun ClotheDto.toClothe(): ClotheModel = ClotheModel(
     id = id,
     name = name,
-    imageUrl = imageUrl,
+    imageUrl = imageUrl.orEmpty(),
     category = category,
-    styles = styles,
-    season = season,
-    color = color,
-    size = size,
-    tags = tags,
-    marketplaceLinks = marketplaceLinks
-        ?: storeUrl?.let { listOf(it) }  // fallback для старого API
-        ?: emptyList(),
+    styles = styleTags?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+    season = season?.let { listOf(it) },
+    color = colors?.firstOrNull(),
+    size = null,
+    tags = null,
+    marketplaceLinks = storeUrl?.let { listOf(it) } ?: emptyList(),
 )
 
 fun ClotheDto.toClotheDetail(): ClotheDetailModel = ClotheDetailModel(
     id = id,
     name = name,
-    imageUrl = imageUrl,
+    imageUrl = imageUrl.orEmpty(),
     category = category,
     material = material,
     fit = fit,
-    styles = styles,
-    season = season,
-    color = color,
+    styles = styleTags?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
+    season = season?.let { listOf(it) },
+    color = colors?.firstOrNull(),
     brand = brand,
-    size = size,
-    marketplaceLinks = marketplaceLinks
-        ?: storeUrl?.let { listOf(it) }
-        ?: emptyList(),
-    tags = tags,
-    createdAt = createdAt,
+    size = null,
+    marketplaceLinks = storeUrl?.let { listOf(it) } ?: emptyList(),
+    tags = null,
+    createdAt = null,
 )
 
 fun ClotheDetailModel.toUpdateRequest(): ClotheUpdateRequest = ClotheUpdateRequest(
@@ -46,16 +42,15 @@ fun ClotheDetailModel.toUpdateRequest(): ClotheUpdateRequest = ClotheUpdateReque
     category = category,
     material = material,
     fit = fit,
-    styles = styles,
-    season = season,
-    color = color,
+    styleTags = styles?.joinToString(","),
+    season = season?.firstOrNull(),
+    colors = color?.let { listOf(it) },
     brand = brand,
-    size = size,
-    marketplaceLinks = marketplaceLinks.ifEmpty { null },
+    storeUrl = marketplaceLinks.firstOrNull(),
 )
 
 fun LookDto.toLook(): LookModel = LookModel(
     id = id,
     name = name,
-    imageUrl = imageUrl,
+    imageUrl = url,
 )

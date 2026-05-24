@@ -4,18 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
@@ -164,66 +161,75 @@ private fun OutfitDetailContent(
     ) { padding ->
         val look = state.look
         if (look != null) {
-            Column(
+            val items = look.lookItems
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(padding),
             ) {
-                AsyncImage(
-                    model = look.url,
-                    contentDescription = look.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(IMAGE_ASPECT_RATIO)
-                        .background(Theme.colors.background.surfaceAlt),
-                )
-
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = look.name,
-                        style = Theme.typography.h3,
-                        color = Theme.colors.label.primary,
+                item {
+                    AsyncImage(
+                        model = look.url,
+                        contentDescription = look.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(IMAGE_ASPECT_RATIO)
+                            .background(Theme.colors.background.surfaceAlt),
                     )
+                }
 
-                    val tags = look.tags
-                    if (!tags.isNullOrEmpty()) {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(tags) { tag ->
-                                TagChip(text = tag)
+                item {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = look.name,
+                            style = Theme.typography.h3,
+                            color = Theme.colors.label.primary,
+                        )
+
+                        val tags = look.tags
+                        if (!tags.isNullOrEmpty()) {
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(tags) { tag ->
+                                    TagChip(text = tag)
+                                }
                             }
                         }
                     }
                 }
 
-                val items = look.lookItems
                 if (!items.isNullOrEmpty()) {
-                    Text(
-                        text = "Вещи в образе",
-                        style = Theme.typography.body,
-                        color = Theme.colors.label.secondary,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    )
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(ITEM_GRID_COLUMNS),
-                        contentPadding = PaddingValues(GRID_PADDING),
-                        horizontalArrangement = Arrangement.spacedBy(GRID_SPACING),
-                        verticalArrangement = Arrangement.spacedBy(GRID_SPACING),
-                        // Fixed height based on item count to avoid nested scroll conflict
-                        modifier = Modifier.fillMaxWidth(),
-                        userScrollEnabled = false,
-                    ) {
-                        items(items) { item ->
-                            ItemCard(
-                                imageUrl = item.imageUrl,
-                                name = item.name,
-                                category = item.category,
-                                onClick = { onIntent(OutfitDetailIntent.ItemClicked(item.clotheId)) },
-                            )
+                    item {
+                        Text(
+                            text = "Вещи в образе",
+                            style = Theme.typography.body,
+                            color = Theme.colors.label.secondary,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                    }
+                    items(items.chunked(ITEM_GRID_COLUMNS)) { rowItems ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(GRID_SPACING),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = GRID_PADDING, vertical = GRID_SPACING / 2),
+                        ) {
+                            rowItems.forEach { item ->
+                                Box(modifier = Modifier.weight(1f)) {
+                                    ItemCard(
+                                        imageUrl = item.imageUrl,
+                                        name = item.name,
+                                        category = item.category,
+                                        onClick = { onIntent(OutfitDetailIntent.ItemClicked(item.clotheId)) },
+                                    )
+                                }
+                            }
+                            if (rowItems.size < ITEM_GRID_COLUMNS) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }

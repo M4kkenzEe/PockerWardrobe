@@ -5,15 +5,15 @@ import com.ownstd.project.profile.internal.data.dto.UserDto
 import com.ownstd.project.profile.internal.domain.model.UserModel
 
 internal fun UserDto.toUser(): UserModel = UserModel(
-    id = id,
+    id = 0,
     name = name,
     email = email,
-    username = username,
+    username = name,
     gender = gender,
-    avatarUrl = avatarUrl,
-    outfitsCount = outfitsCount,
-    clothesCount = clothesCount,
-    sharedCount = sharedCount,
+    avatarUrl = null,
+    outfitsCount = 0,
+    clothesCount = 0,
+    sharedCount = 0,
 )
 
 internal fun UserModel.toUpdateRequest(): UpdateProfileRequest = UpdateProfileRequest(

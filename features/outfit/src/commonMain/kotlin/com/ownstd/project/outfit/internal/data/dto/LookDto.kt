@@ -1,28 +1,35 @@
 package com.ownstd.project.outfit.internal.data.dto
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class LookDto(
-    @SerialName("id") val id: Int? = null,
-    @SerialName("name") val name: String,
-    @SerialName("url") val url: String,
-    @SerialName("look_items") val lookItems: List<LookItemDto>? = null,
-    @SerialName("style") val style: String? = null,
-    @SerialName("tags") val tags: List<String>? = null,
+    val id: Int? = null,
+    val name: String,
+    val url: String,
+    val lookItems: List<LookItemDto>? = null,
+)
+
+@Serializable
+data class ClotheSummaryDto(
+    val id: Int? = null,
+    val imageUrl: String? = null,
+    val name: String,
+    val category: String? = null,
 )
 
 @Serializable
 data class LookItemDto(
-    @SerialName("id") val id: Int,
-    @SerialName("clothe_id") val clotheId: Int,
-    @SerialName("image_url") val imageUrl: String,
-    @SerialName("name") val name: String? = null,
-    @SerialName("category") val category: String? = null,
+    val clothe: ClotheSummaryDto,
+    val size: Int,
+    val x: Float = 0f,
+    val y: Float = 0f,
+    val z: Float = 0f,
+    val rotation: Float = 0f,
 )
 
 @Serializable
 data class ShareUrlDto(
-    @SerialName("url") val url: String,
+    val shareToken: String,
+    val shareUrl: String,
 )

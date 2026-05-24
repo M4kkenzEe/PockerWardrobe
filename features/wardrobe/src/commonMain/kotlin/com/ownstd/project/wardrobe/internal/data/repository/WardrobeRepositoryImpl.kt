@@ -3,10 +3,9 @@ package com.ownstd.project.wardrobe.internal.data.repository
 import com.ownstd.project.wardrobe.internal.data.api.WardrobeApi
 import com.ownstd.project.wardrobe.internal.data.mapper.toClothe
 import com.ownstd.project.wardrobe.internal.data.mapper.toClotheDetail
-import com.ownstd.project.wardrobe.internal.data.mapper.toLook
 import com.ownstd.project.wardrobe.internal.data.mapper.toUpdateRequest
-import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
 import com.ownstd.project.wardrobe.internal.domain.model.ClotheDetailModel
+import com.ownstd.project.wardrobe.internal.domain.model.ClotheModel
 import com.ownstd.project.wardrobe.internal.domain.model.LookModel
 import com.ownstd.project.wardrobe.internal.domain.repository.WardrobeRepository
 
@@ -27,8 +26,7 @@ class WardrobeRepositoryImpl(
         api.deleteClothe(id)
     }
 
-    override suspend fun getClotheOutfits(clotheId: Int): List<LookModel> =
-        api.getClotheOutfits(clotheId).map { it.toLook() }
+    override suspend fun getClotheOutfits(clotheId: Int): List<LookModel> = emptyList()
 
     override suspend fun uploadClothe(imageBytes: ByteArray): ClotheModel =
         api.uploadClothe(imageBytes).toClothe()
