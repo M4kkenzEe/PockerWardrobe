@@ -9,15 +9,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,17 +44,27 @@ import com.ownstd.project.pincard.internal.replaceFragment
 @Composable
 internal fun Wardrobe(viewModel: WardrobeViewModel) {
     val clothes by viewModel.clothes.collectAsState()
+    val isUploading by viewModel.isUploading.collectAsState()
+    val uploadError by viewModel.uploadError.collectAsState()
 
     var dialogState by remember { mutableStateOf(false) }
     var urlState by remember { mutableStateOf("") }
     var requestAddClothe by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uploadError) {
+        if (uploadError) {
+            snackbarHostState.showSnackbar("Не удалось добавить вещь. Попробуйте ещё раз")
+            viewModel.clearUploadError()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(bottom = 44.dp)
     ) {
-        if (clothes.isEmpty()) {
+        if (clothes.isEmpty() && !isUploading) {
             WardrobeEmptyState(
                 onAddClick = { requestAddClothe = true },
                 modifier = Modifier.fillMaxSize()
@@ -68,7 +85,12 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                     )
                 }
 
-                val count = if (clothes.size % 2 == 0) 2 else 3
+                if (isUploading) {
+                    item { SkeletonClotheCard() }
+                }
+
+                val totalItems = clothes.size + if (isUploading) 1 else 0
+                val count = if (totalItems % 2 == 0) 2 else 3
                 items(count) {
                     Spacer(
                         modifier = Modifier
@@ -91,13 +113,28 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
             ) {
                 Text("WB", fontSize = 32.sp)
             }
-            AddClotheFloatButton(
-                modifier = Modifier,
-                onButtonClick = { bitmap -> viewModel.loadClothe(bitmap) },
-                requestLaunch = requestAddClothe,
-                onLaunchConsumed = { requestAddClothe = false }
-            )
+            if (isUploading) {
+                FloatingActionButton(onClick = {}) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                }
+            } else {
+                AddClotheFloatButton(
+                    modifier = Modifier,
+                    onButtonClick = { bitmap -> viewModel.loadClothe(bitmap) },
+                    requestLaunch = requestAddClothe,
+                    onLaunchConsumed = { requestAddClothe = false }
+                )
+            }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
 
         if (dialogState) {
             Dialog(
@@ -119,6 +156,17 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
             }
         }
     }
+}
+
+@Composable
+private fun SkeletonClotheCard(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(RoundedCornerShape(20))
+            .background(Color(0xFF3A3A3A))
+    )
 }
 
 @Composable

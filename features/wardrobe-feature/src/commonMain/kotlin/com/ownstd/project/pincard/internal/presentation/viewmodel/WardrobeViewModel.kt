@@ -17,6 +17,13 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
     }
 
     val clothes = MutableStateFlow<List<Clothe>>(emptyList())
+    val isUploading = MutableStateFlow(false)
+    val uploadError = MutableStateFlow(false)
+
+    fun clearUploadError() {
+        uploadError.value = false
+    }
+
     fun getClothes() {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
@@ -34,14 +41,18 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
     fun loadClothe(bitmap: ImageBitmap) {
         viewModelScope.launch(Dispatchers.IO) {
             println("🖼️ [VM_UPLOAD] Starting loadClothe")
+            isUploading.value = true
             runCatching {
                 useCase.loadClothe(bitmap)
             }.onSuccess {
                 println("✅ [VM_UPLOAD] loadClothe completed, refreshing list")
+                isUploading.value = false
                 getClothes()
             }.onFailure { exception ->
                 println("❌ [VM_UPLOAD_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 exception.printStackTrace()
+                isUploading.value = false
+                uploadError.value = true
             }
         }
     }
