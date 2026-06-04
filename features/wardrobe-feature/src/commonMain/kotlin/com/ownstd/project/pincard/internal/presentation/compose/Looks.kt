@@ -61,7 +61,7 @@ internal fun Looks(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(looksList) { look ->
+                items(looksList, key = { it.id!! }) { look ->
                     LookCard(
                         lookUrl = look.url,
                         onClick = { navigateToDetails(look.id ?: 0) },
@@ -70,7 +70,8 @@ internal fun Looks(
                             viewModel.shareLook(look.id!!) { shareUrl ->
                                 clipboardManager.copyToClipboard(shareUrl)
                             }
-                        }
+                        },
+                        modifier = Modifier.animateItem()
                     )
                 }
             }

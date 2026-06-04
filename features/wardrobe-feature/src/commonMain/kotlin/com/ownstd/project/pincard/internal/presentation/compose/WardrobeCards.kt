@@ -98,13 +98,14 @@ internal fun LookCard(
     lookUrl: String,
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onShare: () -> Unit = {}
+    onShare: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(300.dp)
             .clip(RoundedCornerShape(20))
             .background(Color.White)
