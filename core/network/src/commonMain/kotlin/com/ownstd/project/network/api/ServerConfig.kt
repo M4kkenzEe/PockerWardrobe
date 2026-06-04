@@ -19,10 +19,11 @@ object ServerConfig {
      * - Production: "api.example.com"
      */
 //    const val SERVER_HOST = "192.168.0.88:80"
-    const val SERVER_HOST = "194.87.190.248:80"
+//    const val SERVER_HOST = "194.87.190.248:80"
+    const val SERVER_HOST = "api.clothis.tech"
 
     /**
      * Base URL for API calls (includes /api/v1/ path)
      */
-    const val BASE_URL = "http://$SERVER_HOST/api/v1/"
+    const val BASE_URL = "https://$SERVER_HOST/api/v1/"
 }
