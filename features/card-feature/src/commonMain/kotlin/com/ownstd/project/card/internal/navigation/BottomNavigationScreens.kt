@@ -8,13 +8,6 @@ internal sealed class BottomNavigationScreens {
     abstract val disabledIcon: String
 
     @Serializable
-    data class Home(
-        override val label: String = "Лента",
-        override val enabledIcon: String = "shopping_cart_enabled",
-        override val disabledIcon: String = "shopping_cart_disabled"
-    ) : BottomNavigationScreens()
-
-    @Serializable
     data class Shop(
         override val label: String = "Гардероб",
         override val enabledIcon: String = "shopping_cart_enabled",
