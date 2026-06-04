@@ -15,13 +15,6 @@ internal sealed class BottomNavigationScreens {
     ) : BottomNavigationScreens()
 
     @Serializable
-    data class Outfits(
-        override val label: String = "Образы",
-        override val enabledIcon: String = "shopping_cart_enabled",
-        override val disabledIcon: String = "shopping_cart_disabled"
-    ) : BottomNavigationScreens()
-
-    @Serializable
     data class Profile(
         override val label: String = "Профиль",
         override val enabledIcon: String = "shopping_cart_enabled",

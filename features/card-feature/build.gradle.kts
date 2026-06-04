@@ -80,7 +80,6 @@ kotlin {
 
             implementation(project(":core:storage"))
             implementation(project(":features:wardrobe-feature"))
-            implementation(project(":features:tiktok-feed"))
             implementation(project(":features:authorization"))
             implementation(project(":features:profile"))
         }
