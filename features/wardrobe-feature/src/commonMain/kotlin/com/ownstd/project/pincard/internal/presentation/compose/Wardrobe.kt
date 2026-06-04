@@ -78,10 +78,11 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalItemSpacing = 12.dp
             ) {
-                items(clothes) { clothe ->
+                items(clothes, key = { it.id!! }) { clothe ->
                     ClotheCard(
                         clotheUrl = clothe.imageUrl.replaceFragment(),
-                        onDelete = { viewModel.deleteClothe(clothe.id!!) }
+                        onDelete = { viewModel.deleteClothe(clothe.id!!) },
+                        modifier = Modifier.animateItem()
                     )
                 }
 
