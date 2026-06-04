@@ -24,13 +24,20 @@ import kotlinx.coroutines.withContext
 @Composable
 fun AddClotheFloatButton(
     modifier: Modifier = Modifier,
-    onButtonClick: (imageBitmap: ImageBitmap) -> Unit = {}
+    onButtonClick: (imageBitmap: ImageBitmap) -> Unit = {},
+    requestLaunch: Boolean = false,
+    onLaunchConsumed: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
     var imageSourceOptionDialog by remember { mutableStateOf(value = false) }
     var launchCamera by remember { mutableStateOf(value = false) }
     var launchGallery by remember { mutableStateOf(value = false) }
+
+    if (requestLaunch) {
+        launchGallery = true
+        onLaunchConsumed()
+    }
     var launchSetting by remember { mutableStateOf(value = false) }
     var permissionRationalDialog by remember { mutableStateOf(value = false) }
     val permissionsManager = createPermissionsManager(object : PermissionCallback {

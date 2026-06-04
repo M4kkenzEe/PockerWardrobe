@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -25,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -37,37 +40,45 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
 
     var dialogState by remember { mutableStateOf(false) }
     var urlState by remember { mutableStateOf("") }
-
+    var requestAddClothe by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(bottom = 44.dp)
     ) {
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalItemSpacing = 12.dp
-        ) {
-            items(clothes) { clothe ->
-                ClotheCard(
-                    clotheUrl = clothe.imageUrl.replaceFragment(),
-                    onDelete = { viewModel.deleteClothe(clothe.id!!) }
-                )
-            }
+        if (clothes.isEmpty()) {
+            WardrobeEmptyState(
+                onAddClick = { requestAddClothe = true },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalItemSpacing = 12.dp
+            ) {
+                items(clothes) { clothe ->
+                    ClotheCard(
+                        clotheUrl = clothe.imageUrl.replaceFragment(),
+                        onDelete = { viewModel.deleteClothe(clothe.id!!) }
+                    )
+                }
 
-            val count = if (clothes.size % 2 == 0) 2 else 3
-            items(count) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp)
-                )
+                val count = if (clothes.size % 2 == 0) 2 else 3
+                items(count) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                    )
+                }
             }
         }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -82,7 +93,9 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
             }
             AddClotheFloatButton(
                 modifier = Modifier,
-                onButtonClick = { bitmap -> viewModel.loadClothe(bitmap) }
+                onButtonClick = { bitmap -> viewModel.loadClothe(bitmap) },
+                requestLaunch = requestAddClothe,
+                onLaunchConsumed = { requestAddClothe = false }
             )
         }
 
@@ -104,6 +117,46 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WardrobeEmptyState(
+    onAddClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "👗", fontSize = 64.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Гардероб пуст",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Сфотографируйте вещь или загрузите из галереи",
+            fontSize = 14.sp,
+            color = Color(0xFF9AA0A6),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 40.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onAddClick,
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF8AB4F8))
+        ) {
+            Text(
+                text = "Добавить вещь",
+                color = Color(0xFF27272B),
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }
