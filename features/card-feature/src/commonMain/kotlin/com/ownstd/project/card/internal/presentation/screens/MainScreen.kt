@@ -87,7 +87,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
 
 @Composable
 internal fun BottomNavigationBar(navController: NavHostController) {
-    var currentItem by remember { mutableStateOf<BottomNavigationScreens>(BottomNavigationScreens.Home()) }
+    var currentItem by remember { mutableStateOf<BottomNavigationScreens>(BottomNavigationScreens.Shop()) }
 
     Row(
         modifier = Modifier
@@ -98,7 +98,6 @@ internal fun BottomNavigationBar(navController: NavHostController) {
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         val screens = listOf(
-            BottomNavigationScreens.Home(),
             BottomNavigationScreens.Shop(),
             BottomNavigationScreens.Profile()
         )

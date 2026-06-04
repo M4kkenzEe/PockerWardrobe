@@ -8,7 +8,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ownstd.project.card.internal.deeplink.DeepLink
-import com.ownstd.project.card.internal.presentation.screens.HomeScreen
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGraph
@@ -22,13 +21,9 @@ internal fun BottomNavigationNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavigationScreens.Home(),
+        startDestination = WardrobeNavScreens.Wardrobe,
         modifier = modifier.fillMaxSize()
     ) {
-        composable<BottomNavigationScreens.Home> {
-            HomeScreen()
-        }
-
         composable<BottomNavigationScreens.Shop> {
             LaunchedEffect(Unit) {
                 navController.navigate(WardrobeNavScreens.Wardrobe) {
