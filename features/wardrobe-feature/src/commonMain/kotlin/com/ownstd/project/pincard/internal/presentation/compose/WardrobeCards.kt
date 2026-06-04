@@ -101,6 +101,7 @@ internal fun LookCard(
     onShare: () -> Unit = {}
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -139,10 +140,24 @@ internal fun LookCard(
 
             DropdownMenuItem(
                 onClick = {
-                    onDelete()
+                    showConfirmDialog = true
                     dropDownMenuState = false
                 }
             ) { Text("Удалить") }
         }
+    }
+
+    if (showConfirmDialog) {
+        ConstructorAlertDialog(
+            title = "Удалить образ?",
+            message = "Образ будет удалён",
+            confirmText = "Удалить",
+            cancelText = "Отмена",
+            onConfirm = {
+                showConfirmDialog = false
+                onDelete()
+            },
+            onCancel = { showConfirmDialog = false }
+        )
     }
 }
