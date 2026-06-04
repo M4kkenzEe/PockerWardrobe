@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -32,12 +33,15 @@ internal fun ClotheCard(
     onShare: () -> Unit = {}
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(20))
             .background(Color.White)
+            .alpha(if (isDeleting) 0.4f else 1f)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { dropDownMenuState = true }
@@ -69,11 +73,26 @@ internal fun ClotheCard(
 
             DropdownMenuItem(
                 onClick = {
-                    onDelete()
+                    showConfirmDialog = true
                     dropDownMenuState = false
                 }
             ) { Text("Удалить") }
         }
+    }
+
+    if (showConfirmDialog) {
+        ConstructorAlertDialog(
+            title = "Удалить вещь?",
+            message = "Вещь будет удалена из гардероба",
+            confirmText = "Удалить",
+            cancelText = "Отмена",
+            onConfirm = {
+                showConfirmDialog = false
+                isDeleting = true
+                onDelete()
+            },
+            onCancel = { showConfirmDialog = false }
+        )
     }
 }
 
