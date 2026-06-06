@@ -33,11 +33,12 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ProfileScreen(onLogout: () -> Unit = {}) {
     val viewModel: ProfileViewModel = koinViewModel()
     val userState by viewModel.profileState.collectAsState()
+
     if (userState != null) {
+        val user = userState!!
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Фото пользователя в верхней части экрана
             Image(
                 painter = painterResource(Res.drawable.img_profile_default),
                 contentDescription = "Profile Photo",
@@ -59,7 +60,6 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
                     )
             )
 
-            // Информация о пользователе поверх градиента
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -68,20 +68,23 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = userState!!.name,
+                    text = user.name,
                     style = MaterialTheme.typography.h4,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = userState!!.email,
+                    text = user.email,
                     style = MaterialTheme.typography.body1,
                     color = Color.White
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
-                    text = "Gender: ${userState!!.gender}",
+                    text = "👗 ${user.clothesCount} вещей • ✨ ${user.looksCount} образов",
                     style = MaterialTheme.typography.body2,
-                    color = Color.White
+                    color = Color.White.copy(alpha = 0.85f)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -104,8 +107,4 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
     } else {
         Text("Loading...")
     }
-
-    println("name: ${userState?.name}")
-    println("email: ${userState?.email}")
-    println("gender: ${userState?.gender}")
 }

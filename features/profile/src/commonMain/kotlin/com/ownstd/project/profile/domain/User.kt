@@ -4,4 +4,10 @@ import androidx.compose.runtime.Stable
 import com.ownstd.project.profile.presentation.Gender
 
 @Stable
-data class User(val name: String, val email: String, val gender: Gender)
+data class User(
+    val name: String,
+    val email: String,
+    val gender: Gender,
+    val clothesCount: Int,
+    val looksCount: Int
+)
