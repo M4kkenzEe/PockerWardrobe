@@ -3,6 +3,8 @@ package com.ownstd.project.pincard.internal.presentation.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.ggg
+import org.jetbrains.compose.resources.painterResource
 import com.ownstd.project.pincard.internal.replaceFragment
 
 @Composable
@@ -50,7 +55,11 @@ internal fun ClotheCard(
             model = clotheUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
+            placeholder = painterResource(Res.drawable.ggg),
+            error = painterResource(Res.drawable.ggg),
             modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 160.dp)
         )
         DropdownMenu(
             expanded = dropDownMenuState,
