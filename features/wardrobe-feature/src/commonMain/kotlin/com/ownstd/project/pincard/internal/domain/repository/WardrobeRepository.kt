@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import com.ownstd.project.pincard.internal.data.model.Clothe
 
 internal interface WardrobeRepository {
-    suspend fun getClothes(): List<Clothe>
+    suspend fun getClothes(occasion: String? = null): List<Clothe>
     suspend fun loadClothe(bitmap: ImageBitmap, occasion: String? = null)
     suspend fun uploadFromUrl(pageUrl: String): Clothe
     suspend fun deleteClothe(clotheId: Int)

@@ -5,8 +5,8 @@ import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
 
 internal class WardrobeUseCase(private val wardrobeRepository: WardrobeRepository) {
-    suspend fun getClothes(): List<Clothe> {
-        return wardrobeRepository.getClothes()
+    suspend fun getClothes(occasion: String? = null): List<Clothe> {
+        return wardrobeRepository.getClothes(occasion)
     }
 
     suspend fun loadClothe(bitmap: ImageBitmap, occasion: String? = null) {

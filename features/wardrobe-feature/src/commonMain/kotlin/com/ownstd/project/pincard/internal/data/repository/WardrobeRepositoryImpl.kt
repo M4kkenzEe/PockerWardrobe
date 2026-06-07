@@ -27,13 +27,16 @@ class WardrobeRepositoryImpl(
     val client = networkRepository.getClient()
     val baseUrl = networkRepository.baseUrl
 
-    override suspend fun getClothes(): List<Clothe> {
+    override suspend fun getClothes(occasion: String?): List<Clothe> {
         return try {
             val fullUrl = baseUrl + ENDPOINT
-            println("🌐 [CLOTHES_REQUEST] GET $fullUrl")
+            println("🌐 [CLOTHES_REQUEST] GET $fullUrl occasion=$occasion")
 
             val httpResponse = client.get(fullUrl) {
                 contentType(ContentType.Application.Json)
+                if (!occasion.isNullOrBlank()) {
+                    url { parameters.append("occasion", occasion) }
+                }
             }
 
             println("✅ [CLOTHES_RESPONSE] Status: ${httpResponse.status.value}")
