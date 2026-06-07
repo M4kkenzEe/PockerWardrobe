@@ -52,6 +52,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
     val clothes by viewModel.clothes.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
     val uploadError by viewModel.uploadError.collectAsState()
+    val showPaywall by viewModel.showPaywall.collectAsState()
     val selectedOccasion by viewModel.selectedOccasionFilter.collectAsState()
 
     var dialogState by remember { mutableStateOf(false) }
@@ -200,6 +201,10 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                         }
                     }
                 }
+            }
+
+            if (showPaywall) {
+                PaywallScreen(onDismiss = { viewModel.dismissPaywall() })
             }
         }
     }

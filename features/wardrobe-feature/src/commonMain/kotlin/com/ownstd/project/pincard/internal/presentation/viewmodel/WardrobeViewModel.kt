@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.domain.FreemiumLimitException
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -20,9 +21,14 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
     val selectedOccasionFilter = MutableStateFlow<String?>(null)
     val isUploading = MutableStateFlow(false)
     val uploadError = MutableStateFlow(false)
+    val showPaywall = MutableStateFlow(false)
 
     fun clearUploadError() {
         uploadError.value = false
+    }
+
+    fun dismissPaywall() {
+        showPaywall.value = false
     }
 
     fun getClothes(occasion: String? = selectedOccasionFilter.value) {
@@ -56,9 +62,13 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
                 getClothes()
             }.onFailure { exception ->
                 println("❌ [VM_UPLOAD_ERROR] ${exception::class.simpleName}: ${exception.message}")
-                exception.printStackTrace()
                 isUploading.value = false
-                uploadError.value = true
+                if (exception is FreemiumLimitException) {
+                    showPaywall.value = true
+                } else {
+                    exception.printStackTrace()
+                    uploadError.value = true
+                }
             }
         }
     }

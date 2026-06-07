@@ -6,6 +6,7 @@ import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
 import io.github.suwasto.capturablecompose.CompressionFormat
 import io.github.suwasto.capturablecompose.toByteArray
+import com.ownstd.project.pincard.internal.domain.FreemiumLimitException
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -16,6 +17,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.core.writeFully
@@ -82,15 +84,24 @@ class WardrobeRepositoryImpl(
 
             println("📥 [UPLOAD_RESPONSE] HTTP ${response.status.value} ${response.status.description}")
 
-            if (!response.status.isSuccess()) {
-                val errorBody = response.bodyAsText()
-                println("❌ [UPLOAD_ERROR] Server error body: $errorBody")
-            } else {
-                println("✅ [UPLOAD_SUCCESS] Photo uploaded successfully")
+            when {
+                response.status == HttpStatusCode.PaymentRequired -> {
+                    println("🚫 [UPLOAD_LIMIT] Freemium limit reached")
+                    throw FreemiumLimitException()
+                }
+                !response.status.isSuccess() -> {
+                    val errorBody = response.bodyAsText()
+                    println("❌ [UPLOAD_ERROR] Server error body: $errorBody")
+                    throw Exception("Upload failed: ${response.status.value}")
+                }
+                else -> println("✅ [UPLOAD_SUCCESS] Photo uploaded successfully")
             }
+        } catch (e: FreemiumLimitException) {
+            throw e
         } catch (e: Exception) {
             println("❌ [UPLOAD_EXCEPTION] ${e::class.simpleName}: ${e.message}")
             e.printStackTrace()
+            throw e
         }
     }
 
