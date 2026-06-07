@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class LookDetailsViewModel(
@@ -22,6 +23,12 @@ internal class LookDetailsViewModel(
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _affiliateLinkLoadingIds = MutableStateFlow<Set<Int>>(emptySet())
+    val affiliateLinkLoadingIds: StateFlow<Set<Int>> = _affiliateLinkLoadingIds
+
+    private val _pendingAffiliateUrl = MutableStateFlow<String?>(null)
+    val pendingAffiliateUrl: StateFlow<String?> = _pendingAffiliateUrl
 
     init {
         when {
@@ -66,6 +73,19 @@ internal class LookDetailsViewModel(
                 _isLoading.value = false
             }
         }
+    }
+
+    fun requestAffiliateLink(clotheId: Int, storeUrl: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _affiliateLinkLoadingIds.update { it + clotheId }
+            val url = runCatching { useCase.getAffiliateLink(storeUrl) }.getOrNull() ?: storeUrl
+            _affiliateLinkLoadingIds.update { it - clotheId }
+            _pendingAffiliateUrl.value = url
+        }
+    }
+
+    fun consumeAffiliateUrl() {
+        _pendingAffiliateUrl.value = null
     }
 
     fun addToWardrobe(token: String) {

@@ -38,4 +38,8 @@ internal class LookUseCase(private val lookRepository: LookRepository) {
     suspend fun generateLooks(): GenerateLooksResult {
         return lookRepository.generateLooks()
     }
+
+    suspend fun getAffiliateLink(storeUrl: String): String? {
+        return lookRepository.getAffiliateLink(storeUrl)
+    }
 }

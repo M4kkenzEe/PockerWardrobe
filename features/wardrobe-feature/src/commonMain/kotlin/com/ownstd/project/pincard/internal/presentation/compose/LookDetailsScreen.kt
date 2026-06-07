@@ -28,10 +28,12 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +66,16 @@ fun LookDetailsScreen(
     }
     val look by viewModel.look.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val affiliateLinkLoadingIds by viewModel.affiliateLinkLoadingIds.collectAsState()
+    val pendingAffiliateUrl by viewModel.pendingAffiliateUrl.collectAsState()
+    val uriHandler = LocalUriHandler.current
+
+    LaunchedEffect(pendingAffiliateUrl) {
+        pendingAffiliateUrl?.let { url ->
+            uriHandler.openUri(url)
+            viewModel.consumeAffiliateUrl()
+        }
+    }
 
     if (isLoading || look == null) {
         Box(
@@ -124,6 +136,10 @@ fun LookDetailsScreen(
                 if (!currentLook.lookItems.isNullOrEmpty()) {
                     ClothesListSection(
                         lookItems = currentLook.lookItems,
+                        affiliateLinkLoadingIds = affiliateLinkLoadingIds,
+                        onFindSimilar = { clotheId, storeUrl ->
+                            viewModel.requestAffiliateLink(clotheId, storeUrl)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -255,6 +271,8 @@ private fun ClotheItemInLook(
 @Composable
 private fun ClothesListSection(
     lookItems: List<LookItem>,
+    affiliateLinkLoadingIds: Set<Int>,
+    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -274,10 +292,14 @@ private fun ClothesListSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height((lookItems.size / 2 + 1) * 200.dp) // Фиксированная высота для вложенной сетки
+                .height((lookItems.size / 2 + 1) * 200.dp)
         ) {
             items(lookItems) { lookItem ->
-                ClotheItemCard(clotheItem = lookItem)
+                ClotheItemCard(
+                    clotheItem = lookItem,
+                    isAffiliateLinkLoading = lookItem.clothe.id?.let { it in affiliateLinkLoadingIds } == true,
+                    onFindSimilar = onFindSimilar
+                )
             }
         }
     }
@@ -285,16 +307,15 @@ private fun ClothesListSection(
 
 @Composable
 private fun ClotheItemCard(
-    clotheItem: LookItem
+    clotheItem: LookItem,
+    isAffiliateLinkLoading: Boolean,
+    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit
 ) {
     Box(
         modifier = Modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .clickable {
-                // TODO: Можно добавить переход к деталям вещи или в магазин
-            },
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -319,6 +340,35 @@ private fun ClotheItemCard(
                     color = Color.Black,
                     maxLines = 2
                 )
+            }
+
+            if (clotheItem.clothe.storeUrl.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        val clotheId = clotheItem.clothe.id ?: return@Button
+                        onFindSimilar(clotheId, clotheItem.clothe.storeUrl)
+                    },
+                    enabled = !isAffiliateLinkLoading,
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1A1A1A)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isAffiliateLinkLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Найти похожее →",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
     }

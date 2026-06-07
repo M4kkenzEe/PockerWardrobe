@@ -20,6 +20,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 
 class LookRepositoryImpl(
     private val networkRepository: NetworkRepository,
@@ -165,6 +166,21 @@ class LookRepositoryImpl(
             }
         } catch (e: Exception) {
             GenerateLooksResult.NetworkError(e)
+        }
+    }
+
+    override suspend fun getAffiliateLink(storeUrl: String): String? {
+        return try {
+            val response = client.post("${baseUrl}affiliate/link") {
+                contentType(ContentType.Application.Json)
+                setBody("""{"product_url": "$storeUrl"}""")
+            }
+            if (response.status.isSuccess()) {
+                response.body<Map<String, String>>()["affiliate_url"]
+            } else null
+        } catch (e: Exception) {
+            println("ERR getAffiliateLink: ${e.message}")
+            null
         }
     }
 

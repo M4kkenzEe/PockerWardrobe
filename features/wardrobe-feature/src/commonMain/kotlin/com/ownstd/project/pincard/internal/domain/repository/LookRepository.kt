@@ -15,4 +15,5 @@ internal interface LookRepository {
     suspend fun deleteLook(lookId: Int)
     suspend fun shareLook(lookId: Int): ShareResponse?
     suspend fun generateLooks(): GenerateLooksResult
+    suspend fun getAffiliateLink(storeUrl: String): String?
 }
