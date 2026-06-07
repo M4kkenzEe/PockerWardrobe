@@ -13,15 +13,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewModel() {
-    init {
-        getClothes()
-    }
-
     val clothes = MutableStateFlow<List<Clothe>>(emptyList())
     val selectedOccasionFilter = MutableStateFlow<String?>(null)
     val isUploading = MutableStateFlow(false)
     val uploadError = MutableStateFlow(false)
     val showPaywall = MutableStateFlow(false)
+
+    init {
+        getClothes()
+    }
 
     fun clearUploadError() {
         uploadError.value = false
