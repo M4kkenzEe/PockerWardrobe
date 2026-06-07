@@ -5,7 +5,7 @@ import com.ownstd.project.pincard.internal.data.model.Clothe
 
 internal interface WardrobeRepository {
     suspend fun getClothes(): List<Clothe>
-    suspend fun loadClothe(bitmap: ImageBitmap)
+    suspend fun loadClothe(bitmap: ImageBitmap, occasion: String? = null)
     suspend fun uploadFromUrl(pageUrl: String): Clothe
     suspend fun deleteClothe(clotheId: Int)
 }

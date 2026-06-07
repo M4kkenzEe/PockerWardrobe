@@ -50,10 +50,10 @@ class WardrobeRepositoryImpl(
         }
     }
 
-    override suspend fun loadClothe(bitmap: ImageBitmap) {
+    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?) {
         val imageBytes = bitmap.toByteArray(CompressionFormat.JPEG, IMAGE_QUALITY)
 
-        println("📤 [UPLOAD_START] POST ${baseUrl + ENDPOINT}")
+        println("📤 [UPLOAD_START] POST ${baseUrl + ENDPOINT} occasion=$occasion")
         println("📦 [UPLOAD_BYTES] ${imageBytes.size} bytes (~${imageBytes.size / 1024} KB)")
 
         try {
@@ -64,6 +64,7 @@ class WardrobeRepositoryImpl(
                         formData {
                             append("name", "")
                             append("storeUrl", "")
+                            if (!occasion.isNullOrBlank()) append("occasion", occasion)
                             append(
                                 key = "image",
                                 filename = "clothing_image.jpg",

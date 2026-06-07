@@ -38,12 +38,12 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
         }
     }
 
-    fun loadClothe(bitmap: ImageBitmap) {
+    fun loadClothe(bitmap: ImageBitmap, occasion: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
-            println("🖼️ [VM_UPLOAD] Starting loadClothe")
+            println("🖼️ [VM_UPLOAD] Starting loadClothe occasion=$occasion")
             isUploading.value = true
             runCatching {
-                useCase.loadClothe(bitmap)
+                useCase.loadClothe(bitmap, occasion)
             }.onSuccess {
                 println("✅ [VM_UPLOAD] loadClothe completed, refreshing list")
                 isUploading.value = false
