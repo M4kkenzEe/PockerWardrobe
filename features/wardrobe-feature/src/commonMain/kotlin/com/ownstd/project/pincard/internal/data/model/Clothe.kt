@@ -8,6 +8,7 @@ data class Clothe(
     val name: String,
     val storeUrl: String,
     val imageUrl: String,
+    val occasion: String? = null,
 ) {
     companion object {
         fun empty(): Clothe {

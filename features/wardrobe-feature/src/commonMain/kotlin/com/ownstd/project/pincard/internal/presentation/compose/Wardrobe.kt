@@ -52,6 +52,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
     val clothes by viewModel.clothes.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
     val uploadError by viewModel.uploadError.collectAsState()
+    val selectedOccasion by viewModel.selectedOccasionFilter.collectAsState()
 
     var dialogState by remember { mutableStateOf(false) }
     var urlState by remember { mutableStateOf("") }
@@ -96,40 +97,49 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                 .fillMaxSize()
                 .padding(bottom = 44.dp)
         ) {
-            if (clothes.isEmpty() && !isUploading) {
+            if (clothes.isEmpty() && !isUploading && selectedOccasion == null) {
                 WardrobeEmptyState(
                     onAddClick = { requestAddClothe = true },
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
-                    verticalItemSpacing = 12.dp
-                ) {
-                    items(clothes, key = { it.id!! }) { clothe ->
-                        ClotheCard(
-                            clotheUrl = clothe.imageUrl.replaceFragment(),
-                            onDelete = { viewModel.deleteClothe(clothe.id!!) },
-                            modifier = Modifier.animateItem()
-                        )
-                    }
+                Column(modifier = Modifier.fillMaxSize()) {
+                    OccasionFilterRow(
+                        selectedOccasion = selectedOccasion,
+                        onFilterSelected = { viewModel.setOccasionFilter(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp),
+                        verticalItemSpacing = 12.dp
+                    ) {
+                        items(clothes, key = { it.id!! }) { clothe ->
+                            ClotheCard(
+                                clotheUrl = clothe.imageUrl.replaceFragment(),
+                                onDelete = { viewModel.deleteClothe(clothe.id!!) },
+                                modifier = Modifier.animateItem()
+                            )
+                        }
 
-                    if (isUploading) {
-                        item { SkeletonClotheCard() }
-                    }
+                        if (isUploading) {
+                            item { SkeletonClotheCard() }
+                        }
 
-                    val totalItems = clothes.size + if (isUploading) 1 else 0
-                    val count = if (totalItems % 2 == 0) 2 else 3
-                    items(count) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                        )
+                        val totalItems = clothes.size + if (isUploading) 1 else 0
+                        val count = if (totalItems % 2 == 0) 2 else 3
+                        items(count) {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                            )
+                        }
                     }
                 }
             }
