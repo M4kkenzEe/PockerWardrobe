@@ -40,7 +40,8 @@ import com.ownstd.project.storage.getClipboardManager
 internal fun Looks(
     viewModel: LooksViewModel,
     onNavigateToConstructor: () -> Unit,
-    navigateToDetails: (lookId: Int) -> Unit
+    navigateToDetails: (lookId: Int) -> Unit,
+    onNavigateToTinderOutfit: () -> Unit = {}
 ) {
     val looksList by viewModel.looks.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
@@ -108,6 +109,12 @@ internal fun Looks(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            FloatingActionButton(
+                onClick = onNavigateToTinderOutfit,
+                backgroundColor = Color(0xFF4CAF50)
+            ) {
+                Text("👗", fontSize = 22.sp)
+            }
             FloatingActionButton(
                 onClick = { if (!isGenerating) viewModel.generateLooks() },
                 backgroundColor = Color(0xFFBB86FC)

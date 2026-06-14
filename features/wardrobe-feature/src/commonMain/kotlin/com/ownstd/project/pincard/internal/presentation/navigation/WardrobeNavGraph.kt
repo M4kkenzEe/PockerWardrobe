@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.ownstd.project.pincard.internal.presentation.WardrobeMainScreen
 import com.ownstd.project.pincard.internal.presentation.compose.LookConstructor
 import com.ownstd.project.pincard.internal.presentation.compose.LookDetailsScreen
+import com.ownstd.project.pincard.internal.presentation.compose.TinderOutfitScreen
 
 fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
     composable<WardrobeNavScreens.Wardrobe> {
@@ -16,6 +17,9 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             },
             openDetails = { lookId ->
                 navController.navigate(WardrobeNavScreens.LookDetails(lookId = lookId))
+            },
+            openTinderOutfit = {
+                navController.navigate(WardrobeNavScreens.TinderOutfit)
             }
         )
     }
@@ -34,6 +38,11 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
         LookDetailsScreen(
             lookId = lookDetails.lookId,
             shareToken = lookDetails.shareToken,
+            onBackClick = { navController.popBackStack() }
+        )
+    }
+    composable<WardrobeNavScreens.TinderOutfit> {
+        TinderOutfitScreen(
             onBackClick = { navController.popBackStack() }
         )
     }

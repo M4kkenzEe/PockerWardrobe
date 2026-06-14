@@ -10,6 +10,7 @@ import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import com.ownstd.project.pincard.internal.presentation.viewmodel.ConstructorViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
+import com.ownstd.project.pincard.internal.presentation.viewmodel.TinderOutfitViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -24,6 +25,7 @@ val pinCardModule = module {
     }
 
     viewModel { LooksViewModel(useCase = get()) }
+    viewModel { TinderOutfitViewModel(useCase = get()) }
     viewModel { (lookId: Int?, shareToken: String?) ->
         LookDetailsViewModel(useCase = get(), lookId = lookId, shareToken = shareToken)
     }
