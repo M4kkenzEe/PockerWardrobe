@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,12 +19,15 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -44,6 +49,8 @@ import com.ownstd.project.authorization.internal.presentation.design_system.BLUE
 import com.ownstd.project.authorization.internal.presentation.design_system.GREY_COLOR
 import org.koin.compose.viewmodel.koinViewModel
 
+private val TELEGRAM_BLUE = Color(0xFF229ED9)
+
 @Composable
 fun AuthorizationScreen(
     openSession: () -> Unit
@@ -54,6 +61,14 @@ fun AuthorizationScreen(
     val isSessionOpen by viewModel.isSessionOpen.collectAsState()
     val prefillEmail by viewModel.prefillEmail.collectAsState()
     val prefillPassword by viewModel.prefillPassword.collectAsState()
+    val isTelegramLoading by viewModel.isTelegramLoading.collectAsState()
+
+    val uriHandler = LocalUriHandler.current
+    LaunchedEffect(Unit) {
+        viewModel.openUrlEvent.collect { url ->
+            uriHandler.openUri(url)
+        }
+    }
 
     if (isSessionOpen) {
         openSession()
@@ -71,7 +86,9 @@ fun AuthorizationScreen(
                 errorMessage = isError,
                 initialEmail = prefillEmail,
                 initialPassword = prefillPassword,
+                isTelegramLoading = isTelegramLoading,
                 onLogin = viewModel::loginUser,
+                onTelegramAuth = viewModel::startTelegramAuth,
                 onSwitchToRegister = {
                     viewModel.viewState.value = ViewState.REGISTRATION
                 }
@@ -79,7 +96,9 @@ fun AuthorizationScreen(
 
             ViewState.REGISTRATION -> RegistrationScreen(
                 errorMessage = isError,
+                isTelegramLoading = isTelegramLoading,
                 onRegister = viewModel::registerUser,
+                onTelegramAuth = viewModel::startTelegramAuth,
                 onSwitchToLogin = {
                     viewModel.viewState.value = ViewState.LOGIN
                 }
@@ -93,7 +112,9 @@ fun LoginScreen(
     errorMessage: String?,
     initialEmail: String = "",
     initialPassword: String = "",
+    isTelegramLoading: Boolean = false,
     onLogin: (String, String) -> Unit,
+    onTelegramAuth: () -> Unit,
     onSwitchToRegister: () -> Unit
 ) {
     var email by remember(initialEmail) { mutableStateOf(initialEmail) }
@@ -108,7 +129,6 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Заголовок
         Text(
             text = "Добро пожаловать",
             fontSize = 28.sp,
@@ -117,7 +137,6 @@ fun LoginScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        // Белая карточка с формой
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,7 +145,6 @@ fun LoginScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Подзаголовок
             Text(
                 text = "Вход в аккаунт",
                 fontSize = 20.sp,
@@ -136,7 +154,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Email поле
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -151,7 +168,6 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Пароль поле
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -167,7 +183,6 @@ fun LoginScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Чекбокс "Показать пароль"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -191,7 +206,6 @@ fun LoginScreen(
                 )
             }
 
-            // Ошибка
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
@@ -203,7 +217,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Кнопка входа
             Button(
                 onClick = { onLogin(email, password) },
                 modifier = Modifier
@@ -222,9 +235,15 @@ fun LoginScreen(
                 )
             }
 
+            OrDivider()
+
+            TelegramButton(
+                isLoading = isTelegramLoading,
+                onClick = onTelegramAuth
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Ссылка на регистрацию
             Text(
                 text = "Нет аккаунта? Зарегистрироваться",
                 fontSize = 14.sp,
@@ -242,7 +261,9 @@ fun LoginScreen(
 @Composable
 fun RegistrationScreen(
     errorMessage: String?,
+    isTelegramLoading: Boolean = false,
     onRegister: (String, String, String, Gender) -> Unit,
+    onTelegramAuth: () -> Unit,
     onSwitchToLogin: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
@@ -260,7 +281,6 @@ fun RegistrationScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Заголовок
         Text(
             text = "Создать аккаунт",
             fontSize = 28.sp,
@@ -269,7 +289,6 @@ fun RegistrationScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        // Белая карточка с формой
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -278,7 +297,6 @@ fun RegistrationScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Подзаголовок
             Text(
                 text = "Регистрация",
                 fontSize = 20.sp,
@@ -288,7 +306,6 @@ fun RegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Имя пользователя
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -303,7 +320,6 @@ fun RegistrationScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Email поле
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -318,7 +334,6 @@ fun RegistrationScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Пароль поле
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -334,7 +349,6 @@ fun RegistrationScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            // Чекбокс "Показать пароль"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -358,7 +372,6 @@ fun RegistrationScreen(
                 )
             }
 
-            // Выбор пола
             Box {
                 OutlinedTextField(
                     value = when (gender) {
@@ -406,7 +419,6 @@ fun RegistrationScreen(
                 }
             }
 
-            // Ошибка
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
@@ -418,7 +430,6 @@ fun RegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Кнопка регистрации
             Button(
                 onClick = { onRegister(username, email, password, gender) },
                 modifier = Modifier
@@ -437,9 +448,15 @@ fun RegistrationScreen(
                 )
             }
 
+            OrDivider()
+
+            TelegramButton(
+                isLoading = isTelegramLoading,
+                onClick = onTelegramAuth
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Ссылка на вход
             Text(
                 text = "Уже есть аккаунт? Войти",
                 fontSize = 14.sp,
@@ -454,3 +471,54 @@ fun RegistrationScreen(
     }
 }
 
+@Composable
+private fun OrDivider() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Divider(modifier = Modifier.weight(1f), color = GREY_COLOR.copy(alpha = 0.4f))
+        Text(
+            text = "или",
+            fontSize = 13.sp,
+            color = GREY_COLOR,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        Divider(modifier = Modifier.weight(1f), color = GREY_COLOR.copy(alpha = 0.4f))
+    }
+}
+
+@Composable
+private fun TelegramButton(
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = { if (!isLoading) onClick() },
+        enabled = !isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = TELEGRAM_BLUE,
+            contentColor = Color.White,
+            disabledBackgroundColor = TELEGRAM_BLUE.copy(alpha = 0.6f),
+            disabledContentColor = Color.White
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(
+                text = "✈ Войти через Telegram",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}

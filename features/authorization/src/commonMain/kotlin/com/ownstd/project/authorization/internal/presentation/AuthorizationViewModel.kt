@@ -72,14 +72,10 @@ internal class AuthorizationViewModel(
             val init = initResult.getOrThrow()
             _openUrlEvent.emit(init.botUrl)
 
-            val startTime = System.currentTimeMillis()
-            while (isActive) {
-                if (System.currentTimeMillis() - startTime > TELEGRAM_POLL_TIMEOUT_MS) {
-                    errorState.value = "Время вышло, попробуй снова"
-                    isTelegramLoading.value = false
-                    return@launch
-                }
-
+            val maxPolls = (TELEGRAM_POLL_TIMEOUT_MS / TELEGRAM_POLL_INTERVAL_MS).toInt()
+            var pollCount = 0
+            while (isActive && pollCount < maxPolls) {
+                pollCount++
                 delay(TELEGRAM_POLL_INTERVAL_MS)
 
                 val statusResult = authService.getTelegramStatus(init.stateToken)
@@ -107,6 +103,9 @@ internal class AuthorizationViewModel(
                     // "pending" — continue polling
                 }
             }
+            // loop exhausted without done/expired → timeout
+            errorState.value = "Время вышло, попробуй снова"
+            isTelegramLoading.value = false
         }
     }
 }
