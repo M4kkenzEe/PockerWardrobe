@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ownstd.project.authorization.internal.presentation.AuthorizationScreen
+import com.ownstd.project.card.internal.presentation.screens.DebugScreen
 import com.ownstd.project.card.internal.presentation.screens.MainScreen
 import com.ownstd.project.storage.TokenStorage
 import org.koin.compose.koinInject
@@ -46,7 +47,15 @@ internal fun AppNavHost(
             )
         }
         composable<AppScreens.Main> {
-            MainScreen(parentNavController = navController)
+            MainScreen(
+                parentNavController = navController,
+                onOpenDebug = {
+                    navController.navigate(AppScreens.Debug)
+                }
+            )
+        }
+        composable<AppScreens.Debug> {
+            DebugScreen(onBack = { navController.popBackStack() })
         }
     }
 }

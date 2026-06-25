@@ -44,7 +44,10 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun MainScreen(parentNavController: NavHostController) {
+internal fun MainScreen(
+    parentNavController: NavHostController,
+    onOpenDebug: () -> Unit = {}
+) {
     // Create separate NavController for bottom navigation
     val bottomNavController = rememberNavController()
 
@@ -72,14 +75,14 @@ internal fun MainScreen(parentNavController: NavHostController) {
     ) {
         BottomNavigationNavHost(
             navController = bottomNavController,
-            deepLink = initialDeepLink,  // Use the remembered initial value
+            deepLink = initialDeepLink,
             onLogout = {
-                // Navigate to Authorization screen and clear backstack
                 parentNavController.navigate(AppScreens.Authorization) {
                     popUpTo(AppScreens.Main) { inclusive = true }
                     launchSingleTop = true
                 }
             },
+            onOpenDebug = onOpenDebug,
             modifier = Modifier.padding(bottom = 40.dp)
         )
     }

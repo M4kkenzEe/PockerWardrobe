@@ -30,7 +30,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun ProfileScreen(onLogout: () -> Unit = {}) {
+fun ProfileScreen(onLogout: () -> Unit = {}, onOpenDebug: () -> Unit = {}) {
     val viewModel: ProfileViewModel = koinViewModel()
     val userState by viewModel.profileState.collectAsState()
 
@@ -101,6 +101,19 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
                     modifier = Modifier.fillMaxWidth(0.6f)
                 ) {
                     Text("Выйти")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = onOpenDebug,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.DarkGray.copy(alpha = 0.7f),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.6f)
+                ) {
+                    Text("⚙ Dev Tools")
                 }
             }
         }

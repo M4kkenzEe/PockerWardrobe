@@ -17,6 +17,7 @@ internal fun BottomNavigationNavHost(
     navController: NavHostController,
     deepLink: DeepLink? = null,
     onLogout: () -> Unit = {},
+    onOpenDebug: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -34,7 +35,7 @@ internal fun BottomNavigationNavHost(
         }
 
         composable<BottomNavigationScreens.Profile> {
-            ProfileScreen(onLogout = onLogout)
+            ProfileScreen(onLogout = onLogout, onOpenDebug = onOpenDebug)
         }
 
         wardrobeNavGraph(navController)

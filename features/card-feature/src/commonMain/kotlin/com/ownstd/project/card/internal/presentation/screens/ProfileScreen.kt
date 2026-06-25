@@ -7,6 +7,6 @@ import com.ownstd.project.profile.presentation.ProfileScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun ProfileScreen(onLogout: () -> Unit = {}) {
-    ProfileScreen(onLogout = onLogout)
+internal fun ProfileScreen(onLogout: () -> Unit = {}, onOpenDebug: () -> Unit = {}) {
+    ProfileScreen(onLogout = onLogout, onOpenDebug = onOpenDebug)
 }

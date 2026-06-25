@@ -10,5 +10,6 @@ internal sealed class AppScreens {
     @Serializable
     data object Main : AppScreens()
 
-
+    @Serializable
+    data object Debug : AppScreens()
 }
