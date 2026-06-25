@@ -2,20 +2,34 @@ package com.ownstd.project.authorization.internal.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+private const val TELEGRAM_POLL_INTERVAL_MS = 2_000L
+private const val TELEGRAM_POLL_TIMEOUT_MS = 10 * 60 * 1_000L
 
 internal class AuthorizationViewModel(
-    private val authorizationRepository: AuthorizationRepository
+    private val authorizationRepository: AuthorizationRepository,
+    private val authService: AuthService
 ) : ViewModel() {
     val viewState = MutableStateFlow(ViewState.LOGIN)
     val errorState = MutableStateFlow<String?>(null)
     val isSessionOpen = MutableStateFlow(false)
     val prefillEmail = MutableStateFlow("")
     val prefillPassword = MutableStateFlow("")
+    val isTelegramLoading = MutableStateFlow(false)
+
+    private val _openUrlEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val openUrlEvent: SharedFlow<String> = _openUrlEvent
 
     fun loginUser(username: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -42,4 +56,57 @@ internal class AuthorizationViewModel(
         }
     }
 
+    fun startTelegramAuth() {
+        if (isTelegramLoading.value) return
+        viewModelScope.launch(Dispatchers.IO) {
+            isTelegramLoading.value = true
+            errorState.value = null
+
+            val initResult = authService.getTelegramInit()
+            if (initResult.isFailure) {
+                errorState.value = "Не удалось запустить Telegram авторизацию"
+                isTelegramLoading.value = false
+                return@launch
+            }
+
+            val init = initResult.getOrThrow()
+            _openUrlEvent.emit(init.botUrl)
+
+            val startTime = System.currentTimeMillis()
+            while (isActive) {
+                if (System.currentTimeMillis() - startTime > TELEGRAM_POLL_TIMEOUT_MS) {
+                    errorState.value = "Время вышло, попробуй снова"
+                    isTelegramLoading.value = false
+                    return@launch
+                }
+
+                delay(TELEGRAM_POLL_INTERVAL_MS)
+
+                val statusResult = authService.getTelegramStatus(init.stateToken)
+                if (statusResult.isFailure) continue
+
+                val status = statusResult.getOrThrow()
+                when (status.status) {
+                    "done" -> {
+                        withContext(Dispatchers.Main) {
+                            authorizationRepository.loginByTelegram(
+                                accessToken = status.accessToken!!,
+                                refreshToken = status.refreshToken!!,
+                                expiresAt = status.expiresAt!!
+                            )
+                            isTelegramLoading.value = false
+                            isSessionOpen.value = true
+                        }
+                        return@launch
+                    }
+                    "expired" -> {
+                        errorState.value = "Время вышло, попробуй снова"
+                        isTelegramLoading.value = false
+                        return@launch
+                    }
+                    // "pending" — continue polling
+                }
+            }
+        }
+    }
 }

@@ -10,5 +10,6 @@ interface AuthorizationRepository {
         password: String,
         gender: Gender
     ): String?
+    fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long)
     fun logout()
 }

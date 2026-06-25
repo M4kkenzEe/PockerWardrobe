@@ -28,3 +28,18 @@ data class AuthTokenResponse(
 data class LogoutRequest(
     val refreshToken: String
 )
+
+@Serializable
+data class TelegramInitResponse(
+    val stateToken: String,
+    val botUrl: String
+)
+
+@Serializable
+data class TelegramStatusResponse(
+    val status: String,
+    val accessToken: String? = null,
+    val refreshToken: String? = null,
+    val expiresAt: Long? = null,
+    val userId: Int? = null
+)

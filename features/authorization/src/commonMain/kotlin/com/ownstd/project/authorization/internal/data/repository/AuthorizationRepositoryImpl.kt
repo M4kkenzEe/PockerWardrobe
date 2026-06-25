@@ -51,6 +51,15 @@ class AuthorizationRepositoryImpl(
         return errorMessage
     }
 
+    override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) {
+        tokenStorage.saveSession(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            expiresAt = expiresAt
+        )
+        println("[AuthRepository] telegram login success")
+    }
+
     override fun logout() {
         tokenStorage.clearSession()
         println("[AuthRepository] logout - session cleared")
