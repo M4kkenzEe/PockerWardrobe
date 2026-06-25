@@ -47,12 +47,7 @@ internal fun AppNavHost(
             )
         }
         composable<AppScreens.Main> {
-            MainScreen(
-                parentNavController = navController,
-                onOpenDebug = {
-                    navController.navigate(AppScreens.Debug)
-                }
-            )
+            MainScreen(parentNavController = navController)
         }
         composable<AppScreens.Debug> {
             DebugScreen(onBack = { navController.popBackStack() })

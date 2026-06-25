@@ -44,10 +44,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun MainScreen(
-    parentNavController: NavHostController,
-    onOpenDebug: () -> Unit = {}
-) {
+internal fun MainScreen(parentNavController: NavHostController) {
     // Create separate NavController for bottom navigation
     val bottomNavController = rememberNavController()
 
@@ -82,7 +79,6 @@ internal fun MainScreen(
                     launchSingleTop = true
                 }
             },
-            onOpenDebug = onOpenDebug,
             modifier = Modifier.padding(bottom = 40.dp)
         )
     }

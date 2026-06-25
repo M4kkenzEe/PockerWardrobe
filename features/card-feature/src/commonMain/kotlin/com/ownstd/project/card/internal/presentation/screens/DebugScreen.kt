@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
@@ -31,17 +32,60 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ownstd.project.storage.EnvConfig
+import com.ownstd.project.storage.TokenStorage
 import kotlin.system.exitProcess
+import org.koin.compose.koinInject
 
 private val DARK_BG = Color(0xFF1A1A1A)
 private val CARD_BG = Color(0xFF2A2A2A)
-private val ACCENT = Color(0xFF4CAF50)
-private val DEV_COLOR = Color(0xFFFF9800)
+private val ACCENT_GREEN = Color(0xFF4CAF50)
+private val ACCENT_ORANGE = Color(0xFFFF9800)
+private val ACCENT_RED = Color(0xFFE53935)
 
 @Composable
 internal fun DebugScreen(onBack: () -> Unit = {}) {
+    val tokenStorage: TokenStorage = koinInject()
+
     var isDev by remember { mutableStateOf(EnvConfig.isDev) }
-    var pendingRestart by remember { mutableStateOf(false) }
+    var showEnvConfirm by remember { mutableStateOf(false) }
+    var pendingDev by remember { mutableStateOf(isDev) }
+
+    if (showEnvConfirm) {
+        AlertDialog(
+            onDismissRequest = { showEnvConfirm = false },
+            backgroundColor = CARD_BG,
+            title = {
+                Text(
+                    text = "Сменить стенд?",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Переключение на ${if (pendingDev) "DEV" else "PROD"} требует выхода из аккаунта и перезапуска приложения.",
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        EnvConfig.setDev(pendingDev)
+                        tokenStorage.clearSession()
+                        exitProcess(0)
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = ACCENT_RED)
+                ) {
+                    Text("Выйти и перезапустить", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEnvConfirm = false }) {
+                    Text("Отмена", color = Color.White.copy(alpha = 0.6f))
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -68,7 +112,7 @@ internal fun DebugScreen(onBack: () -> Unit = {}) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Current env indicator
+        // Server environment section
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -95,7 +139,7 @@ internal fun DebugScreen(onBack: () -> Unit = {}) {
                         text = if (isDev) "DEV" else "PROD",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isDev) DEV_COLOR else ACCENT
+                        color = if (isDev) ACCENT_ORANGE else ACCENT_GREEN
                     )
                     Text(
                         text = if (isDev) EnvConfig.DEV_URL else EnvConfig.PROD_URL,
@@ -107,61 +151,32 @@ internal fun DebugScreen(onBack: () -> Unit = {}) {
                 Switch(
                     checked = isDev,
                     onCheckedChange = { checked ->
-                        isDev = checked
-                        EnvConfig.setDev(checked)
-                        pendingRestart = true
+                        pendingDev = checked
+                        showEnvConfirm = true
                     },
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = DEV_COLOR,
-                        checkedTrackColor = DEV_COLOR.copy(alpha = 0.4f),
-                        uncheckedThumbColor = ACCENT,
-                        uncheckedTrackColor = ACCENT.copy(alpha = 0.4f)
+                        checkedThumbColor = ACCENT_ORANGE,
+                        checkedTrackColor = ACCENT_ORANGE.copy(alpha = 0.4f),
+                        uncheckedThumbColor = ACCENT_GREEN,
+                        uncheckedTrackColor = ACCENT_GREEN.copy(alpha = 0.4f)
                     )
                 )
             }
 
-            if (pendingRestart) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider(color = Color.White.copy(alpha = 0.1f))
-                Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+            Divider(color = Color.White.copy(alpha = 0.08f))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = { exitProcess(0) },
-                    modifier = Modifier.fillMaxWidth().height(44.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = if (isDev) DEV_COLOR else ACCENT,
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "Перезапустить приложение",
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Env URLs reference
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(CARD_BG)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "СТЕНДЫ",
-                fontSize = 11.sp,
-                color = Color.White.copy(alpha = 0.5f),
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(10.dp))
             EnvRow(label = "PROD", url = EnvConfig.PROD_URL, active = !isDev)
             Spacer(modifier = Modifier.height(6.dp))
             EnvRow(label = "DEV", url = EnvConfig.DEV_URL, active = isDev)
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Смена стенда требует выхода из аккаунта",
+                fontSize = 11.sp,
+                color = ACCENT_RED.copy(alpha = 0.8f)
+            )
         }
     }
 }
