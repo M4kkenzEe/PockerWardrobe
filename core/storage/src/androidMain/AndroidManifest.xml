@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+    <application>
+        <provider
+            android:name="com.ownstd.project.storage.SecureStorageContextProvider"
+            android:authorities="${applicationId}.SecureStorageContextProvider"
+            android:exported="false" />
+    </application>
+</manifest>

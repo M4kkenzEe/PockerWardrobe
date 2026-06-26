@@ -31,12 +31,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-
-            //koin
             implementation(libs.koin.core)
-
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.noarg)
+        }
+        androidMain.dependencies {
+            implementation("androidx.security:security-crypto:1.1.0-alpha06")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
