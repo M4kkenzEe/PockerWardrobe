@@ -235,12 +235,9 @@ fun LoginScreen(
                 )
             }
 
-            OrDivider()
-
-            TelegramButton(
-                isLoading = isTelegramLoading,
-                onClick = onTelegramAuth
-            )
+            // EPIC-14 paused: Telegram auth hidden until EPIC-17 security fixes are complete
+            // OrDivider()
+            // TelegramButton(isLoading = isTelegramLoading, onClick = onTelegramAuth)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -448,12 +445,9 @@ fun RegistrationScreen(
                 )
             }
 
-            OrDivider()
-
-            TelegramButton(
-                isLoading = isTelegramLoading,
-                onClick = onTelegramAuth
-            )
+            // EPIC-14 paused: Telegram auth hidden until EPIC-17 security fixes are complete
+            // OrDivider()
+            // TelegramButton(isLoading = isTelegramLoading, onClick = onTelegramAuth)
 
             Spacer(modifier = Modifier.height(8.dp))
 
