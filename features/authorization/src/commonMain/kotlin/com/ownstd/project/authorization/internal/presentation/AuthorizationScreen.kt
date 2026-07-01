@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ownstd.project.authorization.internal.presentation.design_system.BG_GREY_COLOR
@@ -62,6 +63,8 @@ fun AuthorizationScreen(
     val prefillEmail by viewModel.prefillEmail.collectAsState()
     val prefillPassword by viewModel.prefillPassword.collectAsState()
     val isTelegramLoading by viewModel.isTelegramLoading.collectAsState()
+    val forgotPasswordEmail by viewModel.forgotPasswordEmail.collectAsState()
+    val isForgotPasswordLoading by viewModel.isForgotPasswordLoading.collectAsState()
 
     val uriHandler = LocalUriHandler.current
     LaunchedEffect(Unit) {
@@ -89,6 +92,10 @@ fun AuthorizationScreen(
                 isTelegramLoading = isTelegramLoading,
                 onLogin = viewModel::loginUser,
                 onTelegramAuth = viewModel::startTelegramAuth,
+                onForgotPassword = {
+                    viewModel.errorState.value = null
+                    viewModel.viewState.value = ViewState.FORGOT_PASSWORD
+                },
                 onSwitchToRegister = {
                     viewModel.viewState.value = ViewState.REGISTRATION
                 }
@@ -100,6 +107,27 @@ fun AuthorizationScreen(
                 onRegister = viewModel::registerUser,
                 onTelegramAuth = viewModel::startTelegramAuth,
                 onSwitchToLogin = {
+                    viewModel.viewState.value = ViewState.LOGIN
+                }
+            )
+
+            ViewState.FORGOT_PASSWORD -> ForgotPasswordScreen(
+                errorMessage = isError,
+                isLoading = isForgotPasswordLoading,
+                onRequestReset = viewModel::requestPasswordReset,
+                onBack = {
+                    viewModel.errorState.value = null
+                    viewModel.viewState.value = ViewState.LOGIN
+                }
+            )
+
+            ViewState.RESET_PASSWORD -> ResetPasswordScreen(
+                errorMessage = isError,
+                isLoading = isForgotPasswordLoading,
+                email = forgotPasswordEmail,
+                onResetPassword = viewModel::resetPassword,
+                onBack = {
+                    viewModel.errorState.value = null
                     viewModel.viewState.value = ViewState.LOGIN
                 }
             )
@@ -115,6 +143,7 @@ fun LoginScreen(
     isTelegramLoading: Boolean = false,
     onLogin: (String, String) -> Unit,
     onTelegramAuth: () -> Unit,
+    onForgotPassword: () -> Unit = {},
     onSwitchToRegister: () -> Unit
 ) {
     var email by remember(initialEmail) { mutableStateOf(initialEmail) }
@@ -181,6 +210,17 @@ fun LoginScreen(
                     cursorColor = BLUE_COLOR
                 ),
                 shape = RoundedCornerShape(12.dp)
+            )
+
+            Text(
+                text = "Забыли пароль?",
+                fontSize = 13.sp,
+                color = BLUE_COLOR,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onForgotPassword() }
+                    .padding(vertical = 2.dp)
+                    .wrapContentWidth(Alignment.End)
             )
 
             Row(
@@ -458,6 +498,271 @@ fun RegistrationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onSwitchToLogin() }
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun ForgotPasswordScreen(
+    errorMessage: String?,
+    isLoading: Boolean,
+    onRequestReset: (String) -> Unit,
+    onBack: () -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 44.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Восстановление",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Восстановление пароля",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = BLUE_COLOR,
+                    unfocusedBorderColor = GREY_COLOR,
+                    cursorColor = BLUE_COLOR
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { if (!isLoading) onRequestReset(email) },
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = BLUE_COLOR,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Отправить код",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Text(
+                text = "Вернуться к входу",
+                fontSize = 14.sp,
+                color = GREY_COLOR,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onBack() }
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun ResetPasswordScreen(
+    errorMessage: String?,
+    isLoading: Boolean,
+    email: String,
+    onResetPassword: (String, String, String) -> Unit,
+    onBack: () -> Unit
+) {
+    var code by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 44.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Новый пароль",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Введите код",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
+            )
+
+            if (email.isNotEmpty()) {
+                Text(
+                    text = "Код отправлен на $email",
+                    fontSize = 13.sp,
+                    color = GREY_COLOR
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            OutlinedTextField(
+                value = code,
+                onValueChange = { if (it.length <= 6) code = it.filter { c -> c.isDigit() } },
+                label = { Text("Код из письма") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = BLUE_COLOR,
+                    unfocusedBorderColor = GREY_COLOR,
+                    cursorColor = BLUE_COLOR
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                label = { Text("Новый пароль") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = BLUE_COLOR,
+                    unfocusedBorderColor = GREY_COLOR,
+                    cursorColor = BLUE_COLOR
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { passwordVisible = !passwordVisible }
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = passwordVisible,
+                    onCheckedChange = { passwordVisible = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = BLUE_COLOR,
+                        uncheckedColor = GREY_COLOR
+                    )
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Показать пароль",
+                    fontSize = 14.sp,
+                    color = GREY_COLOR
+                )
+            }
+
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { if (!isLoading) onResetPassword(email, code, newPassword) },
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = BLUE_COLOR,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Сменить пароль",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            Text(
+                text = "Вернуться к входу",
+                fontSize = 14.sp,
+                color = GREY_COLOR,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onBack() }
                     .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center
             )

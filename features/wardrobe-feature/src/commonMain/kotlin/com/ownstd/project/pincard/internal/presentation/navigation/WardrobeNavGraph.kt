@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.ownstd.project.pincard.internal.presentation.WardrobeMainScreen
+import com.ownstd.project.pincard.internal.presentation.compose.ClothingDetailScreen
 import com.ownstd.project.pincard.internal.presentation.compose.LookConstructor
 import com.ownstd.project.pincard.internal.presentation.compose.LookDetailsScreen
 import com.ownstd.project.pincard.internal.presentation.compose.TinderOutfitScreen
@@ -20,6 +21,9 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             },
             openTinderOutfit = {
                 navController.navigate(WardrobeNavScreens.TinderOutfit)
+            },
+            openClotheDetail = { clotheId ->
+                navController.navigate(WardrobeNavScreens.ClothingDetail(clotheId = clotheId))
             }
         )
     }
@@ -43,6 +47,13 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
     }
     composable<WardrobeNavScreens.TinderOutfit> {
         TinderOutfitScreen(
+            onBackClick = { navController.popBackStack() }
+        )
+    }
+    composable<WardrobeNavScreens.ClothingDetail> { backStackEntry ->
+        val route: WardrobeNavScreens.ClothingDetail = backStackEntry.toRoute()
+        ClothingDetailScreen(
+            clotheId = route.clotheId,
             onBackClick = { navController.popBackStack() }
         )
     }

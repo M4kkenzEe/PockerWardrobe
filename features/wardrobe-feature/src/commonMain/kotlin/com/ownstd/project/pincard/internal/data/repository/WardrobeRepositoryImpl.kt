@@ -13,8 +13,10 @@ import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.append
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import kotlinx.serialization.Serializable
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -129,9 +131,39 @@ class WardrobeRepositoryImpl(
         }
     }
 
+    override suspend fun updateClothe(
+        clotheId: Int,
+        name: String?,
+        storeUrl: String?,
+        season: String?,
+        fit: String?,
+        material: String?,
+        brand: String?,
+        occasion: String?,
+        styleTags: String?,
+    ): Clothe {
+        val response = client.patch("$baseUrl$ENDPOINT/$clotheId") {
+            contentType(ContentType.Application.Json)
+            setBody(UpdateClotheRequest(name, storeUrl, season, fit, material, brand, occasion, styleTags))
+        }
+        return response.body()
+    }
+
     companion object {
         private const val ENDPOINT = "clothes"
         private const val FROM_URL = "/from_url"
         private const val IMAGE_QUALITY = 80
     }
 }
+
+@Serializable
+private data class UpdateClotheRequest(
+    val name: String? = null,
+    val storeUrl: String? = null,
+    val season: String? = null,
+    val fit: String? = null,
+    val material: String? = null,
+    val brand: String? = null,
+    val occasion: String? = null,
+    val styleTags: String? = null,
+)

@@ -27,6 +27,8 @@ internal class AuthorizationViewModel(
     val prefillEmail = MutableStateFlow("")
     val prefillPassword = MutableStateFlow("")
     val isTelegramLoading = MutableStateFlow(false)
+    val forgotPasswordEmail = MutableStateFlow("")
+    val isForgotPasswordLoading = MutableStateFlow(false)
 
     private val _openUrlEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val openUrlEvent: SharedFlow<String> = _openUrlEvent
@@ -52,6 +54,35 @@ internal class AuthorizationViewModel(
                 prefillPassword.value = password
                 errorState.value = null
                 viewState.value = ViewState.LOGIN
+            }
+        }
+    }
+
+    fun requestPasswordReset(email: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isForgotPasswordLoading.value = true
+            errorState.value = null
+            val error = authorizationRepository.requestPasswordReset(email)
+            isForgotPasswordLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                forgotPasswordEmail.value = email
+                viewState.value = ViewState.RESET_PASSWORD
+            }
+        }
+    }
+
+    fun resetPassword(email: String, code: String, newPassword: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isForgotPasswordLoading.value = true
+            errorState.value = null
+            val error = authorizationRepository.resetPassword(email, code, newPassword)
+            isForgotPasswordLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                isSessionOpen.value = true
             }
         }
     }

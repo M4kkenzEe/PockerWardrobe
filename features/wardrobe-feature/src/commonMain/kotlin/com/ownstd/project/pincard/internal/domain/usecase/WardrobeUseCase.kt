@@ -20,4 +20,18 @@ internal class WardrobeUseCase(private val wardrobeRepository: WardrobeRepositor
     suspend fun delete(clotheId: Int) {
         wardrobeRepository.deleteClothe(clotheId)
     }
+
+    suspend fun updateClothe(
+        clotheId: Int,
+        name: String? = null,
+        storeUrl: String? = null,
+        season: String? = null,
+        fit: String? = null,
+        material: String? = null,
+        brand: String? = null,
+        occasion: String? = null,
+        styleTags: String? = null,
+    ): Clothe {
+        return wardrobeRepository.updateClothe(clotheId, name, storeUrl, season, fit, material, brand, occasion, styleTags)
+    }
 }

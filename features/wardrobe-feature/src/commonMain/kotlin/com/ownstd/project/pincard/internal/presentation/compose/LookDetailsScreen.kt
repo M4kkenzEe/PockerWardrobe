@@ -342,12 +342,12 @@ private fun ClotheItemCard(
                 )
             }
 
-            if (clotheItem.clothe.storeUrl.isNotBlank()) {
+            if (!clotheItem.clothe.storeUrl.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
                         val clotheId = clotheItem.clothe.id ?: return@Button
-                        onFindSimilar(clotheId, clotheItem.clothe.storeUrl)
+                        onFindSimilar(clotheId, clotheItem.clothe.storeUrl ?: "")
                     },
                     enabled = !isAffiliateLinkLoading,
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1A1A1A)),

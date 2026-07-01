@@ -48,7 +48,7 @@ import com.ownstd.project.pincard.internal.replaceFragment
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun Wardrobe(viewModel: WardrobeViewModel) {
+internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit = {}) {
     val clothes by viewModel.clothes.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
     val uploadError by viewModel.uploadError.collectAsState()
@@ -123,6 +123,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel) {
                         items(clothes, key = { it.id!! }) { clothe ->
                             ClotheCard(
                                 clotheUrl = clothe.imageUrl.replaceFragment(),
+                                onClick = { onClotheClick(clothe.id!!) },
                                 onDelete = { viewModel.deleteClothe(clothe.id!!) },
                                 modifier = Modifier.animateItem()
                             )

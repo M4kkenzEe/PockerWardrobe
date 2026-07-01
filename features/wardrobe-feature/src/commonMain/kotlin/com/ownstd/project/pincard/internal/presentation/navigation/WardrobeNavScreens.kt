@@ -14,4 +14,7 @@ sealed class WardrobeNavScreens {
 
     @Serializable
     data object TinderOutfit : WardrobeNavScreens()
+
+    @Serializable
+    data class ClothingDetail(val clotheId: Int) : WardrobeNavScreens()
 }
