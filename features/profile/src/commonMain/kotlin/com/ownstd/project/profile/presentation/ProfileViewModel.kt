@@ -29,6 +29,8 @@ internal class ProfileViewModel(
     }
 
     fun logout() {
-        logoutUseCase.execute()
+        viewModelScope.launch {
+            logoutUseCase.execute()
+        }
     }
 }

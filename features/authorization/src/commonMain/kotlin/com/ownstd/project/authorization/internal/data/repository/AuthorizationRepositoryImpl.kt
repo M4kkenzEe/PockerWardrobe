@@ -51,6 +51,43 @@ class AuthorizationRepositoryImpl(
         return errorMessage
     }
 
+    override suspend fun requestPasswordReset(email: String): String? {
+        return authService.forgotPassword(email)
+            .fold(
+                onSuccess = { null },
+                onFailure = { "Не удалось отправить письмо. Проверь интернет-соединение" }
+            )
+    }
+
+    override suspend fun resetPassword(email: String, code: String, newPassword: String): String? {
+        return authService.resetPassword(email, code, newPassword)
+            .fold(
+                onSuccess = { tokenResponse ->
+                    tokenStorage.saveSession(
+                        accessToken = tokenResponse.accessToken,
+                        refreshToken = tokenResponse.refreshToken,
+                        expiresAt = tokenResponse.expiresAt
+                    )
+                    null
+                },
+                onFailure = { exception ->
+                    when {
+                        exception.message?.contains("Неверный код") == true -> "Неверный код или email"
+                        else -> "Не удалось сбросить пароль. Проверь код и попробуй снова"
+                    }
+                }
+            )
+    }
+
+    override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) {
+        tokenStorage.saveSession(
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+            expiresAt = expiresAt
+        )
+        println("[AuthRepository] telegram login success")
+    }
+
     override fun logout() {
         tokenStorage.clearSession()
         println("[AuthRepository] logout - session cleared")

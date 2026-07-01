@@ -33,7 +33,7 @@ internal object NetworkClient {
         return HttpClient {
             install(Logging) {
                 logger = Logger.DEFAULT
-                level = LogLevel.ALL
+                level = LogLevel.NONE
             }
             install(ContentNegotiation) {
                 json(Json {

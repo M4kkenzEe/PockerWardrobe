@@ -2,6 +2,7 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import kotlinx.coroutines.Dispatchers
@@ -9,8 +10,15 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+internal sealed class GenerateLooksError {
+    data object NotEnoughClothes : GenerateLooksError()
+    data object NetworkError : GenerateLooksError()
+}
+
 internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     val looks = MutableStateFlow<List<Look>>(emptyList())
+    val isGenerating = MutableStateFlow(false)
+    val generateError = MutableStateFlow<GenerateLooksError?>(null)
 
     fun getLooks() {
         println("GGG : getlooks")
@@ -47,5 +55,21 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
                 println("ERR shareLook ViewModel: ${exception.message}")
             }
         }
+    }
+
+    fun generateLooks() {
+        viewModelScope.launch(Dispatchers.IO) {
+            isGenerating.value = true
+            when (val result = useCase.generateLooks()) {
+                is GenerateLooksResult.Success -> getLooks()
+                is GenerateLooksResult.NotEnoughClothes -> generateError.value = GenerateLooksError.NotEnoughClothes
+                is GenerateLooksResult.NetworkError -> generateError.value = GenerateLooksError.NetworkError
+            }
+            isGenerating.value = false
+        }
+    }
+
+    fun clearGenerateError() {
+        generateError.value = null
     }
 }

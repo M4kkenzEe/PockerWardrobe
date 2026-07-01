@@ -72,9 +72,8 @@ internal fun MainScreen(parentNavController: NavHostController) {
     ) {
         BottomNavigationNavHost(
             navController = bottomNavController,
-            deepLink = initialDeepLink,  // Use the remembered initial value
+            deepLink = initialDeepLink,
             onLogout = {
-                // Navigate to Authorization screen and clear backstack
                 parentNavController.navigate(AppScreens.Authorization) {
                     popUpTo(AppScreens.Main) { inclusive = true }
                     launchSingleTop = true

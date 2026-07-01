@@ -1,6 +1,7 @@
 package com.ownstd.project.pincard.internal.domain.repository
 
 import com.ownstd.project.pincard.internal.data.model.DraftLook
+import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.data.model.ShareResponse
@@ -13,4 +14,6 @@ internal interface LookRepository {
     suspend fun addLookByShareToken(sharedToken: String)
     suspend fun deleteLook(lookId: Int)
     suspend fun shareLook(lookId: Int): ShareResponse?
+    suspend fun generateLooks(): GenerateLooksResult
+    suspend fun getAffiliateLink(storeUrl: String): String?
 }

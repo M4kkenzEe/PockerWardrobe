@@ -10,6 +10,8 @@ data class ProfileResponse(
     val name: String,
     val email: String,
     val gender: String,
+    val clothes_count: Int = 0,
+    val looks_count: Int = 0,
 ) {
     companion object Companion
 }
@@ -19,6 +21,8 @@ fun ProfileResponse.toUser(): User {
         name = name,
         email = email,
         gender = Gender.valueOf(gender),
+        clothesCount = clothes_count,
+        looksCount = looks_count,
     )
 }
 
@@ -27,5 +31,7 @@ fun ProfileResponse.Companion.emptyBody(): ProfileResponse {
         name = "",
         email = "",
         gender = "OTHER",
+        clothes_count = 0,
+        looks_count = 0,
     )
 }

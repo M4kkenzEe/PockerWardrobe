@@ -2,6 +2,7 @@ package com.ownstd.project.pincard.internal.data.repository
 
 import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.DraftLook
+import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.data.model.ShareResponse
@@ -17,7 +18,9 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 
 class LookRepositoryImpl(
     private val networkRepository: NetworkRepository,
@@ -146,10 +149,46 @@ class LookRepositoryImpl(
         }
     }
 
+    override suspend fun generateLooks(): GenerateLooksResult {
+        return try {
+            val response = client.get("$baseUrl$ENDPOINT/$GENERATE") {
+                contentType(ContentType.Application.Json)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> {
+                    val body = response.body<Map<String, List<Int>>>()
+                    GenerateLooksResult.Success(body["look_ids"] ?: emptyList())
+                }
+                HttpStatusCode.BadRequest -> GenerateLooksResult.NotEnoughClothes
+                else -> GenerateLooksResult.NetworkError(
+                    IllegalStateException("HTTP ${response.status.value}")
+                )
+            }
+        } catch (e: Exception) {
+            GenerateLooksResult.NetworkError(e)
+        }
+    }
+
+    override suspend fun getAffiliateLink(storeUrl: String): String? {
+        return try {
+            val response = client.post("${baseUrl}affiliate/link") {
+                contentType(ContentType.Application.Json)
+                setBody("""{"product_url": "$storeUrl"}""")
+            }
+            if (response.status.isSuccess()) {
+                response.body<Map<String, String>>()["affiliate_url"]
+            } else null
+        } catch (e: Exception) {
+            println("ERR getAffiliateLink: ${e.message}")
+            null
+        }
+    }
+
     companion object {
         private const val ENDPOINT = "looks"
         private const val ADD_IMAGE = "/uploadImage"
         private const val BY_ID = "/byId/"
         private const val SHARE_ENDPOINT = "share"
+        private const val GENERATE = "generate"
     }
 }

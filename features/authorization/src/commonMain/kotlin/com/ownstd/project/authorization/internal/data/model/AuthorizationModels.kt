@@ -1,5 +1,6 @@
 package com.ownstd.project.authorization.internal.data.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -27,4 +28,32 @@ data class AuthTokenResponse(
 @Serializable
 data class LogoutRequest(
     val refreshToken: String
+)
+
+@Serializable
+data class ForgotPasswordRequest(val email: String)
+
+@Serializable
+data class ForgotPasswordResponse(val message: String)
+
+@Serializable
+data class ResetPasswordRequest(
+    val email: String,
+    val code: String,
+    val newPassword: String
+)
+
+@Serializable
+data class TelegramInitResponse(
+    @SerialName("state_token") val stateToken: String,
+    @SerialName("bot_url") val botUrl: String
+)
+
+@Serializable
+data class TelegramStatusResponse(
+    val status: String,
+    @SerialName("access_token") val accessToken: String? = null,
+    @SerialName("refresh_token") val refreshToken: String? = null,
+    @SerialName("expires_at") val expiresAt: Long? = null,
+    @SerialName("user_id") val userId: Int? = null
 )

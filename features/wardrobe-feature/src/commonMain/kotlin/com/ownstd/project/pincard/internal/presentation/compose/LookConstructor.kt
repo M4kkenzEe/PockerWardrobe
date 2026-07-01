@@ -258,7 +258,7 @@ internal fun ClotheItem(
 
 //TODO вынести в дизайн систему
 @Composable
-private fun ConstructorAlertDialog(
+internal fun ConstructorAlertDialog(
     title: String,
     message: String,
     confirmText: String,

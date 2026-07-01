@@ -27,6 +27,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun WardrobeMainScreen(
     openConstructor: () -> Unit = {},
     openDetails: (url: Int) -> Unit = {},
+    openTinderOutfit: () -> Unit = {},
+    openClotheDetail: (clotheId: Int) -> Unit = {},
 ) {
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
@@ -38,11 +40,12 @@ fun WardrobeMainScreen(
             modifier = Modifier.fillMaxSize()
         ) { page ->
             when (page) {
-                0 -> Wardrobe(wardrobeViewModel)
+                0 -> Wardrobe(wardrobeViewModel, onClotheClick = openClotheDetail)
                 else -> Looks(
                     viewModel = looksViewModel,
                     onNavigateToConstructor = openConstructor,
-                    navigateToDetails = openDetails
+                    navigateToDetails = openDetails,
+                    onNavigateToTinderOutfit = openTinderOutfit
                 )
             }
         }

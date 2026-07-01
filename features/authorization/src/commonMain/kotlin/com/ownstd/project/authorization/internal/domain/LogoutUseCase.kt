@@ -6,7 +6,7 @@ class LogoutUseCase(
     private val authorizationRepository: AuthorizationRepository,
     private val networkRepository: NetworkRepository
 ) {
-    fun execute() {
+    suspend fun execute() {
         authorizationRepository.logout()
         networkRepository.clearAuthCache()
     }

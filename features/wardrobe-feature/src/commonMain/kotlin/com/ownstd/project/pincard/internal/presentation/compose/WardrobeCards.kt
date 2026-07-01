@@ -3,6 +3,8 @@ package com.ownstd.project.pincard.internal.presentation.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.ggg
+import org.jetbrains.compose.resources.painterResource
 import com.ownstd.project.pincard.internal.replaceFragment
 
 @Composable
@@ -29,12 +34,14 @@ internal fun ClotheCard(
     clotheUrl: String = "",
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onShare: () -> Unit = {}
+    onShare: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(20))
             .background(Color.White)
@@ -48,7 +55,11 @@ internal fun ClotheCard(
             model = clotheUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
+            placeholder = painterResource(Res.drawable.ggg),
+            error = painterResource(Res.drawable.ggg),
             modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 160.dp)
         )
         DropdownMenu(
             expanded = dropDownMenuState,
@@ -69,11 +80,25 @@ internal fun ClotheCard(
 
             DropdownMenuItem(
                 onClick = {
-                    onDelete()
+                    showConfirmDialog = true
                     dropDownMenuState = false
                 }
             ) { Text("Удалить") }
         }
+    }
+
+    if (showConfirmDialog) {
+        ConstructorAlertDialog(
+            title = "Удалить вещь?",
+            message = "Вещь будет удалена из гардероба",
+            confirmText = "Удалить",
+            cancelText = "Отмена",
+            onConfirm = {
+                showConfirmDialog = false
+                onDelete()
+            },
+            onCancel = { showConfirmDialog = false }
+        )
     }
 }
 
@@ -82,12 +107,14 @@ internal fun LookCard(
     lookUrl: String,
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onShare: () -> Unit = {}
+    onShare: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .height(300.dp)
             .clip(RoundedCornerShape(20))
             .background(Color.White)
@@ -123,10 +150,24 @@ internal fun LookCard(
 
             DropdownMenuItem(
                 onClick = {
-                    onDelete()
+                    showConfirmDialog = true
                     dropDownMenuState = false
                 }
             ) { Text("Удалить") }
         }
+    }
+
+    if (showConfirmDialog) {
+        ConstructorAlertDialog(
+            title = "Удалить образ?",
+            message = "Образ будет удалён",
+            confirmText = "Удалить",
+            cancelText = "Отмена",
+            onConfirm = {
+                showConfirmDialog = false
+                onDelete()
+            },
+            onCancel = { showConfirmDialog = false }
+        )
     }
 }

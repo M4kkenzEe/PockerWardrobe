@@ -89,6 +89,11 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test.junit)
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 

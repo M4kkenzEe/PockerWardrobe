@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.domain.FreemiumLimitException
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -12,18 +13,31 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewModel() {
+    val clothes = MutableStateFlow<List<Clothe>>(emptyList())
+    val selectedOccasionFilter = MutableStateFlow<String?>(null)
+    val isUploading = MutableStateFlow(false)
+    val uploadError = MutableStateFlow(false)
+    val showPaywall = MutableStateFlow(false)
+
     init {
         getClothes()
     }
 
-    val clothes = MutableStateFlow<List<Clothe>>(emptyList())
-    fun getClothes() {
+    fun clearUploadError() {
+        uploadError.value = false
+    }
+
+    fun dismissPaywall() {
+        showPaywall.value = false
+    }
+
+    fun getClothes(occasion: String? = selectedOccasionFilter.value) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                useCase.getClothes()
+                useCase.getClothes(occasion)
             }.onSuccess {
                 clothes.value = it
-                println("🎯 [CLOTHES_VM] Loaded ${it.size} clothes")
+                println("🎯 [CLOTHES_VM] Loaded ${it.size} clothes occasion=$occasion")
             }.onFailure { exception ->
                 println("❌ [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 exception.printStackTrace()
@@ -31,17 +45,30 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
         }
     }
 
-    fun loadClothe(bitmap: ImageBitmap) {
+    fun setOccasionFilter(occasion: String?) {
+        selectedOccasionFilter.value = occasion
+        getClothes(occasion)
+    }
+
+    fun loadClothe(bitmap: ImageBitmap, occasion: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
-            println("🖼️ [VM_UPLOAD] Starting loadClothe")
+            println("🖼️ [VM_UPLOAD] Starting loadClothe occasion=$occasion")
+            isUploading.value = true
             runCatching {
-                useCase.loadClothe(bitmap)
+                useCase.loadClothe(bitmap, occasion)
             }.onSuccess {
                 println("✅ [VM_UPLOAD] loadClothe completed, refreshing list")
+                isUploading.value = false
                 getClothes()
             }.onFailure { exception ->
                 println("❌ [VM_UPLOAD_ERROR] ${exception::class.simpleName}: ${exception.message}")
-                exception.printStackTrace()
+                isUploading.value = false
+                if (exception is FreemiumLimitException) {
+                    showPaywall.value = true
+                } else {
+                    exception.printStackTrace()
+                    uploadError.value = true
+                }
             }
         }
     }
@@ -51,9 +78,7 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
             runCatching {
                 useCase.uploadFromUrl(url)
             }.onSuccess { clothe ->
-                clothes.update { currentList ->
-                    currentList + clothe
-                }
+                clothes.update { currentList -> currentList + clothe }
             }.onFailure { exception ->
                 println(exception)
             }
