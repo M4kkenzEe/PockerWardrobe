@@ -96,7 +96,6 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 44.dp)
         ) {
             if (clothes.isEmpty() && !isUploading && selectedOccasion == null) {
                 WardrobeEmptyState(

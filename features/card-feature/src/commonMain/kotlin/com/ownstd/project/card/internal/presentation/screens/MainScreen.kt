@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -69,7 +70,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
         bottomBar = { BottomNavigationBar(bottomNavController) },
         modifier = Modifier.fillMaxSize(),
         backgroundColor = BG_GREY_COLOR
-    ) {
+    ) { innerPadding ->
         BottomNavigationNavHost(
             navController = bottomNavController,
             deepLink = initialDeepLink,
@@ -79,7 +80,9 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     launchSingleTop = true
                 }
             },
-            modifier = Modifier.padding(bottom = 40.dp)
+            modifier = Modifier
+                .padding(innerPadding)
+                .statusBarsPadding()
         )
     }
 }
@@ -90,10 +93,10 @@ internal fun BottomNavigationBar(navController: NavHostController) {
 
     Row(
         modifier = Modifier
-            .systemBarsPadding()
             .fillMaxWidth()
-            .height(58.dp)
-            .background(DARK_GREY_COLOR),
+            .background(DARK_GREY_COLOR)
+            .navigationBarsPadding()
+            .height(58.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         val screens = listOf(

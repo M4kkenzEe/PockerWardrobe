@@ -71,7 +71,6 @@ internal fun Looks(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 44.dp)
             .padding(horizontal = 14.dp)
             .padding(top = 12.dp)
     ) {

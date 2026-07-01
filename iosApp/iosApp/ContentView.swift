@@ -19,7 +19,7 @@ struct ContentView: View {
 
             // Compose контент поверх фона
             ComposeView()
-                .ignoresSafeArea(.keyboard) // Compose has own keyboard handler
+                .ignoresSafeArea(.all) // Compose handles all insets via WindowInsets API
         }
     }
 }
