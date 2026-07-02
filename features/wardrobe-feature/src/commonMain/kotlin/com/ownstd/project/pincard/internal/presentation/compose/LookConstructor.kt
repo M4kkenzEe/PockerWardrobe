@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -346,6 +348,7 @@ fun ConstructorTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(BG_GREY_COLOR)
+            .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -398,6 +401,7 @@ fun BottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .navigationBarsPadding()
             .padding(16.dp)
     ) {
         // Header

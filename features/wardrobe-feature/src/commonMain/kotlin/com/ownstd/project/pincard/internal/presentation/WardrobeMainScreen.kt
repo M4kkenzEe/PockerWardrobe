@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -34,7 +35,7 @@ fun WardrobeMainScreen(
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
     val pagerState = rememberPagerState(pageCount = { 2 })
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()

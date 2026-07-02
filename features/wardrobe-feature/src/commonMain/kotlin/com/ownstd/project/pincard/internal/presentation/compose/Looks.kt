@@ -32,9 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ownstd.project.pincard.internal.external.rememberShareManager
 import com.ownstd.project.pincard.internal.presentation.viewmodel.GenerateLooksError
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
-import com.ownstd.project.storage.getClipboardManager
 
 @Composable
 internal fun Looks(
@@ -46,7 +46,7 @@ internal fun Looks(
     val looksList by viewModel.looks.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
     val generateError by viewModel.generateError.collectAsState()
-    val clipboardManager = rememberClipboardManager()
+    val shareManager = rememberShareManager()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(generateError) {
@@ -71,7 +71,6 @@ internal fun Looks(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 44.dp)
             .padding(horizontal = 14.dp)
             .padding(top = 12.dp)
     ) {
@@ -94,7 +93,7 @@ internal fun Looks(
                         onDelete = { viewModel.deleteLook(look.id!!) },
                         onShare = {
                             viewModel.shareLook(look.id!!) { shareUrl ->
-                                clipboardManager.copyToClipboard(shareUrl)
+                                shareManager.shareText(shareUrl, "Поделиться образом")
                             }
                         },
                         modifier = Modifier.animateItem()
@@ -184,5 +183,3 @@ private fun LooksEmptyState(
     }
 }
 
-@Composable
-expect fun rememberClipboardManager(): com.ownstd.project.storage.ClipboardManager

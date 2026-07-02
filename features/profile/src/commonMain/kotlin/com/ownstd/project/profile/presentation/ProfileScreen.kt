@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
@@ -37,7 +38,7 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
     if (userState != null) {
         val user = userState!!
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().statusBarsPadding()
         ) {
             Image(
                 painter = painterResource(Res.drawable.img_profile_default),
@@ -63,8 +64,7 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-                    .padding(bottom = 80.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(

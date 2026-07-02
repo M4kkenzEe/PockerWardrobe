@@ -59,7 +59,8 @@ import kotlin.math.roundToInt
 fun LookDetailsScreen(
     lookId: Int? = null,
     shareToken: String? = null,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onNavigateToClotheDetail: ((Int) -> Unit)? = null
 ) {
     val viewModel: LookDetailsViewModel = koinViewModel {
         parametersOf(lookId, shareToken)
@@ -140,6 +141,7 @@ fun LookDetailsScreen(
                         onFindSimilar = { clotheId, storeUrl ->
                             viewModel.requestAffiliateLink(clotheId, storeUrl)
                         },
+                        onNavigateToClotheDetail = onNavigateToClotheDetail,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -273,6 +275,7 @@ private fun ClothesListSection(
     lookItems: List<LookItem>,
     affiliateLinkLoadingIds: Set<Int>,
     onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
+    onNavigateToClotheDetail: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -298,7 +301,8 @@ private fun ClothesListSection(
                 ClotheItemCard(
                     clotheItem = lookItem,
                     isAffiliateLinkLoading = lookItem.clothe.id?.let { it in affiliateLinkLoadingIds } == true,
-                    onFindSimilar = onFindSimilar
+                    onFindSimilar = onFindSimilar,
+                    onNavigateToClotheDetail = onNavigateToClotheDetail
                 )
             }
         }
@@ -309,13 +313,19 @@ private fun ClothesListSection(
 private fun ClotheItemCard(
     clotheItem: LookItem,
     isAffiliateLinkLoading: Boolean,
-    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit
+    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
+    onNavigateToClotheDetail: ((Int) -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White),
+            .background(Color.White)
+            .then(
+                if (onNavigateToClotheDetail != null && clotheItem.clothe.id != null)
+                    Modifier.clickable { onNavigateToClotheDetail(clotheItem.clothe.id) }
+                else Modifier
+            ),
         contentAlignment = Alignment.Center
     ) {
         Column(

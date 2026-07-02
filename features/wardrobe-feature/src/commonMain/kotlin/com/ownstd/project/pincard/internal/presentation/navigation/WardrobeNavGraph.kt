@@ -42,7 +42,10 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
         LookDetailsScreen(
             lookId = lookDetails.lookId,
             shareToken = lookDetails.shareToken,
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            onNavigateToClotheDetail = { clotheId ->
+                navController.navigate(WardrobeNavScreens.ClothingDetail(clotheId = clotheId))
+            }
         )
     }
     composable<WardrobeNavScreens.TinderOutfit> {
