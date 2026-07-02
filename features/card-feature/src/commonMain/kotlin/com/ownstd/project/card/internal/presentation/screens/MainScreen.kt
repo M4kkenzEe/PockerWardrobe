@@ -111,7 +111,13 @@ internal fun BottomNavigationBar(navController: NavHostController) {
                 label = item.label,
                 textColor = if (currentItem == item) BLUE_COLOR else GREY_COLOR,
                 onItemClick = {
-                    navController.navigate(item)
+                    navController.navigate(item) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                     currentItem = item
                 }
             )

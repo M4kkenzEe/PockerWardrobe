@@ -29,6 +29,7 @@ internal fun BottomNavigationNavHost(
                 navController.navigate(WardrobeNavScreens.Wardrobe) {
                     popUpTo(BottomNavigationScreens.Shop()) { inclusive = true }
                     launchSingleTop = true
+                    restoreState = true
                 }
             }
         }
