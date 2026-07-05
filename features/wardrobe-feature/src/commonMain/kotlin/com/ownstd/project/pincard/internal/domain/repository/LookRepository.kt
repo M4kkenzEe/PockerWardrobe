@@ -12,6 +12,7 @@ internal interface LookRepository {
     suspend fun getLookById(lookId: Int): Look?
     suspend fun getLookByShareToken(token: String): Look?
     suspend fun addLookByShareToken(sharedToken: String)
+    suspend fun addClotheByShareToken(shareToken: String, clotheId: Int)
     suspend fun deleteLook(lookId: Int)
     suspend fun shareLook(lookId: Int): ShareResponse?
     suspend fun generateLooks(): GenerateLooksResult

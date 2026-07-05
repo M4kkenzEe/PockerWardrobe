@@ -16,5 +16,5 @@ sealed class WardrobeNavScreens {
     data object TinderOutfit : WardrobeNavScreens()
 
     @Serializable
-    data class ClothingDetail(val clotheId: Int) : WardrobeNavScreens()
+    data class ClothingDetail(val clotheId: Int, val clotheJson: String? = null) : WardrobeNavScreens()
 }

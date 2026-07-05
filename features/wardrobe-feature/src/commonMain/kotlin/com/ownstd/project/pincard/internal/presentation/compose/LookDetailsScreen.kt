@@ -26,6 +26,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +36,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
+import kotlinx.coroutines.flow.collect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
+import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookItem
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsViewModel
@@ -60,7 +64,7 @@ fun LookDetailsScreen(
     lookId: Int? = null,
     shareToken: String? = null,
     onBackClick: () -> Unit = {},
-    onNavigateToClotheDetail: ((Int) -> Unit)? = null
+    onNavigateToClotheDetail: ((Clothe) -> Unit)? = null
 ) {
     val viewModel: LookDetailsViewModel = koinViewModel {
         parametersOf(lookId, shareToken)
@@ -69,12 +73,23 @@ fun LookDetailsScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val affiliateLinkLoadingIds by viewModel.affiliateLinkLoadingIds.collectAsState()
     val pendingAffiliateUrl by viewModel.pendingAffiliateUrl.collectAsState()
+    val addingClotheIds by viewModel.addingClotheIds.collectAsState()
+    val addedClotheIds by viewModel.addedClotheIds.collectAsState()
+    val isAddingLook by viewModel.isAddingLook.collectAsState()
+    val lookAdded by viewModel.lookAdded.collectAsState()
     val uriHandler = LocalUriHandler.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(pendingAffiliateUrl) {
         pendingAffiliateUrl?.let { url ->
             uriHandler.openUri(url)
             viewModel.consumeAffiliateUrl()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.errorEvent.collect { message ->
+            snackbarHostState.showSnackbar(message)
         }
     }
 
@@ -138,9 +153,14 @@ fun LookDetailsScreen(
                     ClothesListSection(
                         lookItems = currentLook.lookItems,
                         affiliateLinkLoadingIds = affiliateLinkLoadingIds,
+                        addingClotheIds = addingClotheIds,
+                        addedClotheIds = addedClotheIds,
                         onFindSimilar = { clotheId, storeUrl ->
                             viewModel.requestAffiliateLink(clotheId, storeUrl)
                         },
+                        onAddClothe = if (shareToken != null) {
+                            { clotheId -> viewModel.addClotheToWardrobe(shareToken, clotheId) }
+                        } else null,
                         onNavigateToClotheDetail = onNavigateToClotheDetail,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -159,7 +179,17 @@ fun LookDetailsScreen(
                     viewModel.addToWardrobe(shareToken)
                 }
             },
+            showAddToWardrobe = shareToken != null,
+            isAddingLook = isAddingLook,
+            lookAdded = lookAdded,
             modifier = Modifier.align(Alignment.TopCenter)
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
         )
     }
 }
@@ -169,6 +199,9 @@ private fun LookDetailsTopBar(
     lookName: String,
     onBackClick: () -> Unit,
     onAddToWardrobe: () -> Unit,
+    showAddToWardrobe: Boolean = false,
+    isAddingLook: Boolean = false,
+    lookAdded: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -179,7 +212,6 @@ private fun LookDetailsTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Кнопка назад
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
@@ -189,7 +221,6 @@ private fun LookDetailsTopBar(
             Text("Назад")
         }
 
-        // Название образа
         Text(
             text = lookName,
             fontSize = 18.sp,
@@ -200,23 +231,55 @@ private fun LookDetailsTopBar(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         )
 
-        // Кнопка добавить в гардероб
-        Button(
-            onClick = onAddToWardrobe,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.White.copy(alpha = 0.9f)
-            ),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.height(48.dp)
-        ) {
-
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "В гардероб",
-                color = Color.Black,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+        if (showAddToWardrobe) {
+            when {
+                lookAdded -> {
+                    Box(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFF2E7D32).copy(alpha = 0.9f))
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "✓ В гардеробе",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+                else -> {
+                    Button(
+                        onClick = onAddToWardrobe,
+                        enabled = !isAddingLook,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.White.copy(alpha = 0.9f),
+                            disabledBackgroundColor = Color.White.copy(alpha = 0.6f)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(48.dp)
+                    ) {
+                        if (isAddingLook) {
+                            CircularProgressIndicator(
+                                color = Color.Black,
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "В гардероб",
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            Spacer(modifier = Modifier.size(48.dp))
         }
     }
 }
@@ -274,8 +337,11 @@ private fun ClotheItemInLook(
 private fun ClothesListSection(
     lookItems: List<LookItem>,
     affiliateLinkLoadingIds: Set<Int>,
+    addingClotheIds: Set<Int> = emptySet(),
+    addedClotheIds: Set<Int> = emptySet(),
     onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
-    onNavigateToClotheDetail: ((Int) -> Unit)? = null,
+    onAddClothe: ((Int) -> Unit)? = null,
+    onNavigateToClotheDetail: ((Clothe) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -301,7 +367,10 @@ private fun ClothesListSection(
                 ClotheItemCard(
                     clotheItem = lookItem,
                     isAffiliateLinkLoading = lookItem.clothe.id?.let { it in affiliateLinkLoadingIds } == true,
+                    isAddingToWardrobe = lookItem.clothe.id?.let { it in addingClotheIds } == true,
+                    isAddedToWardrobe = lookItem.clothe.id?.let { it in addedClotheIds } == true,
                     onFindSimilar = onFindSimilar,
+                    onAddToWardrobe = onAddClothe,
                     onNavigateToClotheDetail = onNavigateToClotheDetail
                 )
             }
@@ -313,8 +382,11 @@ private fun ClothesListSection(
 private fun ClotheItemCard(
     clotheItem: LookItem,
     isAffiliateLinkLoading: Boolean,
+    isAddingToWardrobe: Boolean = false,
+    isAddedToWardrobe: Boolean = false,
     onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
-    onNavigateToClotheDetail: ((Int) -> Unit)? = null
+    onAddToWardrobe: ((Int) -> Unit)? = null,
+    onNavigateToClotheDetail: ((Clothe) -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
@@ -323,7 +395,7 @@ private fun ClotheItemCard(
             .background(Color.White)
             .then(
                 if (onNavigateToClotheDetail != null && clotheItem.clothe.id != null)
-                    Modifier.clickable { onNavigateToClotheDetail(clotheItem.clothe.id) }
+                    Modifier.clickable { onNavigateToClotheDetail(clotheItem.clothe) }
                 else Modifier
             ),
         contentAlignment = Alignment.Center
@@ -377,6 +449,56 @@ private fun ClotheItemCard(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium
                         )
+                    }
+                }
+            }
+
+            if (onAddToWardrobe != null && clotheItem.clothe.id != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                when {
+                    isAddedToWardrobe -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFF2E7D32))
+                                .padding(vertical = 9.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "✓ Добавлено",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                    else -> {
+                        Button(
+                            onClick = { onAddToWardrobe(clotheItem.clothe.id) },
+                            enabled = !isAddingToWardrobe,
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color(0xFF4A90D9),
+                                disabledBackgroundColor = Color(0xFF4A90D9).copy(alpha = 0.6f)
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (isAddingToWardrobe) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text(
+                                    text = "Добавить вещь",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                 }
             }

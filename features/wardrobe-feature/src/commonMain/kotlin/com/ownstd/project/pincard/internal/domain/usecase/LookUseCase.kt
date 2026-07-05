@@ -27,6 +27,10 @@ internal class LookUseCase(private val lookRepository: LookRepository) {
         lookRepository.addLookByShareToken(token)
     }
 
+    suspend fun addClotheByShareToken(shareToken: String, clotheId: Int) {
+        lookRepository.addClotheByShareToken(shareToken, clotheId)
+    }
+
     suspend fun deleteLook(lookId: Int) {
         lookRepository.deleteLook(lookId)
     }

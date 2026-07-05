@@ -127,6 +127,18 @@ class LookRepositoryImpl(
         }
     }
 
+    override suspend fun addClotheByShareToken(shareToken: String, clotheId: Int) {
+        try {
+            client.post("$baseUrl$SHARE_ENDPOINT/$shareToken/import") {
+                contentType(ContentType.Application.Json)
+                setBody("""{"importType":"SELECTED_ITEMS","clotheIds":[$clotheId]}""")
+            }.body()
+        } catch (e: Exception) {
+            println("ERR addClotheByShareToken: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
     override suspend fun deleteLook(lookId: Int) {
         try {
             client.delete("$baseUrl$ENDPOINT/$lookId") {

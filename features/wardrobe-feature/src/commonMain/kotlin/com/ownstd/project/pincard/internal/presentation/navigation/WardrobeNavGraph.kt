@@ -4,11 +4,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.presentation.WardrobeMainScreen
 import com.ownstd.project.pincard.internal.presentation.compose.ClothingDetailScreen
 import com.ownstd.project.pincard.internal.presentation.compose.LookConstructor
 import com.ownstd.project.pincard.internal.presentation.compose.LookDetailsScreen
 import com.ownstd.project.pincard.internal.presentation.compose.TinderOutfitScreen
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
     composable<WardrobeNavScreens.Wardrobe> {
@@ -43,8 +47,16 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             lookId = lookDetails.lookId,
             shareToken = lookDetails.shareToken,
             onBackClick = { navController.popBackStack() },
-            onNavigateToClotheDetail = { clotheId ->
-                navController.navigate(WardrobeNavScreens.ClothingDetail(clotheId = clotheId))
+            onNavigateToClotheDetail = { clothe ->
+                val clotheJson = if (lookDetails.shareToken != null) {
+                    Json.encodeToString(clothe)
+                } else null
+                navController.navigate(
+                    WardrobeNavScreens.ClothingDetail(
+                        clotheId = clothe.id ?: 0,
+                        clotheJson = clotheJson
+                    )
+                )
             }
         )
     }
@@ -55,8 +67,12 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
     }
     composable<WardrobeNavScreens.ClothingDetail> { backStackEntry ->
         val route: WardrobeNavScreens.ClothingDetail = backStackEntry.toRoute()
+        val preloadedClothe: Clothe? = route.clotheJson?.let {
+            runCatching { Json.decodeFromString<Clothe>(it) }.getOrNull()
+        }
         ClothingDetailScreen(
             clotheId = route.clotheId,
+            preloadedClothe = preloadedClothe,
             onBackClick = { navController.popBackStack() }
         )
     }

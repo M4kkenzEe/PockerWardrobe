@@ -1,8 +1,10 @@
 package com.ownstd.project.pincard.internal.di
 
+import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.data.repository.LookRepositoryImpl
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import com.ownstd.project.pincard.internal.data.repository.WardrobeRepositoryImpl
+import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
@@ -16,9 +18,13 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val pinCardModule = module {
-    viewModel { (clotheId: Int) -> ClothingDetailViewModel(useCase = get(), clotheId = clotheId) }
+    single { WardrobeRefreshSignal() }
+
+    viewModel { (clotheId: Int, preloadedClothe: Clothe?) ->
+        ClothingDetailViewModel(useCase = get(), clotheId = clotheId, preloadedClothe = preloadedClothe)
+    }
     viewModel { ConstructorViewModel(wardrobeUseCase = get(), lookUseCase = get()) }
-    viewModel { WardrobeViewModel(useCase = get()) }
+    viewModel { WardrobeViewModel(useCase = get(), wardrobeRefreshSignal = get()) }
     factory { WardrobeUseCase(wardrobeRepository = get()) }
     single<WardrobeRepository> {
         WardrobeRepositoryImpl(
@@ -29,7 +35,7 @@ val pinCardModule = module {
     viewModel { LooksViewModel(useCase = get()) }
     viewModel { TinderOutfitViewModel(useCase = get()) }
     viewModel { (lookId: Int?, shareToken: String?) ->
-        LookDetailsViewModel(useCase = get(), lookId = lookId, shareToken = shareToken)
+        LookDetailsViewModel(useCase = get(), wardrobeRefreshSignal = get(), lookId = lookId, shareToken = shareToken)
     }
     factory { LookUseCase(lookRepository = get()) }
     single<LookRepository> {

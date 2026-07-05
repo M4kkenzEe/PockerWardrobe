@@ -2,18 +2,22 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ownstd.project.pincard.internal.data.model.DraftLook
 import com.ownstd.project.pincard.internal.data.model.Look
+import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class LookDetailsViewModel(
     private val useCase: LookUseCase,
+    private val wardrobeRefreshSignal: WardrobeRefreshSignal,
     lookId: Int? = null,
     shareToken: String? = null
 ) : ViewModel() {
@@ -29,6 +33,23 @@ internal class LookDetailsViewModel(
 
     private val _pendingAffiliateUrl = MutableStateFlow<String?>(null)
     val pendingAffiliateUrl: StateFlow<String?> = _pendingAffiliateUrl
+
+    // Per-item add-to-wardrobe states
+    private val _addingClotheIds = MutableStateFlow<Set<Int>>(emptySet())
+    val addingClotheIds: StateFlow<Set<Int>> = _addingClotheIds
+
+    private val _addedClotheIds = MutableStateFlow<Set<Int>>(emptySet())
+    val addedClotheIds: StateFlow<Set<Int>> = _addedClotheIds
+
+    private val _errorEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+
+    // Whole-look add state
+    private val _isAddingLook = MutableStateFlow(false)
+    val isAddingLook: StateFlow<Boolean> = _isAddingLook
+
+    private val _lookAdded = MutableStateFlow(false)
+    val lookAdded: StateFlow<Boolean> = _lookAdded
 
     init {
         when {
@@ -47,9 +68,7 @@ internal class LookDetailsViewModel(
             runCatching {
                 useCase.getLookById(id)
             }.onSuccess { lookResponse ->
-                if (lookResponse != null) {
-                    _look.value = lookResponse
-                }
+                if (lookResponse != null) _look.value = lookResponse
             }.onFailure { exception ->
                 println("Error loading look by ID: $exception")
             }.also {
@@ -64,9 +83,7 @@ internal class LookDetailsViewModel(
             runCatching {
                 useCase.getLookByToken(token)
             }.onSuccess { lookResponse ->
-                if (lookResponse != null) {
-                    _look.value = lookResponse
-                }
+                if (lookResponse != null) _look.value = lookResponse
             }.onFailure { exception ->
                 println("Error loading look by share token: $exception")
             }.also {
@@ -90,14 +107,34 @@ internal class LookDetailsViewModel(
 
     fun addToWardrobe(token: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val currentLook = _look.value ?: return@launch
+            _isAddingLook.value = true
             runCatching {
                 useCase.addLookByShareToken(token)
-                println("Adding look to wardrobe: ${currentLook.name}")
             }.onSuccess {
-                println("Look successfully added to wardrobe")
+                _lookAdded.value = true
+                wardrobeRefreshSignal.emit()
             }.onFailure { exception ->
+                _errorEvent.tryEmit("Не удалось добавить образ")
                 println("Error adding look to wardrobe: $exception")
+            }.also {
+                _isAddingLook.value = false
+            }
+        }
+    }
+
+    fun addClotheToWardrobe(shareToken: String, clotheId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _addingClotheIds.update { it + clotheId }
+            runCatching {
+                useCase.addClotheByShareToken(shareToken, clotheId)
+            }.onSuccess {
+                _addedClotheIds.update { it + clotheId }
+                wardrobeRefreshSignal.emit()
+            }.onFailure { exception ->
+                _errorEvent.tryEmit("Не удалось добавить вещь")
+                println("Error adding clothe $clotheId: ${exception.message}")
+            }.also {
+                _addingClotheIds.update { it - clotheId }
             }
         }
     }

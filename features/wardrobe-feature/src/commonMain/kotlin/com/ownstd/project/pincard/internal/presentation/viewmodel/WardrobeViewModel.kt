@@ -5,14 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.FreemiumLimitException
+import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewModel() {
+internal class WardrobeViewModel(
+    private val useCase: WardrobeUseCase,
+    private val wardrobeRefreshSignal: WardrobeRefreshSignal
+) : ViewModel() {
     val clothes = MutableStateFlow<List<Clothe>>(emptyList())
     val selectedOccasionFilter = MutableStateFlow<String?>(null)
     val isUploading = MutableStateFlow(false)
@@ -21,6 +26,9 @@ internal class WardrobeViewModel(private val useCase: WardrobeUseCase) : ViewMod
 
     init {
         getClothes()
+        viewModelScope.launch {
+            wardrobeRefreshSignal.flow.collect { getClothes() }
+        }
     }
 
     fun clearUploadError() {

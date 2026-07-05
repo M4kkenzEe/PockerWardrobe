@@ -19,7 +19,10 @@ data class ClothingDetailState(
 internal class ClothingDetailViewModel(
     private val useCase: WardrobeUseCase,
     private val clotheId: Int,
+    private val preloadedClothe: Clothe? = null,
 ) : ViewModel() {
+
+    val isReadOnly: Boolean get() = preloadedClothe != null
 
     val state = MutableStateFlow(ClothingDetailState())
 
@@ -37,6 +40,11 @@ internal class ClothingDetailViewModel(
     }
 
     private fun load() {
+        if (preloadedClothe != null) {
+            state.value = ClothingDetailState(clothe = preloadedClothe)
+            initEditFields(preloadedClothe)
+            return
+        }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { useCase.getClothes() }
                 .onSuccess { clothes ->

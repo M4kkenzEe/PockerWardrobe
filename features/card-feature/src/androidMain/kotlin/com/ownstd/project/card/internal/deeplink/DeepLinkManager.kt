@@ -24,8 +24,8 @@ actual class DeepLinkManager {
 
     companion object {
         private const val TAG = "DeepLinkManager"
-        private const val SCHEME = "http"
-        private const val HOST = "pocketwardrobe"
+        private const val SCHEME = "https"
+        private const val HOST = "clothis.tech"
         private const val SHARE_SEGMENT = "share"
 
         @Volatile
@@ -40,7 +40,7 @@ actual class DeepLinkManager {
 
     /**
      * Parse and handle a deep link URL
-     * Supports URLs like: http://pocketwardrobe/share/{uuid}
+     * Supports URLs like: https://clothis.tech/share/{uuid}
      */
     actual fun handleDeepLinkUrl(url: String): Boolean {
         Log.d(TAG, "handleDeepLinkUrl: $url")

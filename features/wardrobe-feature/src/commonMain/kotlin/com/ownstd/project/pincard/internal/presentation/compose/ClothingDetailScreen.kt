@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.presentation.viewmodel.ClothingDetailViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
 import org.koin.compose.viewmodel.koinViewModel
@@ -54,9 +55,10 @@ private val CHIP_BG = Color(0xFF3A3A3A)
 @Composable
 fun ClothingDetailScreen(
     clotheId: Int,
+    preloadedClothe: Clothe? = null,
     onBackClick: () -> Unit = {},
 ) {
-    val viewModel: ClothingDetailViewModel = koinViewModel { parametersOf(clotheId) }
+    val viewModel: ClothingDetailViewModel = koinViewModel { parametersOf(clotheId, preloadedClothe) }
     val state by viewModel.state.collectAsState()
     val editName by viewModel.editName.collectAsState()
     val editStoreUrl by viewModel.editStoreUrl.collectAsState()
@@ -115,29 +117,33 @@ fun ClothingDetailScreen(
                         ) {
                             Text("←", color = TEXT_PRIMARY, fontSize = 18.sp)
                         }
-                        if (isSaving) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(36.dp),
-                                color = ACCENT,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0x99000000))
-                                    .clickable {
-                                        if (isEditMode) viewModel.onSave() else viewModel.onEditToggle()
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (isEditMode) "✓" else "✏",
-                                    color = if (isEditMode) ACCENT else TEXT_PRIMARY,
-                                    fontSize = 16.sp
+                        if (!viewModel.isReadOnly) {
+                            if (isSaving) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(36.dp),
+                                    color = ACCENT,
+                                    strokeWidth = 2.dp
                                 )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0x99000000))
+                                        .clickable {
+                                            if (isEditMode) viewModel.onSave() else viewModel.onEditToggle()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (isEditMode) "✓" else "✏",
+                                        color = if (isEditMode) ACCENT else TEXT_PRIMARY,
+                                        fontSize = 16.sp
+                                    )
+                                }
                             }
+                        } else {
+                            Spacer(modifier = Modifier.size(40.dp))
                         }
                     }
                 }

@@ -34,8 +34,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
-                    android:host="pocketwardrobe"
+                    android:scheme="https"
+                    android:host="clothis.tech"
                     android:pathPattern="/share/.*" />
             </intent-filter>
         </activity>
