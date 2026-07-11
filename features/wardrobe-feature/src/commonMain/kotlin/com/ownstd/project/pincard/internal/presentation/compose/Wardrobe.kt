@@ -9,21 +9,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,11 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit = {}) {
     val clothes by viewModel.clothes.collectAsState()
@@ -55,9 +55,11 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
     val showPaywall by viewModel.showPaywall.collectAsState()
     val selectedOccasion by viewModel.selectedOccasionFilter.collectAsState()
 
-    var dialogState by remember { mutableStateOf(false) }
-    var urlState by remember { mutableStateOf("") }
     var requestAddClothe by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isUploading,
+        onRefresh = { if (!isUploading) requestAddClothe = true }
+    )
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -96,6 +98,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .pullRefresh(pullRefreshState)
         ) {
             if (clothes.isEmpty() && !isUploading && selectedOccasion == null) {
                 WardrobeEmptyState(
@@ -145,63 +148,25 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                FloatingActionButton(
-                    onClick = { dialogState = true },
-                    modifier = Modifier
-                ) {
-                    Text("WB", fontSize = 32.sp)
-                }
-                if (isUploading) {
-                    FloatingActionButton(onClick = {}) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                    }
-                } else {
-                    AddClotheFloatButton(
-                        modifier = Modifier,
-                        onButtonClick = { bitmap ->
-                            pendingBitmap = bitmap
-                            coroutineScope.launch { sheetState.show() }
-                        },
-                        requestLaunch = requestAddClothe,
-                        onLaunchConsumed = { requestAddClothe = false }
-                    )
-                }
-            }
+            AddClotheFloatButton(
+                onButtonClick = { bitmap ->
+                    pendingBitmap = bitmap
+                    coroutineScope.launch { sheetState.show() }
+                },
+                requestLaunch = requestAddClothe,
+                onLaunchConsumed = { requestAddClothe = false }
+            )
+
+            PullRefreshIndicator(
+                refreshing = isUploading,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
 
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
-
-            if (dialogState) {
-                Dialog(
-                    onDismissRequest = { dialogState = false },
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.background(Color.White)
-                    ) {
-                        TextField(onValueChange = { urlState = it }, value = urlState)
-                        Button(onClick = {
-                            viewModel.uploadFromUrl(urlState)
-                            urlState = ""
-                            dialogState = false
-                        }) {
-                            Text("Import")
-                        }
-                    }
-                }
-            }
 
             if (showPaywall) {
                 PaywallScreen(onDismiss = { viewModel.dismissPaywall() })
