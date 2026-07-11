@@ -1,16 +1,12 @@
 package com.ownstd.project.pincard.internal.presentation.compose
 
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.unit.sp
 import com.ownstd.project.pincard.external.AlertMessageDialog
 import com.ownstd.project.pincard.external.PermissionCallback
 import com.ownstd.project.pincard.external.PermissionStatus
@@ -23,7 +19,6 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun AddClotheFloatButton(
-    modifier: Modifier = Modifier,
     onButtonClick: (imageBitmap: ImageBitmap) -> Unit = {},
     requestLaunch: Boolean = false,
     onLaunchConsumed: () -> Unit = {}
@@ -97,13 +92,6 @@ fun AddClotheFloatButton(
                 permissionRationalDialog = false
             })
 
-    }
-
-    FloatingActionButton(
-        onClick = { launchGallery = true },
-        modifier = modifier
-    ) {
-        Text("+", fontSize = 32.sp)
     }
 
     if (imageBitmap != null) {
