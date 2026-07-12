@@ -38,6 +38,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(project(":features:card-feature"))
+            implementation(project(":design-system"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)

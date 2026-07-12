@@ -82,6 +82,7 @@ kotlin {
             implementation(project(":features:wardrobe-feature"))
             implementation(project(":features:authorization"))
             implementation(project(":features:profile"))
+            implementation(project(":design-system"))
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

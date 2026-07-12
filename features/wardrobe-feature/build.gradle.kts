@@ -82,6 +82,7 @@ kotlin {
 
             implementation(project(":core:storage"))
             implementation(project(":core:network"))
+            implementation(project(":design-system"))
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
