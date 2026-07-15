@@ -23,10 +23,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
-import kotlinprojecttesting.features.wardrobe_feature.generated.resources.ggg
-import org.jetbrains.compose.resources.painterResource
+import coil3.compose.SubcomposeAsyncImage
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.replaceFragment
 
 @Composable
@@ -51,12 +50,18 @@ internal fun ClotheCard(
             ),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = clotheUrl,
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
-            placeholder = painterResource(Res.drawable.ggg),
-            error = painterResource(Res.drawable.ggg),
+            loading = {
+                val shimmer by rememberShimmerTranslation()
+                SkeletonCard(
+                    shimmerTranslation = shimmer,
+                    modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 160.dp),
+                    shape = RoundedCornerShape(20),
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 160.dp)
@@ -124,10 +129,18 @@ internal fun LookCard(
             ),
         contentAlignment = Alignment.Center
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = lookUrl.replaceFragment(),
             contentDescription = null,
             contentScale = ContentScale.Fit,
+            loading = {
+                val shimmer by rememberShimmerTranslation()
+                SkeletonCard(
+                    shimmerTranslation = shimmer,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20),
+                )
+            },
             modifier = Modifier
         )
 
