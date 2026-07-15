@@ -149,6 +149,14 @@ class WardrobeRepositoryImpl(
         return response.body()
     }
 
+    override suspend fun saveToWardrobe(clotheId: Int): Clothe {
+        val response = client.post("$baseUrl$ENDPOINT/$clotheId/save") {
+            contentType(ContentType.Application.Json)
+        }
+        if (response.status.isSuccess()) return response.body()
+        throw Exception("Failed to save clothe: ${response.status.value}")
+    }
+
     companion object {
         private const val ENDPOINT = "clothes"
         private const val FROM_URL = "/from_url"

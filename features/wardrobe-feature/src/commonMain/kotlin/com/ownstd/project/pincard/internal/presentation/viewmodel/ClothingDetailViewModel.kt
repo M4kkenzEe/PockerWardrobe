@@ -3,9 +3,11 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -14,17 +16,19 @@ data class ClothingDetailState(
     val isEditMode: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,
+    val isOwned: Boolean? = null,
+    val isSavingToWardrobe: Boolean = false,
 )
 
 internal class ClothingDetailViewModel(
     private val useCase: WardrobeUseCase,
+    private val wardrobeRefreshSignal: WardrobeRefreshSignal,
     private val clotheId: Int,
     private val preloadedClothe: Clothe? = null,
 ) : ViewModel() {
 
-    val isReadOnly: Boolean get() = preloadedClothe != null
-
     val state = MutableStateFlow(ClothingDetailState())
+    val savedToWardrobeEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     val editName = MutableStateFlow("")
     val editStoreUrl = MutableStateFlow("")
@@ -41,16 +45,24 @@ internal class ClothingDetailViewModel(
 
     private fun load() {
         if (preloadedClothe != null) {
-            state.value = ClothingDetailState(clothe = preloadedClothe)
+            state.value = ClothingDetailState(clothe = preloadedClothe, isOwned = null)
             initEditFields(preloadedClothe)
+            viewModelScope.launch(Dispatchers.IO) {
+                val clothes = runCatching { useCase.getClothes() }.getOrDefault(emptyList())
+                state.value = state.value.copy(isOwned = clothes.any { it.id == clotheId })
+            }
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { useCase.getClothes() }
                 .onSuccess { clothes ->
                     val clothe = clothes.find { it.id == clotheId }
-                    state.value = ClothingDetailState(clothe = clothe)
-                    clothe?.let { initEditFields(it) }
+                    if (clothe != null) {
+                        state.value = ClothingDetailState(clothe = clothe, isOwned = true)
+                        initEditFields(clothe)
+                    } else {
+                        state.value = ClothingDetailState(error = "Вещь не найдена")
+                    }
                 }
                 .onFailure { ex ->
                     state.value = ClothingDetailState(error = ex.message ?: "Ошибка загрузки")
@@ -67,6 +79,22 @@ internal class ClothingDetailViewModel(
         editBrand.value = clothe.brand ?: ""
         editOccasion.value = clothe.occasion ?: ""
         editStyleTags.value = clothe.styleTags ?: ""
+    }
+
+    fun saveToWardrobe() {
+        val id = state.value.clothe?.id ?: return
+        state.value = state.value.copy(isSavingToWardrobe = true, error = null)
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { useCase.saveToWardrobe(id) }
+                .onSuccess {
+                    wardrobeRefreshSignal.emit()
+                    state.value = state.value.copy(isOwned = true, isSavingToWardrobe = false)
+                    savedToWardrobeEvent.tryEmit(Unit)
+                }
+                .onFailure { ex ->
+                    state.value = state.value.copy(isSavingToWardrobe = false, error = ex.message ?: "Ошибка сохранения")
+                }
+        }
     }
 
     fun onEditToggle() {

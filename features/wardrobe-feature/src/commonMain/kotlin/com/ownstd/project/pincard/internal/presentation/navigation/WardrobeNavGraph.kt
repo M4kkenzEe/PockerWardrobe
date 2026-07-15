@@ -48,9 +48,7 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             shareToken = lookDetails.shareToken,
             onBackClick = { navController.popBackStack() },
             onNavigateToClotheDetail = { clothe ->
-                val clotheJson = if (lookDetails.shareToken != null) {
-                    Json.encodeToString(clothe)
-                } else null
+                val clotheJson = Json.encodeToString(clothe)
                 navController.navigate(
                     WardrobeNavScreens.ClothingDetail(
                         clotheId = clothe.id ?: 0,

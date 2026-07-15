@@ -34,4 +34,8 @@ internal class WardrobeUseCase(private val wardrobeRepository: WardrobeRepositor
     ): Clothe {
         return wardrobeRepository.updateClothe(clotheId, name, storeUrl, season, fit, material, brand, occasion, styleTags)
     }
+
+    suspend fun saveToWardrobe(clotheId: Int): Clothe {
+        return wardrobeRepository.saveToWardrobe(clotheId)
+    }
 }

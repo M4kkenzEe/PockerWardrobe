@@ -19,4 +19,5 @@ internal interface WardrobeRepository {
         occasion: String? = null,
         styleTags: String? = null,
     ): Clothe
+    suspend fun saveToWardrobe(clotheId: Int): Clothe
 }
