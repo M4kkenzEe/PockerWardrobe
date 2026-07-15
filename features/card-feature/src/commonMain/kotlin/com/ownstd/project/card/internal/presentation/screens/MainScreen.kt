@@ -1,19 +1,8 @@
 package com.ownstd.project.card.internal.presentation.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,53 +12,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.ownstd.project.card.design_system.BG_GREY_COLOR
-import com.ownstd.project.card.design_system.BLUE_COLOR
-import com.ownstd.project.card.design_system.DARK_GREY_COLOR
-import com.ownstd.project.card.design_system.GREY_COLOR
+import com.ownstd.project.card.internal.deeplink.DeepLink
+import com.ownstd.project.card.internal.deeplink.getDeepLinkManager
 import com.ownstd.project.card.internal.navigation.AppScreens
 import com.ownstd.project.card.internal.navigation.BottomNavigationNavHost
 import com.ownstd.project.card.internal.navigation.BottomNavigationScreens
-import kotlinprojecttesting.features.card_feature.generated.resources.Res
-import kotlinprojecttesting.features.card_feature.generated.resources.shopping_cart_disabled
-import kotlinprojecttesting.features.card_feature.generated.resources.shopping_cart_enabled
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
+import com.ownstd.project.designsystem.components.ClothisNavIsland
+import com.ownstd.project.designsystem.components.NavTab
+import com.ownstd.project.designsystem.theme.ClothisTheme
 
 @Composable
 internal fun MainScreen(parentNavController: NavHostController) {
-    // Create separate NavController for bottom navigation
     val bottomNavController = rememberNavController()
-
-    // Get deep link from DeepLinkManager
-    val deepLinkManager = com.ownstd.project.card.internal.deeplink.getDeepLinkManager()
+    val deepLinkManager = getDeepLinkManager()
     val currentDeepLink by deepLinkManager.deepLinkFlow.collectAsState()
-
-    // Remember the INITIAL deep link value to use as startDestination
-    // This prevents NavHost from being recreated when deep link is cleared
     val initialDeepLink = remember { currentDeepLink }
+    var selectedTab by remember { mutableStateOf(NavTab.Wardrobe) }
+    val colors = ClothisTheme.colors
 
-    // Clear deep link after consuming it (only on first composition with deep link)
     LaunchedEffect(currentDeepLink) {
         if (currentDeepLink != null) {
-            // Deep link will be used as startDestination in BottomNavigationNavHost
-            // Clear it after the NavHost is created to prevent re-navigation
             deepLinkManager.clearDeepLink()
         }
     }
 
-    Scaffold(
-        bottomBar = { BottomNavigationBar(bottomNavController) },
-        modifier = Modifier.fillMaxSize(),
-        backgroundColor = BG_GREY_COLOR
-    ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.canvas),
+    ) {
         BottomNavigationNavHost(
             navController = bottomNavController,
             deepLink = initialDeepLink,
@@ -79,83 +52,27 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     launchSingleTop = true
                 }
             },
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.fillMaxSize(),
         )
-    }
-}
 
-@Composable
-internal fun BottomNavigationBar(navController: NavHostController) {
-    var currentItem by remember { mutableStateOf<BottomNavigationScreens>(BottomNavigationScreens.Shop()) }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(DARK_GREY_COLOR)
-            .navigationBarsPadding()
-            .height(58.dp),
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        val screens = listOf(
-            BottomNavigationScreens.Shop(),
-            BottomNavigationScreens.Profile()
-        )
-        for (item in screens) {
-            BottomNavigationItem(
-                painter = painterResource(
-                    if (currentItem == item)
-                        mapper(item.enabledIcon)
-                    else
-                        mapper(item.disabledIcon)
-                ),
-                label = item.label,
-                textColor = if (currentItem == item) BLUE_COLOR else GREY_COLOR,
-                onItemClick = {
-                    navController.navigate(item) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                    currentItem = item
+        // Floating glass nav island
+        ClothisNavIsland(
+            selectedTab = selectedTab,
+            onTabSelected = { tab ->
+                selectedTab = tab
+                val destination = when (tab) {
+                    NavTab.Wardrobe -> BottomNavigationScreens.Shop()
+                    NavTab.Profile -> BottomNavigationScreens.Profile()
                 }
-            )
-        }
-    }
-}
-
-@Composable
-internal fun BottomNavigationItem(
-    painter: Painter,
-    label: String,
-    textColor: Color,
-    onItemClick: () -> Unit = {}
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .padding(top = 10.dp, bottom = 8.dp)
-            .clickable { onItemClick() },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
-    ) {
-        Image(painter = painter, contentDescription = "")
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            letterSpacing = 0.4.sp,
-            lineHeight = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = textColor
+                bottomNavController.navigate(destination) {
+                    popUpTo(bottomNavController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
-    }
-}
-
-fun mapper(name: String): DrawableResource {
-    return when (name) {
-        "shopping_cart_enabled" -> Res.drawable.shopping_cart_enabled
-        "shopping_cart_disabled" -> Res.drawable.shopping_cart_disabled
-        else -> throw IllegalArgumentException("Unknown resource name: $name")
     }
 }

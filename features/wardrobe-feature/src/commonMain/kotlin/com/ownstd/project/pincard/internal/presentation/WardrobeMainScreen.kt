@@ -1,27 +1,20 @@
 package com.ownstd.project.pincard.internal.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.ownstd.project.designsystem.components.WardrobeTopBar
+import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.presentation.compose.Looks
 import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -34,11 +27,22 @@ fun WardrobeMainScreen(
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
     val pagerState = rememberPagerState(pageCount = { 2 })
+    val scope = rememberCoroutineScope()
+    val colors = ClothisTheme.colors
 
-    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+    Column(modifier = Modifier.fillMaxSize().background(colors.canvas)) {
+        WardrobeTopBar(
+            selectedTab = pagerState.currentPage,
+            onTabSelected = { page ->
+                scope.launch { pagerState.animateScrollToPage(page) }
+            },
+            onSearchClick = { /* TODO: открыть поиск */ },
+            onFilterClick = { /* TODO: открыть фильтр */ },
+        )
+
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
                 0 -> Wardrobe(wardrobeViewModel, onClotheClick = openClotheDetail)
@@ -46,26 +50,7 @@ fun WardrobeMainScreen(
                     viewModel = looksViewModel,
                     onNavigateToConstructor = openConstructor,
                     navigateToDetails = openDetails,
-                    onNavigateToTinderOutfit = openTinderOutfit
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            repeat(pagerState.pageCount) { iteration ->
-                val color =
-                    if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
-                Box(
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .clip(CircleShape)
-                        .background(color)
-                        .size(16.dp)
+                    onNavigateToTinderOutfit = openTinderOutfit,
                 )
             }
         }
