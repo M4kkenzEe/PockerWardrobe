@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.internal.deeplink.DeepLink
 import com.ownstd.project.card.internal.deeplink.getDeepLinkManager
@@ -31,6 +32,10 @@ internal fun MainScreen(parentNavController: NavHostController) {
     val initialDeepLink = remember { currentDeepLink }
     var selectedTab by remember { mutableStateOf(NavTab.Wardrobe) }
     val colors = ClothisTheme.colors
+    val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
+    val showNavIsland = listOf("ClothingDetail", "LookDetails", "LookConstructor", "TinderOutfit")
+        .none { currentRoute.contains(it) }
 
     LaunchedEffect(currentDeepLink) {
         if (currentDeepLink != null) {
@@ -55,24 +60,26 @@ internal fun MainScreen(parentNavController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Floating glass nav island
-        ClothisNavIsland(
-            selectedTab = selectedTab,
-            onTabSelected = { tab ->
-                selectedTab = tab
-                val destination = when (tab) {
-                    NavTab.Wardrobe -> BottomNavigationScreens.Shop()
-                    NavTab.Profile -> BottomNavigationScreens.Profile()
-                }
-                bottomNavController.navigate(destination) {
-                    popUpTo(bottomNavController.graph.startDestinationId) {
-                        saveState = true
+        // Floating glass nav island — hidden on detail screens
+        if (showNavIsland) {
+            ClothisNavIsland(
+                selectedTab = selectedTab,
+                onTabSelected = { tab ->
+                    selectedTab = tab
+                    val destination = when (tab) {
+                        NavTab.Wardrobe -> BottomNavigationScreens.Shop()
+                        NavTab.Profile -> BottomNavigationScreens.Profile()
                     }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+                    bottomNavController.navigate(destination) {
+                        popUpTo(bottomNavController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
     }
 }
