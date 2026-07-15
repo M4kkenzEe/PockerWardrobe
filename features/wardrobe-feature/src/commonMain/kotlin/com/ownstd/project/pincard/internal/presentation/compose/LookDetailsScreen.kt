@@ -250,8 +250,8 @@ private fun LookDetailsTopBar(
                         onClick = onAddToWardrobe,
                         enabled = !isAddingLook,
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.White.copy(alpha = 0.9f),
-                            disabledBackgroundColor = Color.White.copy(alpha = 0.6f)
+                            backgroundColor = Color(0xFFF0EEE9).copy(alpha = 0.9f),
+                            disabledBackgroundColor = Color(0xFFF0EEE9).copy(alpha = 0.6f)
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(48.dp)
@@ -287,7 +287,7 @@ private fun LookPreviewCard(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
+            .background(Color(0xFFF0EEE9))
     ) {
         // Отрисовка вещей с их координатами
         Box(
@@ -387,7 +387,7 @@ private fun ClotheItemCard(
         modifier = Modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
+            .background(Color(0xFFF0EEE9))
             .then(
                 if (onNavigateToClotheDetail != null && clotheItem.clothe.id != null)
                     Modifier.clickable { onNavigateToClotheDetail(clotheItem.clothe) }

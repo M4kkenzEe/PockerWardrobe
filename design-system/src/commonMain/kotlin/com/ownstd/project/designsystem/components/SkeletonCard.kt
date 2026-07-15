@@ -6,10 +6,19 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -17,6 +26,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 // Shimmer tokens — dark warm palette matching canvas (#141210)
 // base = surfaceElevated (#26231F), highlight = OnCanvasMuted @9% alpha over base
@@ -69,4 +81,30 @@ fun SkeletonCard(
                 )
             }
     )
+}
+
+@Preview
+@Composable
+fun SkeletonCardPreview() {
+    val heights = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 190.dp)
+    val shimmer by rememberShimmerTranslation()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF141210))
+    ) {
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalItemSpacing = 12.dp,
+        ) {
+            items(heights) { h: Dp ->
+                SkeletonCard(
+                    shimmerTranslation = shimmer,
+                    modifier = Modifier.height(h),
+                )
+            }
+        }
+    }
 }

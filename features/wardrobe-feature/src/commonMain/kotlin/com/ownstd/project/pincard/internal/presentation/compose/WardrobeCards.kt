@@ -43,7 +43,7 @@ internal fun ClotheCard(
         modifier = modifier
             .wrapContentHeight()
             .clip(RoundedCornerShape(20))
-            .background(Color.White)
+            .background(Color(0xFFF0EEE9))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { dropDownMenuState = true }
@@ -122,7 +122,7 @@ internal fun LookCard(
         modifier = modifier
             .height(300.dp)
             .clip(RoundedCornerShape(20))
-            .background(Color.White)
+            .background(Color(0xFFF0EEE9))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = { dropDownMenuState = true }
