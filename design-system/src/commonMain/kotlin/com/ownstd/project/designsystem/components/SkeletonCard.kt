@@ -1,0 +1,69 @@
+package com.ownstd.project.designsystem.components
+
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+
+// Shimmer tokens — dark warm palette matching canvas (#141210)
+// base = surfaceElevated (#26231F), highlight = OnCanvasMuted @9% alpha over base
+private val SkeletonBase = Color(0xFF26231F)
+private val SkeletonHighlight = Color(0xFF322E2A)
+
+/**
+ * Returns an animated fraction [−1, 2] driving the shimmer sweep.
+ * Call once per parent container and pass [shimmerTranslation] down to each [SkeletonCard]
+ * so all cards share a single synchronized animation (1200 ms, linear, restart).
+ */
+@Composable
+fun rememberShimmerTranslation(): State<Float> {
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    return transition.animateFloat(
+        initialValue = -1f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "shimmerTranslate",
+    )
+}
+
+/**
+ * Rounded skeleton placeholder with a left-to-right shimmer sweep.
+ *
+ * Pass [shimmerTranslation] from [rememberShimmerTranslation] called at the parent level
+ * so multiple cards animate in sync. Size is controlled entirely via [modifier].
+ */
+@Composable
+fun SkeletonCard(
+    shimmerTranslation: Float,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(20))
+            .drawBehind {
+                val w = size.width
+                drawRect(
+                    brush = Brush.linearGradient(
+                        colors = listOf(SkeletonBase, SkeletonHighlight, SkeletonBase),
+                        start = Offset(shimmerTranslation * w, 0f),
+                        end = Offset((shimmerTranslation + 1f) * w, 0f),
+                    )
+                )
+            }
+    )
+}

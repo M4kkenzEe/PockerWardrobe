@@ -35,19 +35,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
+
+// Staggered heights for 6 clothing skeleton cards — simulates natural photo proportions
+private val CLOTHE_SKELETON_HEIGHTS = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 190.dp)
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit = {}) {
     val clothes by viewModel.clothes.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
     val uploadError by viewModel.uploadError.collectAsState()
     val showPaywall by viewModel.showPaywall.collectAsState()
@@ -68,25 +74,31 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
     }
 
     Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(pullRefreshState)
-        ) {
-            if (clothes.isEmpty() && !isUploading && selectedOccasion == null) {
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
+    ) {
+        when {
+            isLoading && clothes.isEmpty() -> {
+                SkeletonClothesGrid(heights = CLOTHE_SKELETON_HEIGHTS)
+            }
+            clothes.isEmpty() && !isUploading && selectedOccasion == null -> {
                 WardrobeEmptyState(
                     onAddClick = { requestAddClothe = true },
                     modifier = Modifier.fillMaxSize()
                 )
-            } else {
+            }
+            else -> {
                 Column(modifier = Modifier.fillMaxSize()) {
                     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    val shimmer by rememberShimmerTranslation()
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2),
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
                             start = 8.dp,
                             end = 8.dp,
-                            bottom = navBarBottom + 76.dp, // nav bar + island(64) + gap(12)
+                            bottom = navBarBottom + 76.dp,
                         ),
                         horizontalArrangement = Arrangement.spacedBy(18.dp),
                         verticalItemSpacing = 12.dp
@@ -101,48 +113,67 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
                         }
 
                         if (isUploading) {
-                            item { SkeletonClotheCard() }
+                            item {
+                                SkeletonCard(
+                                    shimmerTranslation = shimmer,
+                                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
-
-            AddClotheFloatButton(
-                onButtonClick = { bitmap ->
-                    viewModel.loadClothe(bitmap, null)
-                },
-                requestLaunch = requestAddClothe,
-                onLaunchConsumed = { requestAddClothe = false }
-            )
-
-            PullRefreshIndicator(
-                refreshing = isUploading,
-                state = pullRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
-
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 76.dp)
-            )
-
-            if (showPaywall) {
-                PaywallScreen(onDismiss = { viewModel.dismissPaywall() })
-            }
         }
+
+        AddClotheFloatButton(
+            onButtonClick = { bitmap ->
+                viewModel.loadClothe(bitmap, null)
+            },
+            requestLaunch = requestAddClothe,
+            onLaunchConsumed = { requestAddClothe = false }
+        )
+
+        PullRefreshIndicator(
+            refreshing = isUploading,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 76.dp)
+        )
+
+        if (showPaywall) {
+            PaywallScreen(onDismiss = { viewModel.dismissPaywall() })
+        }
+    }
 }
 
 @Composable
-private fun SkeletonClotheCard(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .clip(RoundedCornerShape(20))
-            .background(Color(0xFF3A3A3A))
-    )
+private fun SkeletonClothesGrid(heights: List<Dp>) {
+    val shimmer by rememberShimmerTranslation()
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            bottom = navBarBottom + 76.dp,
+        ),
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalItemSpacing = 12.dp
+    ) {
+        items(heights.size) { i ->
+            SkeletonCard(
+                shimmerTranslation = shimmer,
+                modifier = Modifier.fillMaxWidth().height(heights[i])
+            )
+        }
+    }
 }
 
 @Composable

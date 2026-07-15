@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -31,6 +33,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.external.rememberShareManager
 import com.ownstd.project.pincard.internal.presentation.viewmodel.GenerateLooksError
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
@@ -43,6 +47,7 @@ internal fun Looks(
     onNavigateToTinderOutfit: () -> Unit = {}
 ) {
     val looksList by viewModel.looks.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val isGenerating by viewModel.isGenerating.collectAsState()
     val generateError by viewModel.generateError.collectAsState()
     val shareManager = rememberShareManager()
@@ -73,33 +78,39 @@ internal fun Looks(
             .padding(horizontal = 14.dp)
             .padding(top = 12.dp)
     ) {
-        if (looksList.isEmpty() && !isGenerating) {
-            OutfitsEmptyState(
-                onBuildOutfitClick = onNavigateToConstructor,
-                onGenerateOutfitsClick = { if (!isGenerating) viewModel.generateLooks() },
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            LazyVerticalGrid(
-                modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(looksList, key = { it.id!! }) { look ->
-                    LookCard(
-                        lookUrl = look.url,
-                        onClick = { navigateToDetails(look.id ?: 0) },
-                        onDelete = { viewModel.deleteLook(look.id!!) },
-                        onShare = {
-                            viewModel.shareLook(look.id!!) { shareUrl ->
-                                shareManager.shareText(shareUrl, "Поделиться образом")
-                            }
-                        },
-                        modifier = Modifier.animateItem()
-                    )
+        when {
+            isLoading && looksList.isEmpty() -> {
+                SkeletonLooksGrid()
+            }
+            looksList.isEmpty() && !isGenerating -> {
+                OutfitsEmptyState(
+                    onBuildOutfitClick = onNavigateToConstructor,
+                    onGenerateOutfitsClick = { if (!isGenerating) viewModel.generateLooks() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            else -> {
+                val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                LazyVerticalGrid(
+                    modifier = Modifier.fillMaxSize(),
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(looksList, key = { it.id!! }) { look ->
+                        LookCard(
+                            lookUrl = look.url,
+                            onClick = { navigateToDetails(look.id ?: 0) },
+                            onDelete = { viewModel.deleteLook(look.id!!) },
+                            onShare = {
+                                viewModel.shareLook(look.id!!) { shareUrl ->
+                                    shareManager.shareText(shareUrl, "Поделиться образом")
+                                }
+                            },
+                            modifier = Modifier.animateItem()
+                        )
+                    }
                 }
             }
         }
@@ -149,4 +160,22 @@ internal fun Looks(
     }
 }
 
-
+@Composable
+private fun SkeletonLooksGrid() {
+    val shimmer by rememberShimmerTranslation()
+    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(6) {
+            SkeletonCard(
+                shimmerTranslation = shimmer,
+                modifier = Modifier.fillMaxWidth().height(300.dp)
+            )
+        }
+    }
+}

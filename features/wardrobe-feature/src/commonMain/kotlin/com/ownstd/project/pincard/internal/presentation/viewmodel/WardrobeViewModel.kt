@@ -20,9 +20,12 @@ internal class WardrobeViewModel(
 ) : ViewModel() {
     val clothes = MutableStateFlow<List<Clothe>>(emptyList())
     val selectedOccasionFilter = MutableStateFlow<String?>(null)
+    val isLoading = MutableStateFlow(true)
     val isUploading = MutableStateFlow(false)
     val uploadError = MutableStateFlow(false)
     val showPaywall = MutableStateFlow(false)
+
+    private var firstLoadComplete = false
 
     init {
         getClothes()
@@ -49,6 +52,10 @@ internal class WardrobeViewModel(
             }.onFailure { exception ->
                 println("❌ [CLOTHES_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 exception.printStackTrace()
+            }
+            if (!firstLoadComplete) {
+                firstLoadComplete = true
+                isLoading.value = false
             }
         }
     }

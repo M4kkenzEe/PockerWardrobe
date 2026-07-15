@@ -118,6 +118,11 @@ Uses **Jetpack Navigation Compose** (multiplatform):
 3. **Новые фичи**: Создавай по шаблону из Feature Module Pattern выше
 4. **Состояние**: ViewModel + MutableStateFlow + collectAsState()
 5. **DI**: Регистрируй зависимости в Koin модулях
-6. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
+6. **Skeleton / Shimmer** — `SkeletonCard` + `rememberShimmerTranslation()` live in `design-system/.../components/SkeletonCard.kt`.
+   - Base: `#26231F` (`surfaceElevated`), Highlight: `#322E2A` (OnCanvasMuted @9% alpha over base)
+   - Duration: 1200 ms, LinearEasing, RepeatMode.Restart
+   - Call `rememberShimmerTranslation()` once per grid/container, pass `shimmerTranslation: Float` to each `SkeletonCard` for a synchronized sweep.
+
+7. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
    - `./ksrc.exe deps --offline` — list available dependencies with sources
    - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — read source file

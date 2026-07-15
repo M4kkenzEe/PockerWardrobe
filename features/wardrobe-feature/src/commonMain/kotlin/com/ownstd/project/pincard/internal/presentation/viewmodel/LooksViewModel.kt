@@ -17,8 +17,11 @@ internal sealed class GenerateLooksError {
 
 internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     val looks = MutableStateFlow<List<Look>>(emptyList())
+    val isLoading = MutableStateFlow(true)
     val isGenerating = MutableStateFlow(false)
     val generateError = MutableStateFlow<GenerateLooksError?>(null)
+
+    private var firstLoadComplete = false
 
     fun getLooks() {
         println("GGG : getlooks")
@@ -32,6 +35,10 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
             }.onFailure { exception ->
                 println("🎯 [LOOKS_VM_ERROR] ${exception::class.simpleName}: ${exception.message}")
                 println(exception)
+            }
+            if (!firstLoadComplete) {
+                firstLoadComplete = true
+                isLoading.value = false
             }
         }
     }
