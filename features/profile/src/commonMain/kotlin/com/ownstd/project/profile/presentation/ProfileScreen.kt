@@ -18,12 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.profile.resources.Res
 import com.ownstd.project.profile.resources.img_profile_default
 import org.jetbrains.compose.resources.painterResource
@@ -106,6 +109,18 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
             }
         }
     } else {
-        Text("Loading...")
+        ProfileSkeleton()
+    }
+}
+
+@Composable
+private fun ProfileSkeleton() {
+    val shimmer by rememberShimmerTranslation()
+    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+        SkeletonCard(
+            shimmerTranslation = shimmer,
+            modifier = Modifier.fillMaxWidth().height(300.dp),
+            shape = RoundedCornerShape(0),
+        )
     }
 }

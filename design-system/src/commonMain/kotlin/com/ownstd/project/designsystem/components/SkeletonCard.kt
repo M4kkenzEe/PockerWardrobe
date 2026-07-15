@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 
 // Shimmer tokens — dark warm palette matching canvas (#141210)
 // base = surfaceElevated (#26231F), highlight = OnCanvasMuted @9% alpha over base
@@ -46,15 +47,17 @@ fun rememberShimmerTranslation(): State<Float> {
  *
  * Pass [shimmerTranslation] from [rememberShimmerTranslation] called at the parent level
  * so multiple cards animate in sync. Size is controlled entirely via [modifier].
+ * Use [shape] to match the actual content shape (default is 20% rounded, same as wardrobe cards).
  */
 @Composable
 fun SkeletonCard(
     shimmerTranslation: Float,
     modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(20),
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20))
+            .clip(shape)
             .drawBehind {
                 val w = size.width
                 drawRect(

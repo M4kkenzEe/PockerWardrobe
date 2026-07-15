@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookItem
@@ -94,14 +96,7 @@ fun LookDetailsScreen(
     }
 
     if (isLoading || look == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.DarkGray),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = Color.White)
-        }
+        LookDetailsSkeleton()
         return
     }
 
@@ -502,6 +497,31 @@ private fun ClotheItemCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LookDetailsSkeleton() {
+    val shimmer by rememberShimmerTranslation()
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF141210))) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            Spacer(modifier = Modifier.height(56.dp))
+            SkeletonCard(
+                shimmerTranslation = shimmer,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                shape = RoundedCornerShape(20.dp),
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            repeat(3) {
+                SkeletonCard(
+                    shimmerTranslation = shimmer,
+                    modifier = Modifier.fillMaxWidth().height(72.dp),
+                    shape = RoundedCornerShape(16.dp),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

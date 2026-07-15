@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.presentation.viewmodel.TinderOutfitState
 import com.ownstd.project.pincard.internal.presentation.viewmodel.TinderOutfitViewModel
@@ -72,9 +73,7 @@ private fun TinderOutfitContent(
 
         when {
             state.isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color(0xFFBB86FC))
-                }
+                TinderLoadingSkeleton(modifier = Modifier.weight(1f))
             }
             state.isEmpty -> {
                 TinderEmptyState(modifier = Modifier.fillMaxSize())
@@ -254,6 +253,27 @@ private fun ActionButton(
             .background(backgroundColor, CircleShape)
     ) {
         Text(label, fontSize = fontSize.sp, color = contentColor)
+    }
+}
+
+@Composable
+private fun TinderLoadingSkeleton(modifier: Modifier = Modifier) {
+    val shimmer by rememberShimmerTranslation()
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        SkeletonCard(
+            shimmerTranslation = shimmer,
+            modifier = Modifier.fillMaxWidth().weight(0.65f),
+            shape = RoundedCornerShape(20.dp),
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.size(64.dp), shape = CircleShape)
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.size(72.dp), shape = CircleShape)
+        }
     }
 }
 

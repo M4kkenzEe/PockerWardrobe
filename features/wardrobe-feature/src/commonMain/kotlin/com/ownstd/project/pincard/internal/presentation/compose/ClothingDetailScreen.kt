@@ -27,6 +27,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.ownstd.project.designsystem.components.SkeletonCard
+import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.presentation.viewmodel.ClothingDetailViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
@@ -60,6 +63,10 @@ fun ClothingDetailScreen(
 ) {
     val viewModel: ClothingDetailViewModel = koinViewModel { parametersOf(clotheId, preloadedClothe) }
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.savedToWardrobeEvent.collect { onBackClick() }
+    }
     val editName by viewModel.editName.collectAsState()
     val editStoreUrl by viewModel.editStoreUrl.collectAsState()
     val editSeason by viewModel.editSeason.collectAsState()
@@ -71,14 +78,13 @@ fun ClothingDetailScreen(
     val clothe = state.clothe
     val isEditMode = state.isEditMode
     val isSaving = state.isSaving
+    val isOwned = state.isOwned
+    val isSavingToWardrobe = state.isSavingToWardrobe
     val uriHandler = LocalUriHandler.current
 
     Box(modifier = Modifier.fillMaxSize().background(BG)) {
         if (clothe == null && state.error == null) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = ACCENT
-            )
+            ClothingDetailSkeleton()
         } else if (state.error != null && clothe == null) {
             Text(
                 text = state.error ?: "Ошибка",
@@ -117,33 +123,34 @@ fun ClothingDetailScreen(
                         ) {
                             Text("←", color = TEXT_PRIMARY, fontSize = 18.sp)
                         }
-                        if (!viewModel.isReadOnly) {
-                            if (isSaving) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(36.dp),
-                                    color = ACCENT,
-                                    strokeWidth = 2.dp
+                        when {
+                            isOwned == null -> CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = ACCENT,
+                                strokeWidth = 2.dp
+                            )
+                            isOwned == true && isSaving -> CircularProgressIndicator(
+                                modifier = Modifier.size(36.dp),
+                                color = ACCENT,
+                                strokeWidth = 2.dp
+                            )
+                            isOwned == true -> Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0x99000000))
+                                    .clickable {
+                                        if (isEditMode) viewModel.onSave() else viewModel.onEditToggle()
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isEditMode) "✓" else "✏",
+                                    color = if (isEditMode) ACCENT else TEXT_PRIMARY,
+                                    fontSize = 16.sp
                                 )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(0x99000000))
-                                        .clickable {
-                                            if (isEditMode) viewModel.onSave() else viewModel.onEditToggle()
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = if (isEditMode) "✓" else "✏",
-                                        color = if (isEditMode) ACCENT else TEXT_PRIMARY,
-                                        fontSize = 16.sp
-                                    )
-                                }
                             }
-                        } else {
-                            Spacer(modifier = Modifier.size(40.dp))
+                            else -> Spacer(modifier = Modifier.size(40.dp))
                         }
                     }
                 }
@@ -291,39 +298,69 @@ fun ClothingDetailScreen(
                         onActivateEdit = { viewModel.onEditToggle() }
                     )
 
-                    if (state.error != null) {
-                        Text(
-                            text = state.error!!,
-                            color = Color.Red,
-                            fontSize = 13.sp
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(80.dp))
                 }
             }
 
-            // "Собрать образ" bottom button
-            Button(
-                onClick = { /* EPIC-16 */ },
-                enabled = false,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = ACCENT,
-                    disabledBackgroundColor = Color(0xFF3A3A3A)
-                )
-            ) {
+            if (state.error != null) {
                 Text(
-                    text = "Собрать образ",
-                    color = Color(0xFF9AA0A6),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    text = state.error!!,
+                    color = Color.Red,
+                    fontSize = 13.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(start = 16.dp, end = 16.dp, bottom = 84.dp)
                 )
+            }
+
+            if (isOwned == false) {
+                Button(
+                    onClick = { viewModel.saveToWardrobe() },
+                    enabled = !isSavingToWardrobe,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = ACCENT,
+                        disabledBackgroundColor = Color(0xFF3A3A3A)
+                    )
+                ) {
+                    if (isSavingToWardrobe) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                    } else {
+                        Text(
+                            text = "Добавить в гардероб",
+                            color = Color(0xFF27272B),
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            } else {
+                Button(
+                    onClick = { /* EPIC-16 */ },
+                    enabled = false,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = ACCENT,
+                        disabledBackgroundColor = Color(0xFF3A3A3A)
+                    )
+                ) {
+                    Text(
+                        text = "Собрать образ",
+                        color = Color(0xFF9AA0A6),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }
@@ -473,6 +510,27 @@ private fun MarketplaceSection(
                     modifier = Modifier.clickable { onActivateEdit() }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ClothingDetailSkeleton() {
+    val shimmer by rememberShimmerTranslation()
+    Column(modifier = Modifier.fillMaxSize()) {
+        SkeletonCard(
+            shimmerTranslation = shimmer,
+            modifier = Modifier.fillMaxWidth().height(320.dp),
+            shape = RoundedCornerShape(0),
+        )
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(12.dp))
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
+            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
         }
     }
 }
