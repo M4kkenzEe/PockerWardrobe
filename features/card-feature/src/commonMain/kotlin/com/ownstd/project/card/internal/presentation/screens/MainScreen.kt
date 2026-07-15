@@ -3,7 +3,6 @@ package com.ownstd.project.card.internal.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -13,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.internal.deeplink.DeepLink
@@ -45,7 +43,6 @@ internal fun MainScreen(parentNavController: NavHostController) {
             .fillMaxSize()
             .background(colors.canvas),
     ) {
-        // Content — bottom padding reserves space for the floating nav island
         BottomNavigationNavHost(
             navController = bottomNavController,
             deepLink = initialDeepLink,
@@ -55,9 +52,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     launchSingleTop = true
                 }
             },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 88.dp), // island 64dp + 12dp gap + ~12dp nav bar inset
+            modifier = Modifier.fillMaxSize(),
         )
 
         // Floating glass nav island

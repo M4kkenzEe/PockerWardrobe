@@ -3,7 +3,12 @@ package com.ownstd.project.pincard.internal.presentation.compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -75,9 +80,11 @@ internal fun Looks(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
+            val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
                 columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -100,7 +107,8 @@ internal fun Looks(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp),
+                .navigationBarsPadding()
+                .padding(end = 24.dp, bottom = 76.dp + 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             FloatingActionButton(
@@ -133,7 +141,10 @@ internal fun Looks(
 
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 76.dp)
         )
     }
 }

@@ -4,10 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -107,18 +111,15 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
                 )
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    OccasionFilterRow(
-                        selectedOccasion = selectedOccasion,
-                        onFilterSelected = { viewModel.setOccasionFilter(it) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
+                    val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = navBarBottom + 76.dp, // nav bar + island(64) + gap(12)
+                        ),
                         horizontalArrangement = Arrangement.spacedBy(18.dp),
                         verticalItemSpacing = 12.dp
                     ) {
@@ -133,16 +134,6 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
 
                         if (isUploading) {
                             item { SkeletonClotheCard() }
-                        }
-
-                        val totalItems = clothes.size + if (isUploading) 1 else 0
-                        val count = if (totalItems % 2 == 0) 2 else 3
-                        items(count) {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(6.dp)
-                            )
                         }
                     }
                 }
@@ -165,7 +156,9 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
 
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 76.dp)
             )
 
             if (showPaywall) {
