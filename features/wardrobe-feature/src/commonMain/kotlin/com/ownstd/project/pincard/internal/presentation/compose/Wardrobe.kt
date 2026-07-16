@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -91,6 +92,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
             else -> {
                 Column(modifier = Modifier.fillMaxSize()) {
                     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                     val shimmer by rememberShimmerTranslation()
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2),
@@ -98,6 +100,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
                         contentPadding = PaddingValues(
                             start = 8.dp,
                             end = 8.dp,
+                            top = statusBarTop + 8.dp,
                             bottom = navBarBottom + 76.dp,
                         ),
                         horizontalArrangement = Arrangement.spacedBy(18.dp),
@@ -156,12 +159,14 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
 private fun SkeletonClothesGrid(heights: List<Dp>) {
     val shimmer by rememberShimmerTranslation()
     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 8.dp,
             end = 8.dp,
+            top = statusBarTop + 8.dp,
             bottom = navBarBottom + 76.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(18.dp),

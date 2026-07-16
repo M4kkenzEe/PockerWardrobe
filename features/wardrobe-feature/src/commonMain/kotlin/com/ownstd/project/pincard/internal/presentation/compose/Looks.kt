@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -80,11 +81,13 @@ internal fun Looks(
         onDispose { }
     }
 
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 14.dp)
-            .padding(top = 12.dp)
+            .padding(top = statusBarTop + 12.dp)
             .pullRefresh(pullRefreshState)
     ) {
         when {
@@ -167,10 +170,11 @@ internal fun Looks(
 private fun SkeletonLooksGrid() {
     val shimmer by rememberShimmerTranslation()
     val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
+        contentPadding = PaddingValues(top = statusBarTop + 12.dp, bottom = navBarBottom + 76.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -20,9 +21,18 @@ import com.ownstd.project.card.internal.deeplink.getDeepLinkManager
 import com.ownstd.project.card.internal.navigation.AppScreens
 import com.ownstd.project.card.internal.navigation.BottomNavigationNavHost
 import com.ownstd.project.card.internal.navigation.BottomNavigationScreens
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import com.ownstd.project.designsystem.components.ClothisNavIsland
+import com.ownstd.project.designsystem.components.GlassIconButton
 import com.ownstd.project.designsystem.components.NavTab
 import com.ownstd.project.designsystem.theme.ClothisTheme
+import kotlinprojecttesting.design_system.generated.resources.Res
+import kotlinprojecttesting.design_system.generated.resources.ic_search
+import kotlinprojecttesting.design_system.generated.resources.ic_tune
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun MainScreen(parentNavController: NavHostController) {
@@ -60,26 +70,46 @@ internal fun MainScreen(parentNavController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Floating glass nav island — hidden on detail screens
+        // Floating bottom controls — filter | nav island | search
         if (showNavIsland) {
-            ClothisNavIsland(
-                selectedTab = selectedTab,
-                onTabSelected = { tab ->
-                    selectedTab = tab
-                    val destination = when (tab) {
-                        NavTab.Wardrobe -> BottomNavigationScreens.Shop()
-                        NavTab.Profile -> BottomNavigationScreens.Profile()
-                    }
-                    bottomNavController.navigate(destination) {
-                        popUpTo(bottomNavController.graph.startDestinationId) {
-                            saveState = true
+            val dimens = ClothisTheme.dimens
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = dimens.navIslandBottomGap),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                GlassIconButton(
+                    painter = painterResource(Res.drawable.ic_tune),
+                    contentDescription = "Фильтр",
+                    onClick = { /* TODO: open filter */ },
+                )
+                ClothisNavIsland(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                        val destination = when (tab) {
+                            NavTab.Wardrobe -> BottomNavigationScreens.Shop()
+                            NavTab.Profile -> BottomNavigationScreens.Profile()
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
+                        bottomNavController.navigate(destination) {
+                            popUpTo(bottomNavController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    applyInsets = false,
+                )
+                GlassIconButton(
+                    painter = painterResource(Res.drawable.ic_search),
+                    contentDescription = "Поиск",
+                    onClick = { /* TODO: open search */ },
+                )
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ fun ClothisNavIsland(
     selectedTab: NavTab,
     onTabSelected: (NavTab) -> Unit,
     modifier: Modifier = Modifier,
+    applyInsets: Boolean = true,
 ) {
     val colors = ClothisTheme.colors
     val dimens = ClothisTheme.dimens
@@ -49,8 +50,12 @@ fun ClothisNavIsland(
 
     Row(
         modifier = modifier
-            .navigationBarsPadding()
-            .padding(bottom = dimens.navIslandBottomGap)
+            .then(
+                if (applyInsets) Modifier
+                    .navigationBarsPadding()
+                    .padding(bottom = dimens.navIslandBottomGap)
+                else Modifier
+            )
             .width(240.dp)
             .height(dimens.navIslandHeight)
             .clip(islandShape)

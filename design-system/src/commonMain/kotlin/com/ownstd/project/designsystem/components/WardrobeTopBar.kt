@@ -73,7 +73,7 @@ fun WardrobeTopBar(
 }
 
 @Composable
-private fun WardrobeSegmentedControl(
+fun WardrobeSegmentedControl(
     tabs: List<String>,
     selectedIndex: Int,
     onTabSelected: (Int) -> Unit,

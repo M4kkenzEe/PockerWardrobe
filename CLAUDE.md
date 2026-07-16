@@ -123,6 +123,18 @@ Uses **Jetpack Navigation Compose** (multiplatform):
    - Duration: 1200 ms, LinearEasing, RepeatMode.Restart
    - Call `rememberShimmerTranslation()` once per grid/container, pass `shimmerTranslation: Float` to each `SkeletonCard` for a synchronized sweep.
 
-7. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
+8. **Floating bottom controls pattern** — `GlassIconButton` (`design-system/.../components/GlassIconButton.kt`):
+   - Circular, diameter = `dimens.navIslandHeight` (64dp)
+   - Material: `glassTint` background + 1dp `glassStroke` border + `CircleShape`
+   - Icon: `navIslandIconSize` (28dp), color `onCanvasMuted`, `indication = null`
+   - In `MainScreen.kt`, placed as siblings in a `Row` with `ClothisNavIsland(applyInsets = false)` between them; the Row owns `navigationBarsPadding` + `padding(bottom = navIslandBottomGap)`.
+
+9. **Auto-hiding tab pill** (`WardrobeMainScreen.kt`):
+   - `WardrobeSegmentedControl` (public, from `design-system`) floats at `Alignment.TopCenter` below status bar.
+   - Hidden by default; shown via `AnimatedVisibility` (fadeIn/fadeOut 200ms).
+   - Reveal/hide logic: `LaunchedEffect(pagerState)` + `snapshotFlow { isScrollInProgress to currentPage }.collectLatest { pillVisible = true; delay(3000); pillVisible = false }`.
+   - 3s timer restarts on every swipe frame or page change; tapping a pill segment triggers `pagerState.animateScrollToPage()` which restarts it too.
+
+10. **Исследование зависимостей**: Use `./ksrc.exe` (in project root) to explore Kotlin/Gradle library sources:
    - `./ksrc.exe deps --offline` — list available dependencies with sources
    - `./ksrc.exe cat "group:artifact:version!/commonMain/path/File.kt" --lines 1,100` — read source file
