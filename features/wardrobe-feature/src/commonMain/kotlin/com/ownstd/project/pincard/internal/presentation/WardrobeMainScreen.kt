@@ -50,7 +50,6 @@ fun WardrobeMainScreen(
                     viewModel = looksViewModel,
                     onNavigateToConstructor = openConstructor,
                     navigateToDetails = openDetails,
-                    onNavigateToTinderOutfit = openTinderOutfit,
                 )
             }
         }

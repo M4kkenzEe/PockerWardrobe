@@ -17,10 +17,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,12 +42,12 @@ import com.ownstd.project.pincard.internal.external.rememberShareManager
 import com.ownstd.project.pincard.internal.presentation.viewmodel.GenerateLooksError
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun Looks(
     viewModel: LooksViewModel,
     onNavigateToConstructor: () -> Unit,
     navigateToDetails: (lookId: Int) -> Unit,
-    onNavigateToTinderOutfit: () -> Unit = {}
 ) {
     val looksList by viewModel.looks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -52,6 +55,11 @@ internal fun Looks(
     val generateError by viewModel.generateError.collectAsState()
     val shareManager = rememberShareManager()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = false,
+        onRefresh = { onNavigateToConstructor() }
+    )
 
     LaunchedEffect(generateError) {
         when (generateError) {
@@ -77,6 +85,7 @@ internal fun Looks(
             .fillMaxSize()
             .padding(horizontal = 14.dp)
             .padding(top = 12.dp)
+            .pullRefresh(pullRefreshState)
     ) {
         when {
             isLoading && looksList.isEmpty() -> {
@@ -123,12 +132,6 @@ internal fun Looks(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             FloatingActionButton(
-                onClick = onNavigateToTinderOutfit,
-                backgroundColor = Color(0xFF4CAF50)
-            ) {
-                Text("👗", fontSize = 22.sp)
-            }
-            FloatingActionButton(
                 onClick = { if (!isGenerating) viewModel.generateLooks() },
                 backgroundColor = Color(0xFFBB86FC)
             ) {
@@ -142,13 +145,13 @@ internal fun Looks(
                     Text("✨", fontSize = 22.sp)
                 }
             }
-            FloatingActionButton(
-                onClick = { if (!isGenerating) onNavigateToConstructor() },
-                modifier = Modifier.alpha(if (isGenerating) 0.5f else 1f)
-            ) {
-                Text("+", fontSize = 32.sp)
-            }
         }
+
+        PullRefreshIndicator(
+            refreshing = false,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter),
+        )
 
         SnackbarHost(
             hostState = snackbarHostState,
