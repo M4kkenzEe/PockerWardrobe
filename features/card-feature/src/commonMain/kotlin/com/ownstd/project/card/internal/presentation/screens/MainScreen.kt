@@ -1,5 +1,9 @@
 package com.ownstd.project.card.internal.presentation.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,11 +85,17 @@ internal fun MainScreen(parentNavController: NavHostController) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                GlassIconButton(
-                    painter = painterResource(Res.drawable.ic_tune),
-                    contentDescription = "Фильтр",
-                    onClick = { /* TODO: open filter */ },
-                )
+                AnimatedVisibility(
+                    visible = selectedTab == NavTab.Wardrobe,
+                    enter = fadeIn(tween(200)),
+                    exit = fadeOut(tween(200)),
+                ) {
+                    GlassIconButton(
+                        painter = painterResource(Res.drawable.ic_tune),
+                        contentDescription = "Фильтр",
+                        onClick = { /* TODO: open filter */ },
+                    )
+                }
                 ClothisNavIsland(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
@@ -104,11 +114,17 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     },
                     applyInsets = false,
                 )
-                GlassIconButton(
-                    painter = painterResource(Res.drawable.ic_search),
-                    contentDescription = "Поиск",
-                    onClick = { /* TODO: open search */ },
-                )
+                AnimatedVisibility(
+                    visible = selectedTab == NavTab.Wardrobe,
+                    enter = fadeIn(tween(200)),
+                    exit = fadeOut(tween(200)),
+                ) {
+                    GlassIconButton(
+                        painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = "Поиск",
+                        onClick = { /* TODO: open search */ },
+                    )
+                }
             }
         }
     }
