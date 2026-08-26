@@ -1,5 +1,6 @@
 package com.ownstd.project.network.internal
 
+import com.ownstd.project.storage.SessionManager
 import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -29,7 +30,16 @@ private data class RefreshResponse(
 )
 
 internal object NetworkClient {
-    fun getClient(tokenStorage: TokenStorage, baseUrl: String): HttpClient {
+    fun getClient(
+        tokenStorage: TokenStorage,
+        baseUrl: String,
+        sessionManager: SessionManager
+    ): HttpClient {
+        fun clearSessionAndNotify() {
+            tokenStorage.clearSession()
+            sessionManager.notifySessionExpired()
+        }
+
         return HttpClient {
             install(Logging) {
                 logger = Logger.DEFAULT
@@ -52,7 +62,7 @@ internal object NetworkClient {
                     refreshTokens {
                         val oldRefresh = tokenStorage.getRefreshToken()
                             ?: run {
-                                tokenStorage.clearSession()
+                                clearSessionAndNotify()
                                 return@refreshTokens null
                             }
                         try {
@@ -68,16 +78,13 @@ internal object NetworkClient {
                                     refreshToken = body.refreshToken,
                                     expiresAt    = body.expiresAt
                                 )
-                                println("[Auth] token refreshed, userId=${body.userId}")
                                 BearerTokens(body.accessToken, body.refreshToken)
                             } else {
-                                println("[Auth] refresh failed: ${response.status}, clearing session")
-                                tokenStorage.clearSession()
+                                clearSessionAndNotify()
                                 null
                             }
                         } catch (e: Exception) {
-                            println("[Auth] refresh exception: ${e.message}, clearing session")
-                            tokenStorage.clearSession()
+                            clearSessionAndNotify()
                             null
                         }
                     }

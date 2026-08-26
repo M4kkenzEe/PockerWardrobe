@@ -34,12 +34,18 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.noarg)
+            implementation(libs.kotlinx.coroutines.core)
         }
         androidMain.dependencies {
             implementation("androidx.security:security-crypto:1.1.0-alpha06")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test.junit)
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

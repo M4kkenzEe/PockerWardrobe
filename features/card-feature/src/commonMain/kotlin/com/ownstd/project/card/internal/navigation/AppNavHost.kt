@@ -2,7 +2,7 @@ package com.ownstd.project.card.internal.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import com.ownstd.project.authorization.internal.presentation.AuthorizationScreen
 import com.ownstd.project.card.internal.presentation.screens.DebugScreen
 import com.ownstd.project.card.internal.presentation.screens.MainScreen
+import com.ownstd.project.storage.SessionManager
 import com.ownstd.project.storage.TokenStorage
 import org.koin.compose.koinInject
 
@@ -19,6 +20,7 @@ internal fun AppNavHost(
     modifier: Modifier = Modifier,
 ) {
     val tokenStorage: TokenStorage = koinInject()
+    val sessionManager: SessionManager = koinInject()
 
     val token = tokenStorage.getAccessToken()
     val isAuthorized = !token.isNullOrEmpty()
@@ -27,6 +29,15 @@ internal fun AppNavHost(
         AppScreens.Main
     } else {
         AppScreens.Authorization
+    }
+
+    LaunchedEffect(Unit) {
+        sessionManager.sessionExpiredEvent.collect {
+            navController.navigate(AppScreens.Authorization) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
     }
 
     HandleDeepLink(navController)
