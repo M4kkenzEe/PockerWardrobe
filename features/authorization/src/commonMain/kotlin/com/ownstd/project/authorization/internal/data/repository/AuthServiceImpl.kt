@@ -4,6 +4,7 @@ import com.ownstd.project.authorization.internal.data.model.AuthTokenResponse
 import com.ownstd.project.authorization.internal.data.model.ForgotPasswordRequest
 import com.ownstd.project.authorization.internal.data.model.ForgotPasswordResponse
 import com.ownstd.project.authorization.internal.data.model.LoginRequest
+import com.ownstd.project.authorization.internal.data.model.LogoutRequest
 import com.ownstd.project.authorization.internal.data.model.RegisterRequest
 import com.ownstd.project.authorization.internal.data.model.ResetPasswordRequest
 import com.ownstd.project.authorization.internal.data.model.TelegramInitResponse
@@ -107,6 +108,21 @@ class AuthServiceImpl(
         }
     }
 
+    override suspend fun logout(refreshToken: String): Result<Unit> {
+        return try {
+            val response = client.post(baseUrl + LOGOUT_URL) {
+                contentType(ContentType.Application.Json)
+                setBody(LogoutRequest(refreshToken))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(Unit)
+                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getTelegramInit(): Result<TelegramInitResponse> {
         return try {
             val response = client.get(baseUrl + TELEGRAM_INIT_URL)
@@ -134,6 +150,7 @@ class AuthServiceImpl(
     companion object {
         const val REGISTER_URL = "register"
         const val LOGIN_URL = "login"
+        const val LOGOUT_URL = "logout"
         const val FORGOT_PASSWORD_URL = "auth/forgot-password"
         const val RESET_PASSWORD_URL = "auth/reset-password"
         const val TELEGRAM_INIT_URL = "auth/telegram/init"

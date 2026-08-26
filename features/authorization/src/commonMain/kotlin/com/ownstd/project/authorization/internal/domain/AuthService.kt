@@ -21,6 +21,8 @@ interface AuthService {
     suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse>
     suspend fun resetPassword(email: String, code: String, newPassword: String): Result<AuthTokenResponse>
 
+    suspend fun logout(refreshToken: String): Result<Unit>
+
     suspend fun getTelegramInit(): Result<TelegramInitResponse>
     suspend fun getTelegramStatus(state: String): Result<TelegramStatusResponse>
 }

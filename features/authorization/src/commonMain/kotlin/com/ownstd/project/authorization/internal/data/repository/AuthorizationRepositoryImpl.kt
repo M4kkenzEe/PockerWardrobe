@@ -88,7 +88,13 @@ class AuthorizationRepositoryImpl(
         println("[AuthRepository] telegram login success")
     }
 
-    override fun logout() {
+    override suspend fun logout() {
+        val refreshToken = tokenStorage.getRefreshToken()
+        if (refreshToken != null) {
+            authService.logout(refreshToken)
+                .onSuccess { println("[AuthRepository] server logout success") }
+                .onFailure { e -> println("[AuthRepository] server logout failed (best-effort): ${e.message}") }
+        }
         tokenStorage.clearSession()
         println("[AuthRepository] logout - session cleared")
     }
