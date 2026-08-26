@@ -6,16 +6,20 @@ import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TELEGRAM_POLL_INTERVAL_MS = 2_000L
 private const val TELEGRAM_POLL_TIMEOUT_MS = 10 * 60 * 1_000L
+private const val RESEND_COOLDOWN_SECONDS = 60
 
 internal class AuthorizationViewModel(
     private val authorizationRepository: AuthorizationRepository,
@@ -30,8 +34,15 @@ internal class AuthorizationViewModel(
     val forgotPasswordEmail = MutableStateFlow("")
     val isForgotPasswordLoading = MutableStateFlow(false)
 
+    private val _resendCountdown = MutableStateFlow(0)
+
+    /** Seconds remaining on resend cooldown. 0 = button is active. */
+    val resendCountdown: StateFlow<Int> = _resendCountdown.asStateFlow()
+
     private val _openUrlEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val openUrlEvent: SharedFlow<String> = _openUrlEvent
+
+    private var resendTimerJob: Job? = null
 
     fun loginUser(username: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -68,7 +79,26 @@ internal class AuthorizationViewModel(
                 errorState.value = error
             } else {
                 forgotPasswordEmail.value = email
+                startResendTimer()
                 viewState.value = ViewState.RESET_PASSWORD
+            }
+        }
+    }
+
+    /**
+     * Resends the OTP code without navigating away from the ResetPassword screen.
+     * Restarts the 60-second cooldown timer.
+     */
+    fun resendPasswordResetCode(email: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isForgotPasswordLoading.value = true
+            errorState.value = null
+            val error = authorizationRepository.requestPasswordReset(email)
+            isForgotPasswordLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                startResendTimer()
             }
         }
     }
@@ -137,6 +167,19 @@ internal class AuthorizationViewModel(
             // loop exhausted without done/expired → timeout
             errorState.value = "Время вышло, попробуй снова"
             isTelegramLoading.value = false
+        }
+    }
+
+    private fun startResendTimer() {
+        resendTimerJob?.cancel()
+        resendTimerJob = viewModelScope.launch {
+            var seconds = RESEND_COOLDOWN_SECONDS
+            while (seconds > 0) {
+                _resendCountdown.value = seconds
+                delay(1_000L)
+                seconds--
+            }
+            _resendCountdown.value = 0
         }
     }
 }

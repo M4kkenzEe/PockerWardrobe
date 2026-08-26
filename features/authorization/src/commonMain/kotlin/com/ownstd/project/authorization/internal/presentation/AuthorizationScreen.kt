@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ownstd.project.authorization.internal.presentation.design_system.BG_GREY_COLOR
 import com.ownstd.project.authorization.internal.presentation.design_system.BLUE_COLOR
+import com.ownstd.project.authorization.internal.presentation.design_system.ERROR_COLOR
 import com.ownstd.project.authorization.internal.presentation.design_system.GREY_COLOR
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -65,6 +66,7 @@ fun AuthorizationScreen(
     val isTelegramLoading by viewModel.isTelegramLoading.collectAsState()
     val forgotPasswordEmail by viewModel.forgotPasswordEmail.collectAsState()
     val isForgotPasswordLoading by viewModel.isForgotPasswordLoading.collectAsState()
+    val resendCountdown by viewModel.resendCountdown.collectAsState()
 
     val uriHandler = LocalUriHandler.current
     LaunchedEffect(Unit) {
@@ -125,11 +127,49 @@ fun AuthorizationScreen(
                 errorMessage = isError,
                 isLoading = isForgotPasswordLoading,
                 email = forgotPasswordEmail,
+                resendCountdown = resendCountdown,
                 onResetPassword = viewModel::resetPassword,
+                onResendCode = viewModel::resendPasswordResetCode,
                 onBack = {
                     viewModel.errorState.value = null
                     viewModel.viewState.value = ViewState.LOGIN
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ValidatedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    errorMessage: String? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None
+) {
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            isError = errorMessage != null,
+            visualTransformation = visualTransformation,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = BLUE_COLOR,
+                unfocusedBorderColor = GREY_COLOR,
+                cursorColor = BLUE_COLOR
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = ERROR_COLOR,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }
     }
@@ -149,6 +189,12 @@ fun LoginScreen(
     var email by remember(initialEmail) { mutableStateOf(initialEmail) }
     var password by remember(initialPassword) { mutableStateOf(initialPassword) }
     var passwordVisible by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+
+    val emailErr = emailErrorMessage(email, emailTouched)
+    val passwordErr = if (passwordTouched && password.isBlank()) "Пароль не может быть пустым" else null
+    val isFormValid = isValidEmail(email) && password.isNotBlank()
 
     Column(
         modifier = Modifier
@@ -183,33 +229,19 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { email = it; emailTouched = true },
+                label = "Email",
+                errorMessage = emailErr
             )
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Пароль") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { password = it; passwordTouched = true },
+                label = "Пароль",
+                errorMessage = passwordErr,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
             )
 
             Text(
@@ -259,12 +291,15 @@ fun LoginScreen(
 
             Button(
                 onClick = { onLogin(email, password) },
+                enabled = isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
+                    disabledContentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -306,9 +341,27 @@ fun RegistrationScreen(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var gender by remember { mutableStateOf(Gender.OTHER) }
     var dropDownExpanded by remember { mutableStateOf(false) }
+
+    var usernameTouched by remember { mutableStateOf(false) }
+    var emailTouched by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+    var confirmPasswordTouched by remember { mutableStateOf(false) }
+
+    val usernameErr = if (usernameTouched && username.isBlank()) "Введите имя пользователя" else null
+    val emailErr = emailErrorMessage(email, emailTouched)
+    val passwordErr = passwordErrorMessage(password, passwordTouched)
+    val confirmPasswordErr = confirmPasswordErrorMessage(password, confirmPassword, confirmPasswordTouched)
+
+    val isFormValid = username.isNotBlank() &&
+        isValidEmail(email) &&
+        isValidPassword(password) &&
+        password == confirmPassword
+
+    val passwordTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
 
     Column(
         modifier = Modifier
@@ -343,47 +396,34 @@ fun RegistrationScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = username,
-                onValueChange = { username = it },
-                label = { Text("Имя пользователя") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { username = it; usernameTouched = true },
+                label = "Имя пользователя",
+                errorMessage = usernameErr
             )
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { email = it; emailTouched = true },
+                label = "Email",
+                errorMessage = emailErr
             )
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = password,
-                onValueChange = { password = it },
-                label = { Text("Пароль") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { password = it; passwordTouched = true },
+                label = "Пароль",
+                errorMessage = passwordErr,
+                visualTransformation = passwordTransformation
+            )
+
+            ValidatedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it; confirmPasswordTouched = true },
+                label = "Подтвердите пароль",
+                errorMessage = confirmPasswordErr,
+                visualTransformation = passwordTransformation
             )
 
             Row(
@@ -469,12 +509,15 @@ fun RegistrationScreen(
 
             Button(
                 onClick = { onRegister(username, email, password, gender) },
+                enabled = isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
+                    disabledContentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -513,6 +556,10 @@ fun ForgotPasswordScreen(
     onBack: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
+    var emailTouched by remember { mutableStateOf(false) }
+
+    val emailErr = emailErrorMessage(email, emailTouched)
+    val isFormValid = isValidEmail(email)
 
     Column(
         modifier = Modifier
@@ -547,18 +594,11 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            ValidatedTextField(
                 value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { email = it; emailTouched = true },
+                label = "Email",
+                errorMessage = emailErr
             )
 
             if (errorMessage != null) {
@@ -574,13 +614,15 @@ fun ForgotPasswordScreen(
 
             Button(
                 onClick = { if (!isLoading) onRequestReset(email) },
-                enabled = !isLoading,
+                enabled = !isLoading && isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
+                    disabledContentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -618,12 +660,27 @@ fun ResetPasswordScreen(
     errorMessage: String?,
     isLoading: Boolean,
     email: String,
+    resendCountdown: Int,
     onResetPassword: (String, String, String) -> Unit,
+    onResendCode: (String) -> Unit,
     onBack: () -> Unit
 ) {
     var code by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var passwordTouched by remember { mutableStateOf(false) }
+    var confirmPasswordTouched by remember { mutableStateOf(false) }
+
+    val passwordErr = passwordErrorMessage(newPassword, passwordTouched)
+    val confirmPasswordErr = confirmPasswordErrorMessage(newPassword, confirmPassword, confirmPasswordTouched)
+
+    val isFormValid = code.isNotEmpty() &&
+        isValidPassword(newPassword) &&
+        newPassword == confirmPassword
+
+    val passwordTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
+    val resendActive = isResendEnabled(resendCountdown, isLoading)
 
     Column(
         modifier = Modifier
@@ -680,19 +737,31 @@ fun ResetPasswordScreen(
                 shape = RoundedCornerShape(12.dp)
             )
 
-            OutlinedTextField(
+            Text(
+                text = formatResendText(resendCountdown),
+                fontSize = 13.sp,
+                color = if (resendActive) BLUE_COLOR else GREY_COLOR,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (resendActive) Modifier.clickable { onResendCode(email) } else Modifier)
+                    .padding(vertical = 2.dp)
+                    .wrapContentWidth(Alignment.End)
+            )
+
+            ValidatedTextField(
                 value = newPassword,
-                onValueChange = { newPassword = it },
-                label = { Text("Новый пароль") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
-                ),
-                shape = RoundedCornerShape(12.dp)
+                onValueChange = { newPassword = it; passwordTouched = true },
+                label = "Новый пароль",
+                errorMessage = passwordErr,
+                visualTransformation = passwordTransformation
+            )
+
+            ValidatedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it; confirmPasswordTouched = true },
+                label = "Подтвердите пароль",
+                errorMessage = confirmPasswordErr,
+                visualTransformation = passwordTransformation
             )
 
             Row(
@@ -731,13 +800,15 @@ fun ResetPasswordScreen(
 
             Button(
                 onClick = { if (!isLoading) onResetPassword(email, code, newPassword) },
-                enabled = !isLoading,
+                enabled = !isLoading && isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
+                    disabledContentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
