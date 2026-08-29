@@ -192,9 +192,9 @@ fun LoginScreen(
     var emailTouched by remember { mutableStateOf(false) }
     var passwordTouched by remember { mutableStateOf(false) }
 
-    val emailErr = emailErrorMessage(email, emailTouched)
+    val emailErr = if (emailTouched && email.isBlank()) "Email не может быть пустым" else null
     val passwordErr = if (passwordTouched && password.isBlank()) "Пароль не может быть пустым" else null
-    val isFormValid = isValidEmail(email) && password.isNotBlank()
+    val isFormValid = email.isNotBlank() && password.isNotBlank()
 
     Column(
         modifier = Modifier
