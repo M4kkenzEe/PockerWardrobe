@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -23,7 +24,8 @@ private const val RESEND_COOLDOWN_SECONDS = 60
 
 internal class AuthorizationViewModel(
     private val authorizationRepository: AuthorizationRepository,
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     val viewState = MutableStateFlow(ViewState.LOGIN)
     val errorState = MutableStateFlow<String?>(null)
@@ -45,7 +47,7 @@ internal class AuthorizationViewModel(
     private var resendTimerJob: Job? = null
 
     fun loginUser(username: String, password: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             val result = authorizationRepository.loginUser(username, password)
             if (result != null) {
                 errorState.value = result
@@ -56,7 +58,7 @@ internal class AuthorizationViewModel(
     }
 
     fun registerUser(username: String, email: String, password: String, gender: Gender) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             val result = authorizationRepository.registerUser(username, email, password, gender)
             if (result != null) {
                 errorState.value = result
@@ -70,7 +72,7 @@ internal class AuthorizationViewModel(
     }
 
     fun requestPasswordReset(email: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             isForgotPasswordLoading.value = true
             errorState.value = null
             val error = authorizationRepository.requestPasswordReset(email)
@@ -90,7 +92,7 @@ internal class AuthorizationViewModel(
      * Restarts the 60-second cooldown timer.
      */
     fun resendPasswordResetCode(email: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             isForgotPasswordLoading.value = true
             errorState.value = null
             val error = authorizationRepository.requestPasswordReset(email)
@@ -104,7 +106,7 @@ internal class AuthorizationViewModel(
     }
 
     fun resetPassword(email: String, code: String, newPassword: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             isForgotPasswordLoading.value = true
             errorState.value = null
             val error = authorizationRepository.resetPassword(email, code, newPassword)
@@ -119,7 +121,7 @@ internal class AuthorizationViewModel(
 
     fun startTelegramAuth() {
         if (isTelegramLoading.value) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcher) {
             isTelegramLoading.value = true
             errorState.value = null
 
