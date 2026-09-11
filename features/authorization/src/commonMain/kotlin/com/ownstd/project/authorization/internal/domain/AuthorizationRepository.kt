@@ -12,6 +12,5 @@ interface AuthorizationRepository {
     ): String?
     suspend fun requestPasswordReset(email: String): String?
     suspend fun resetPassword(email: String, code: String, newPassword: String): String?
-    fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long)
     suspend fun logout()
 }

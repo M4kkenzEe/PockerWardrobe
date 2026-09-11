@@ -1,6 +1,5 @@
 package com.ownstd.project.authorization
 
-import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.AuthorizationViewModel
 import com.ownstd.project.authorization.internal.presentation.Gender
@@ -33,7 +32,7 @@ class PasswordResetFlowTest {
     @Before fun setUp() { Dispatchers.setMain(dispatcher) }
     @After fun tearDown() { Dispatchers.resetMain() }
 
-    private fun viewModel() = AuthorizationViewModel(repo, StubAuthService(), dispatcher)
+    private fun viewModel() = AuthorizationViewModel(repo, dispatcher)
 
     @Test fun `happy path - request code then reset password lands user in the app`() = runTest(dispatcher) {
         val vm = viewModel()
@@ -166,16 +165,5 @@ private class FakeAuthRepository : AuthorizationRepository {
         return resetPasswordError
     }
 
-    override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) = Unit
     override suspend fun logout() = Unit
-}
-
-private class StubAuthService : AuthService {
-    override suspend fun register(username: String, email: String, password: String, gender: String) = error("unused")
-    override suspend fun login(username: String, password: String) = error("unused")
-    override suspend fun forgotPassword(email: String) = error("unused")
-    override suspend fun resetPassword(email: String, code: String, newPassword: String) = error("unused")
-    override suspend fun logout(refreshToken: String) = error("unused")
-    override suspend fun getTelegramInit() = error("unused")
-    override suspend fun getTelegramStatus(state: String) = error("unused")
 }

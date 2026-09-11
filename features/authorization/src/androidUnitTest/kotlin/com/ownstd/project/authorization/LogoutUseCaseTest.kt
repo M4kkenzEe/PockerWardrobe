@@ -68,8 +68,6 @@ private class FakeAuthorizationRepository(
 
     override suspend fun resetPassword(email: String, code: String, newPassword: String): String? = null
 
-    override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) {}
-
     override suspend fun logout() {
         logoutCalled = true
         tokenStorage.clearSession()
@@ -166,7 +164,6 @@ class LogoutUseCaseTest {
             override suspend fun registerUser(username: String, email: String, password: String, gender: Gender): String? = null
             override suspend fun requestPasswordReset(email: String): String? = null
             override suspend fun resetPassword(email: String, code: String, newPassword: String): String? = null
-            override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) {}
             override suspend fun logout() { order.add("logout") }
         }
         val orderedNet = object : NetworkRepository {

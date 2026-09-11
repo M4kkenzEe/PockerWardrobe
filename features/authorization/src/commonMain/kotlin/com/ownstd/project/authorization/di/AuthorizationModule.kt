@@ -25,7 +25,7 @@ fun authorizationModule(): Module = module {
 
     single { LogoutUseCase(authorizationRepository = get(), networkRepository = get()) }
 
-    viewModel<AuthorizationViewModel> { AuthorizationViewModel(authorizationRepository = get(), authService = get()) }
+    viewModel<AuthorizationViewModel> { AuthorizationViewModel(authorizationRepository = get()) }
 
     factory<AuthService> { AuthServiceImpl(networkRepository = get()) }
 }

@@ -79,15 +79,6 @@ class AuthorizationRepositoryImpl(
             )
     }
 
-    override fun loginByTelegram(accessToken: String, refreshToken: String, expiresAt: Long) {
-        tokenStorage.saveSession(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            expiresAt = expiresAt
-        )
-        println("[AuthRepository] telegram login success")
-    }
-
     override suspend fun logout() {
         val refreshToken = tokenStorage.getRefreshToken()
         if (refreshToken != null) {
