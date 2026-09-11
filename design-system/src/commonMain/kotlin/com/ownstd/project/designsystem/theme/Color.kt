@@ -13,7 +13,8 @@ internal val OnCanvas = Color(0xFFF5F1EA)
 internal val OnCanvasMuted = Color(0xFFA8A198)
 internal val OnSurface = Color(0xFF1E1B18)
 internal val OnSurfaceMuted = Color(0x8C1E1B18)   // 55% alpha
-internal val OnClay = Color(0xFFF5F1EA)
+// Dark text meets normal-text contrast on the locked clay fill.
+internal val OnClay = Color(0xFF1E1B18)
 internal val OnTeal = Color(0xFFF5F1EA)
 internal val Divider = Color(0x1AF5F1EA)            // 10% alpha
 internal val SurfaceDivider = Color(0x141E1B18)     // 8% alpha

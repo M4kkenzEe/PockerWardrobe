@@ -29,6 +29,11 @@ data class ClothisDimens(
 
     // Component sizes
     val buttonHeight: Dp = 52.dp,
+    val touchTargetMin: Dp = 48.dp,
+    val borderWidth: Dp = 1.dp,
+    val progressStroke: Dp = 2.dp,
+    val detailImageMaxWidth: Dp = 440.dp,
+    val detailContentMaxWidth: Dp = 600.dp,
     val iconButtonSize: Dp = 40.dp,
     val iconButtonIcon: Dp = 24.dp,
     val segmentControlHeight: Dp = 40.dp,

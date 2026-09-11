@@ -57,6 +57,7 @@ kotlin {
 
             //navigation
             implementation(libs.compose.navigation)
+            implementation("org.jetbrains.compose.ui:ui-backhandler:1.8.2")
 
             //viewmodel
             implementation(libs.androidx.lifecycle.viewmodel.compose)

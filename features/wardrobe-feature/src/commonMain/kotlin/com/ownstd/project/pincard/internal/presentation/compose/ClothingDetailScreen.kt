@@ -2,552 +2,434 @@ package com.ownstd.project.pincard.internal.presentation.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardType
 import coil3.compose.AsyncImage
-import com.ownstd.project.designsystem.components.SkeletonCard
-import com.ownstd.project.designsystem.components.rememberShimmerTranslation
+import com.ownstd.project.designsystem.components.*
+import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.data.model.Clothe
-import com.ownstd.project.pincard.internal.presentation.viewmodel.ClothingDetailViewModel
-import com.ownstd.project.pincard.internal.replaceFragment
+import com.ownstd.project.pincard.internal.presentation.viewmodel.*
+import androidx.compose.ui.platform.LocalUriHandler
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.*
 
-private val BG = Color(0xFF1E1E1E)
-private val SURFACE = Color(0xFF2A2A2A)
-private val ACCENT = Color(0xFF8AB4F8)
-private val TEXT_PRIMARY = Color.White
-private val TEXT_SECONDARY = Color(0xFF9AA0A6)
-private val CHIP_BG = Color(0xFF3A3A3A)
-
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 fun ClothingDetailScreen(
     clotheId: Int,
     preloadedClothe: Clothe? = null,
     onBackClick: () -> Unit = {},
 ) {
-    val viewModel: ClothingDetailViewModel = koinViewModel { parametersOf(clotheId, preloadedClothe) }
+    val viewModel: ClothingDetailViewModel = koinViewModel(key = "clothing-detail-$clotheId") {
+        parametersOf(clotheId, preloadedClothe)
+    }
     val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.savedToWardrobeEvent.collect { onBackClick() }
-    }
-    val editName by viewModel.editName.collectAsState()
-    val editStoreUrl by viewModel.editStoreUrl.collectAsState()
-    val editSeason by viewModel.editSeason.collectAsState()
-    val editFit by viewModel.editFit.collectAsState()
-    val editMaterial by viewModel.editMaterial.collectAsState()
-    val editBrand by viewModel.editBrand.collectAsState()
-    val editStyleTags by viewModel.editStyleTags.collectAsState()
-
-    val clothe = state.clothe
-    val isEditMode = state.isEditMode
-    val isSaving = state.isSaving
-    val isOwned = state.isOwned
-    val isSavingToWardrobe = state.isSavingToWardrobe
     val uriHandler = LocalUriHandler.current
-
-    Box(modifier = Modifier.fillMaxSize().background(BG)) {
-        if (clothe == null && state.error == null) {
-            ClothingDetailSkeleton()
-        } else if (state.error != null && clothe == null) {
-            Text(
-                text = state.error ?: "Ошибка",
-                color = Color.Red,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else if (clothe != null) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Hero image
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(320.dp)
-                ) {
-                    AsyncImage(
-                        model = clothe.imageUrl.replaceFragment(),
-                        contentDescription = clothe.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    // Top bar overlay
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x99000000))
-                                .clickable { onBackClick() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("←", color = TEXT_PRIMARY, fontSize = 18.sp)
-                        }
-                        when {
-                            isOwned == null -> CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = ACCENT,
-                                strokeWidth = 2.dp
-                            )
-                            isOwned == true && isSaving -> CircularProgressIndicator(
-                                modifier = Modifier.size(36.dp),
-                                color = ACCENT,
-                                strokeWidth = 2.dp
-                            )
-                            isOwned == true -> Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0x99000000))
-                                    .clickable {
-                                        if (isEditMode) viewModel.onSave() else viewModel.onEditToggle()
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (isEditMode) "✓" else "✏",
-                                    color = if (isEditMode) ACCENT else TEXT_PRIMARY,
-                                    fontSize = 16.sp
-                                )
-                            }
-                            else -> Spacer(modifier = Modifier.size(40.dp))
-                        }
-                    }
-                }
-
-                // Scrollable attributes
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Name
-                    AttributeSection(label = "Название") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editName,
-                                onValueChange = { viewModel.editName.value = it },
-                                placeholder = "Название вещи"
-                            )
-                        } else {
-                            Text(
-                                text = clothe.name.ifBlank { "—" },
-                                color = TEXT_PRIMARY,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    // Colors
-                    if (!clothe.colors.isNullOrEmpty()) {
-                        AttributeSection(label = "Цвета") {
-                            ColorChips(colors = clothe.colors)
-                        }
-                    }
-
-                    // Category
-                    clothe.category?.takeIf { it.isNotBlank() }?.let { category ->
-                        AttributeSection(label = "Категория") {
-                            Chip(text = category)
-                        }
-                    }
-
-                    // Season
-                    AttributeSection(label = "Сезон") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editSeason,
-                                onValueChange = { viewModel.editSeason.value = it },
-                                placeholder = "Лето / Зима / ..."
-                            )
-                        } else {
-                            Text(
-                                text = clothe.season ?: "—",
-                                color = if (clothe.season != null) TEXT_PRIMARY else TEXT_SECONDARY,
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-
-                    // Fit
-                    AttributeSection(label = "Посадка") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editFit,
-                                onValueChange = { viewModel.editFit.value = it },
-                                placeholder = "Облегающий / Свободный / ..."
-                            )
-                        } else {
-                            Text(
-                                text = clothe.fit ?: "—",
-                                color = if (clothe.fit != null) TEXT_PRIMARY else TEXT_SECONDARY,
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-
-                    // Material
-                    AttributeSection(label = "Материал") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editMaterial,
-                                onValueChange = { viewModel.editMaterial.value = it },
-                                placeholder = "Хлопок / Шерсть / ..."
-                            )
-                        } else {
-                            Text(
-                                text = clothe.material ?: "—",
-                                color = if (clothe.material != null) TEXT_PRIMARY else TEXT_SECONDARY,
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-
-                    // Brand
-                    AttributeSection(label = "Бренд") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editBrand,
-                                onValueChange = { viewModel.editBrand.value = it },
-                                placeholder = "Zara / H&M / ..."
-                            )
-                        } else {
-                            Text(
-                                text = clothe.brand ?: "—",
-                                color = if (clothe.brand != null) TEXT_PRIMARY else TEXT_SECONDARY,
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-
-                    // Style tags
-                    AttributeSection(label = "Стиль") {
-                        if (isEditMode) {
-                            EditField(
-                                value = editStyleTags,
-                                onValueChange = { viewModel.editStyleTags.value = it },
-                                placeholder = "casual, street, formal"
-                            )
-                        } else {
-                            val tags = clothe.styleTags
-                                ?.split(",")
-                                ?.map { it.trim() }
-                                ?.filter { it.isNotBlank() }
-                            if (!tags.isNullOrEmpty()) {
-                                TagChips(tags = tags)
-                            } else {
-                                Text("—", color = TEXT_SECONDARY, fontSize = 15.sp)
-                            }
-                        }
-                    }
-
-                    // Marketplace URL section
-                    Spacer(modifier = Modifier.height(4.dp))
-                    MarketplaceSection(
-                        storeUrl = clothe.storeUrl,
-                        isEditMode = isEditMode,
-                        editStoreUrl = editStoreUrl,
-                        onEditStoreUrlChange = { viewModel.editStoreUrl.value = it },
-                        onOpenStore = { url ->
-                            if (url.isNotBlank()) uriHandler.openUri(url)
-                        },
-                        onActivateEdit = { viewModel.onEditToggle() }
-                    )
-
-                    Spacer(modifier = Modifier.height(80.dp))
-                }
-            }
-
-            if (state.error != null) {
-                Text(
-                    text = state.error!!,
-                    color = Color.Red,
-                    fontSize = 13.sp,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(start = 16.dp, end = 16.dp, bottom = 84.dp)
-                )
-            }
-
-            if (isOwned == false) {
-                Button(
-                    onClick = { viewModel.saveToWardrobe() },
-                    enabled = !isSavingToWardrobe,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = ACCENT,
-                        disabledBackgroundColor = Color(0xFF3A3A3A)
-                    )
-                ) {
-                    if (isSavingToWardrobe) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                    } else {
-                        Text(
-                            text = "Добавить в гардероб",
-                            color = Color(0xFF27272B),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            } else {
-                Button(
-                    onClick = { /* EPIC-16 */ },
-                    enabled = false,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = ACCENT,
-                        disabledBackgroundColor = Color(0xFF3A3A3A)
-                    )
-                ) {
-                    Text(
-                        text = "Собрать образ",
-                        color = Color(0xFF9AA0A6),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-        }
+    val latestOnBack by rememberUpdatedState(onBackClick)
+    LaunchedEffect(viewModel) {
+        viewModel.savedToWardrobeEvent.collect { latestOnBack() }
     }
-}
-
-@Composable
-private fun AttributeSection(label: String, content: @Composable () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(SURFACE)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Text(text = label, color = TEXT_SECONDARY, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-        content()
+    BackHandler(enabled = state.isEditMode || state.isSavingToWardrobe) {
+        if (!state.isSaving && !state.isSavingToWardrobe) viewModel.onEditToggle()
     }
-}
-
-@Composable
-private fun EditField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(placeholder, color = TEXT_SECONDARY, fontSize = 14.sp) },
-        modifier = Modifier.fillMaxWidth(),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = TEXT_PRIMARY,
-            unfocusedBorderColor = Color(0xFF555555),
-            focusedBorderColor = ACCENT,
-            cursorColor = ACCENT,
-            backgroundColor = SURFACE
-        ),
-        singleLine = true
+    ClothingDetailContent(
+        state = state,
+        onBack = {
+            if (state.isEditMode) viewModel.onEditToggle() else onBackClick()
+        },
+        onEdit = viewModel::onEditToggle,
+        onSave = viewModel::onSave,
+        onAdd = viewModel::saveToWardrobe,
+        onRetry = viewModel::retry,
+        onFieldChange = viewModel::onFieldChange,
+        onOpenStore = { url ->
+            runCatching { uriHandler.openUri(url) }.onFailure { viewModel.onStoreOpenFailed() }
+        },
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ColorChips(colors: List<String>) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        colors.forEach { hex ->
-            val color = runCatching { Color(parseHexColor(hex)) }.getOrElse { Color.Gray }
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .border(1.dp, Color(0xFF555555), CircleShape)
+internal fun ClothingDetailContent(
+    state: ClothingDetailState,
+    onBack: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onSave: () -> Unit = {},
+    onAdd: () -> Unit = {},
+    onRetry: () -> Unit = {},
+    onFieldChange: (ClothingField, String) -> Unit = { _, _ -> },
+    onOpenStore: (String) -> Unit = {},
+) {
+    val colors = ClothisTheme.colors
+    val dimens = ClothisTheme.dimens
+    val details = state.details
+    val scrollState = rememberScrollState()
+    LaunchedEffect(state.isEditMode) { scrollState.scrollTo(0) }
+    LaunchedEffect(state.error, scrollState.maxValue) {
+        if (state.error != null && details != null) scrollState.scrollTo(scrollState.maxValue)
+    }
+    Column(
+        modifier = Modifier.fillMaxSize().background(colors.canvas)
+            .statusBarsPadding().navigationBarsPadding().imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = Modifier.widthIn(max = dimens.detailContentMaxWidth).fillMaxWidth()
+                .padding(horizontal = dimens.spaceSm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = onBack,
+                enabled = !state.isSaving && !state.isSavingToWardrobe,
+                modifier = Modifier.size(dimens.touchTargetMin),
+            ) {
+                Icon(
+                    painterResource(Res.drawable.ic_detail_back),
+                    contentDescription = stringResource(Res.string.item_detail_back),
+                    tint = colors.onCanvas,
+                    modifier = Modifier.size(dimens.iconButtonIcon),
+                )
+            }
+            Text(
+                text = stringResource(if (state.isEditMode) Res.string.item_detail_edit_title else Res.string.item_detail_title),
+                color = colors.onCanvas,
+                style = ClothisTheme.typography.title,
+                modifier = Modifier.weight(1f).padding(vertical = dimens.spaceSm),
             )
         }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun TagChips(tags: List<String>) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        tags.forEach { tag ->
-            Chip(text = tag)
+        Column(
+            modifier = Modifier.weight(1f).widthIn(max = dimens.detailContentMaxWidth)
+                .fillMaxWidth().verticalScroll(scrollState)
+                .padding(horizontal = dimens.screenHorizontalPadding)
+                .padding(bottom = dimens.space2xl),
+            verticalArrangement = Arrangement.spacedBy(dimens.space2xl),
+        ) {
+            when {
+                details == null && state.isLoading -> ClothingDetailSkeleton()
+                details == null -> {
+                    Spacer(Modifier.height(dimens.space2xl))
+                    DetailStatus(stringResource(errorResource(state.error ?: ClothingDetailError.Load)))
+                    if (state.error == ClothingDetailError.NotFound) {
+                        Text(
+                            stringResource(Res.string.item_detail_not_found_hint),
+                            color = colors.onCanvasMuted, style = ClothisTheme.typography.body,
+                        )
+                        ClothisPrimaryButton(stringResource(Res.string.item_detail_return), onBack, Modifier.fillMaxWidth())
+                    } else {
+                        ClothisPrimaryButton(stringResource(Res.string.item_detail_retry), onRetry, Modifier.fillMaxWidth())
+                    }
+                }
+                state.isEditMode -> {
+                    Text(
+                        stringResource(Res.string.item_detail_edit_hint),
+                        color = colors.onCanvasMuted, style = ClothisTheme.typography.body,
+                    )
+                    ClothingEditForm(state, onFieldChange)
+                }
+                else -> {
+                    ClothingHero(details)
+                    Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+                        details.category?.let {
+                            Text(it, style = ClothisTheme.typography.caption, color = colors.onCanvasMuted)
+                        }
+                        Text(
+                            details.name.ifBlank { stringResource(Res.string.item_detail_unnamed) },
+                            style = ClothisTheme.typography.h1, color = colors.onCanvas,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        if (state.isOwned != null) {
+                            Text(
+                                stringResource(if (state.isOwned) Res.string.item_detail_owned else Res.string.item_detail_catalog),
+                                style = ClothisTheme.typography.caption, color = colors.onCanvasMuted,
+                            )
+                        }
+                        if (state.didSave) DetailStatus(stringResource(Res.string.item_detail_saved))
+                    }
+                    ClothingAttributes(details)
+                    MarketplaceSection(details, state.isOwned == true, onEdit, onOpenStore)
+                    if (state.isOwned == true) {
+                        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+                            ClothisGhostButton(
+                                text = stringResource(Res.string.item_detail_outfit),
+                                onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text(
+                                stringResource(Res.string.item_detail_outfit_unavailable),
+                                style = ClothisTheme.typography.caption, color = colors.onCanvasMuted,
+                            )
+                        }
+                    }
+                }
+            }
+            // Long errors belong to the scrollable content, never a floating overlay.
+            if (details != null && state.error != null) {
+                DetailStatus(stringResource(errorResource(state.error)))
+            }
+        }
+        if (details != null) {
+            DetailActions(state, onEdit, onSave, onAdd, onRetry)
         }
     }
 }
 
 @Composable
-private fun Chip(text: String) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(CHIP_BG)
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    ) {
-        Text(text = text, color = TEXT_PRIMARY, fontSize = 13.sp)
+private fun ClothingHero(details: ClothingDetailUiModel) {
+    val dimens = ClothisTheme.dimens
+    val colors = ClothisTheme.colors
+    var imageFailed by remember(details.imageUrl) { mutableStateOf(false) }
+    var imageLoaded by remember(details.imageUrl) { mutableStateOf(false) }
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.widthIn(max = dimens.detailImageMaxWidth).fillMaxWidth().aspectRatio(4f / 3f)
+                .clip(RoundedCornerShape(dimens.radiusCard)).background(colors.surface),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (details.imageUrl.isBlank() || imageFailed || !imageLoaded) {
+                Text(
+                    stringResource(
+                        if (details.imageUrl.isBlank() || imageFailed) Res.string.item_detail_image_missing
+                        else Res.string.item_detail_image_loading,
+                    ),
+                    style = ClothisTheme.typography.body, color = colors.onSurface,
+                    modifier = Modifier.padding(dimens.spaceLg),
+                )
+            }
+            if (details.imageUrl.isNotBlank() && !imageFailed) {
+                AsyncImage(
+                    model = details.imageUrl,
+                    contentDescription = details.name,
+                    contentScale = ContentScale.Fit,
+                    onSuccess = { imageLoaded = true },
+                    onError = { imageFailed = true },
+                    modifier = Modifier.fillMaxSize().padding(dimens.spaceLg),
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ClothingAttributes(details: ClothingDetailUiModel) {
+    val dimens = ClothisTheme.dimens
+    val colors = ClothisTheme.colors
+    Column {
+        SectionHeading(stringResource(Res.string.item_detail_about))
+        details.attributes.forEach { attribute ->
+            ClothisDetailRow(
+                stringResource(fieldResource(attribute.field)),
+                attribute.value ?: stringResource(Res.string.item_detail_missing),
+            )
+        }
+        Column(
+            modifier = Modifier.padding(top = dimens.spaceLg),
+            verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+        ) {
+            Text(stringResource(Res.string.item_detail_colors), style = ClothisTheme.typography.caption, color = colors.onCanvasMuted)
+            if (details.colors.isEmpty()) {
+                Text(stringResource(Res.string.item_detail_missing), style = ClothisTheme.typography.body, color = colors.onCanvas)
+            } else {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm), verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+                    details.colors.forEach { color ->
+                        Row(
+                            modifier = Modifier.clip(RoundedCornerShape(dimens.radiusChip)).background(colors.surfaceElevated)
+                                .padding(dimens.spaceSm),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+                        ) {
+                            color.color?.let {
+                                Box(Modifier.size(dimens.spaceLg).clip(CircleShape).background(it)
+                                    .border(dimens.borderWidth, colors.onCanvasMuted, CircleShape))
+                            }
+                            Text(color.label, style = ClothisTheme.typography.caption, color = colors.onCanvas)
+                        }
+                    }
+                }
+            }
+        }
+        Column(
+            modifier = Modifier.padding(top = dimens.spaceLg),
+            verticalArrangement = Arrangement.spacedBy(dimens.spaceSm),
+        ) {
+            Text(stringResource(Res.string.item_detail_style), style = ClothisTheme.typography.caption, color = colors.onCanvasMuted)
+            if (details.tags.isEmpty()) {
+                Text(stringResource(Res.string.item_detail_missing), style = ClothisTheme.typography.body, color = colors.onCanvas)
+            } else {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(dimens.spaceSm), verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
+                    details.tags.forEach { tag ->
+                        Text(
+                            tag, style = ClothisTheme.typography.caption, color = colors.onCanvas,
+                            modifier = Modifier.clip(RoundedCornerShape(dimens.radiusChip)).background(colors.surfaceElevated)
+                                .padding(horizontal = dimens.spaceMd, vertical = dimens.spaceSm),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun MarketplaceSection(
-    storeUrl: String?,
-    isEditMode: Boolean,
-    editStoreUrl: String,
-    onEditStoreUrlChange: (String) -> Unit,
+    details: ClothingDetailUiModel,
+    isOwned: Boolean,
+    onEdit: () -> Unit,
     onOpenStore: (String) -> Unit,
-    onActivateEdit: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(SURFACE)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("Ссылка на магазин", color = TEXT_SECONDARY, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-
-        if (isEditMode) {
-            OutlinedTextField(
-                value = editStoreUrl,
-                onValueChange = onEditStoreUrlChange,
-                placeholder = { Text("https://www.wildberries.ru/...", color = TEXT_SECONDARY, fontSize = 13.sp) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    textColor = TEXT_PRIMARY,
-                    unfocusedBorderColor = Color(0xFF555555),
-                    focusedBorderColor = ACCENT,
-                    cursorColor = ACCENT,
-                    backgroundColor = SURFACE
-                ),
-                singleLine = true
+    val colors = ClothisTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(ClothisTheme.dimens.spaceSm)) {
+        SectionHeading(stringResource(Res.string.item_detail_store))
+        if (details.storeUrl != null) {
+            Text(details.storeDomain.orEmpty(), style = ClothisTheme.typography.body, color = colors.onCanvasMuted)
+            ClothisGhostButton(
+                stringResource(Res.string.item_detail_store_open), { onOpenStore(details.storeUrl) }, Modifier.fillMaxWidth(),
             )
         } else {
-            val hasUrl = !storeUrl.isNullOrBlank()
-            if (hasUrl) {
-                val domain = extractDomain(storeUrl!!)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = domain,
-                        color = ACCENT,
-                        fontSize = 14.sp,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(ACCENT)
-                            .clickable { onOpenStore(storeUrl) }
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text("Открыть", color = Color(0xFF27272B), fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                    }
-                }
-            } else {
-                Text(
-                    text = "Добавить ссылку на магазин",
-                    color = TEXT_SECONDARY,
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable { onActivateEdit() }
-                )
+            Text(
+                stringResource(if (details.hasStoreValue) Res.string.item_detail_store_invalid else Res.string.item_detail_store_empty),
+                style = ClothisTheme.typography.body, color = colors.onCanvasMuted,
+            )
+            if (isOwned) DetailTextAction(stringResource(Res.string.item_detail_store_add), onEdit)
+        }
+    }
+}
+
+@Composable
+private fun ClothingEditForm(state: ClothingDetailState, onFieldChange: (ClothingField, String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(ClothisTheme.dimens.spaceMd)) {
+        ClothingField.entries.forEach { field ->
+            ClothisTextField(
+                value = state.draft[field].orEmpty(),
+                onValueChange = { onFieldChange(field, it) },
+                label = stringResource(fieldResource(field)),
+                enabled = !state.isSaving,
+                isError = (field == ClothingField.Name && state.error == ClothingDetailError.NameRequired) ||
+                    (field == ClothingField.StoreUrl && state.error == ClothingDetailError.InvalidUrl),
+                placeholder = when (field) {
+                    ClothingField.Style -> stringResource(Res.string.item_detail_style_hint)
+                    ClothingField.StoreUrl -> stringResource(Res.string.item_detail_store_hint)
+                    else -> null
+                },
+                keyboardOptions = if (field == ClothingField.StoreUrl) KeyboardOptions(keyboardType = KeyboardType.Uri) else KeyboardOptions.Default,
+            )
+            if (field == ClothingField.Name && state.error == ClothingDetailError.NameRequired) {
+                DetailStatus(stringResource(Res.string.item_detail_name_error))
+            }
+            if (field == ClothingField.StoreUrl && state.error == ClothingDetailError.InvalidUrl) {
+                DetailStatus(stringResource(Res.string.item_detail_url_error))
             }
         }
     }
 }
 
 @Composable
-private fun ClothingDetailSkeleton() {
-    val shimmer by rememberShimmerTranslation()
-    Column(modifier = Modifier.fillMaxSize()) {
-        SkeletonCard(
-            shimmerTranslation = shimmer,
-            modifier = Modifier.fillMaxWidth().height(320.dp),
-            shape = RoundedCornerShape(0),
-        )
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(12.dp))
-            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
-            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
-            SkeletonCard(shimmerTranslation = shimmer, modifier = Modifier.fillMaxWidth().height(80.dp), shape = RoundedCornerShape(12.dp))
+private fun DetailActions(
+    state: ClothingDetailState,
+    onEdit: () -> Unit,
+    onSave: () -> Unit,
+    onAdd: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    val dimens = ClothisTheme.dimens
+    Column(
+        modifier = Modifier.widthIn(max = dimens.detailContentMaxWidth).fillMaxWidth()
+            .padding(horizontal = dimens.screenHorizontalPadding)
+            .padding(top = dimens.spaceSm, bottom = dimens.spaceSm),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceXs),
+    ) {
+        Divider(color = ClothisTheme.colors.divider, thickness = dimens.borderWidth)
+        when {
+            state.isEditMode -> {
+                ClothisPrimaryButton(
+                    stringResource(if (state.isSaving) Res.string.item_detail_saving else Res.string.item_detail_save),
+                    onSave, Modifier.fillMaxWidth(), isLoading = state.isSaving,
+                )
+                DetailTextAction(stringResource(Res.string.item_detail_cancel), onEdit, enabled = !state.isSaving)
+            }
+            state.isOwned == true -> ClothisPrimaryButton(stringResource(Res.string.item_detail_edit), onEdit, Modifier.fillMaxWidth())
+            state.isOwned == false -> ClothisPrimaryButton(
+                stringResource(if (state.isSavingToWardrobe) Res.string.item_detail_adding else Res.string.item_detail_add),
+                onAdd, Modifier.fillMaxWidth(), isLoading = state.isSavingToWardrobe,
+            )
+            state.isLoading -> DetailStatus(stringResource(Res.string.item_detail_checking))
+            else -> ClothisPrimaryButton(stringResource(Res.string.item_detail_retry), onRetry, Modifier.fillMaxWidth())
         }
     }
 }
 
-private fun extractDomain(url: String): String {
-    return url
-        .removePrefix("https://")
-        .removePrefix("http://")
-        .removePrefix("www.")
-        .substringBefore("/")
+@Composable
+private fun DetailTextAction(text: String, onClick: () -> Unit, enabled: Boolean = true) {
+    TextButton(
+        onClick = onClick, enabled = enabled,
+        modifier = Modifier.heightIn(min = ClothisTheme.dimens.touchTargetMin),
+        colors = ButtonDefaults.textButtonColors(contentColor = ClothisTheme.colors.onCanvas, disabledContentColor = ClothisTheme.colors.onCanvasMuted),
+    ) { Text(text, style = ClothisTheme.typography.body) }
 }
 
-private fun parseHexColor(hex: String): Long {
-    val cleaned = hex.removePrefix("#")
-    return when (cleaned.length) {
-        6 -> ("FF$cleaned").toLong(16)
-        8 -> cleaned.toLong(16)
-        else -> 0xFF888888L
+@Composable
+private fun SectionHeading(text: String) {
+    Text(text, style = ClothisTheme.typography.h2, color = ClothisTheme.colors.onCanvas, modifier = Modifier.semantics { heading() })
+}
+
+@Composable
+private fun DetailStatus(text: String) {
+    Text(
+        text, style = ClothisTheme.typography.body, color = ClothisTheme.colors.onCanvas,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+    )
+}
+
+@Composable
+private fun ClothingDetailSkeleton() {
+    val dimens = ClothisTheme.dimens
+    val shimmer by rememberShimmerTranslation()
+    Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceLg)) {
+        DetailStatus(stringResource(Res.string.item_detail_loading))
+        SkeletonCard(shimmer, Modifier.fillMaxWidth().aspectRatio(4f / 3f), RoundedCornerShape(dimens.radiusCard))
+        repeat(4) {
+            SkeletonCard(shimmer, Modifier.fillMaxWidth().height(dimens.buttonHeight), RoundedCornerShape(dimens.radiusChip))
+        }
     }
+}
+
+private fun fieldResource(field: ClothingField): StringResource = when (field) {
+    ClothingField.Name -> Res.string.item_detail_name
+    ClothingField.Season -> Res.string.item_detail_season
+    ClothingField.Fit -> Res.string.item_detail_fit
+    ClothingField.Material -> Res.string.item_detail_material
+    ClothingField.Brand -> Res.string.item_detail_brand
+    ClothingField.Occasion -> Res.string.item_detail_occasion
+    ClothingField.Style -> Res.string.item_detail_style
+    ClothingField.StoreUrl -> Res.string.item_detail_store_url
+}
+
+private fun errorResource(error: ClothingDetailError): StringResource = when (error) {
+    ClothingDetailError.Load -> Res.string.item_detail_load_error
+    ClothingDetailError.NotFound -> Res.string.item_detail_not_found
+    ClothingDetailError.Ownership -> Res.string.item_detail_ownership_error
+    ClothingDetailError.Save -> Res.string.item_detail_save_error
+    ClothingDetailError.Add -> Res.string.item_detail_add_error
+    ClothingDetailError.NameRequired -> Res.string.item_detail_name_error
+    ClothingDetailError.InvalidUrl -> Res.string.item_detail_url_error
+    ClothingDetailError.OpenStore -> Res.string.item_detail_open_error
 }

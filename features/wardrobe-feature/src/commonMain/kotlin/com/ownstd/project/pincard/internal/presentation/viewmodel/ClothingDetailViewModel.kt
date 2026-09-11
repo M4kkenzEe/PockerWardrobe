@@ -5,19 +5,27 @@ import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class ClothingDetailState(
+internal data class ClothingDetailState(
     val clothe: Clothe? = null,
+    val details: ClothingDetailUiModel? = null,
+    val draft: Map<ClothingField, String> = emptyMap(),
+    val isLoading: Boolean = true,
     val isEditMode: Boolean = false,
     val isSaving: Boolean = false,
-    val error: String? = null,
+    val error: ClothingDetailError? = null,
     val isOwned: Boolean? = null,
     val isSavingToWardrobe: Boolean = false,
+    val didSave: Boolean = false,
 )
 
 internal class ClothingDetailViewModel(
@@ -25,108 +33,130 @@ internal class ClothingDetailViewModel(
     private val wardrobeRefreshSignal: WardrobeRefreshSignal,
     private val clotheId: Int,
     private val preloadedClothe: Clothe? = null,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
-
     val state = MutableStateFlow(ClothingDetailState())
     val savedToWardrobeEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private var loadJob: Job? = null
 
-    val editName = MutableStateFlow("")
-    val editStoreUrl = MutableStateFlow("")
-    val editSeason = MutableStateFlow("")
-    val editFit = MutableStateFlow("")
-    val editMaterial = MutableStateFlow("")
-    val editBrand = MutableStateFlow("")
-    val editOccasion = MutableStateFlow("")
-    val editStyleTags = MutableStateFlow("")
+    init { retry() }
 
-    init {
-        load()
-    }
-
-    private fun load() {
-        if (preloadedClothe != null) {
-            state.value = ClothingDetailState(clothe = preloadedClothe, isOwned = null)
-            initEditFields(preloadedClothe)
-            viewModelScope.launch(Dispatchers.IO) {
-                val clothes = runCatching { useCase.getClothes() }.getOrDefault(emptyList())
-                state.value = state.value.copy(isOwned = clothes.any { it.id == clotheId })
+    fun retry() {
+        if (loadJob?.isActive == true) return
+        state.update {
+            it.copy(
+                clothe = it.clothe ?: preloadedClothe,
+                details = it.details ?: preloadedClothe?.toDetailUiModel(),
+                isLoading = true,
+                error = null,
+            )
+        }
+        loadJob = viewModelScope.launch(ioDispatcher) {
+            try {
+                val owned = useCase.getClothes().find { it.id == clotheId }
+                val clothe = owned ?: preloadedClothe
+                state.value = if (clothe == null) {
+                    ClothingDetailState(isLoading = false, error = ClothingDetailError.NotFound)
+                } else {
+                    ClothingDetailState(
+                        clothe = clothe, details = clothe.toDetailUiModel(),
+                        isLoading = false, isOwned = owned != null,
+                    )
+                }
+            } catch (ex: Exception) {
+                if (ex is CancellationException) throw ex
+                state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = if (it.clothe == null) ClothingDetailError.Load else ClothingDetailError.Ownership,
+                    )
+                }
             }
-            return
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching { useCase.getClothes() }
-                .onSuccess { clothes ->
-                    val clothe = clothes.find { it.id == clotheId }
-                    if (clothe != null) {
-                        state.value = ClothingDetailState(clothe = clothe, isOwned = true)
-                        initEditFields(clothe)
-                    } else {
-                        state.value = ClothingDetailState(error = "Вещь не найдена")
-                    }
-                }
-                .onFailure { ex ->
-                    state.value = ClothingDetailState(error = ex.message ?: "Ошибка загрузки")
-                }
-        }
-    }
-
-    private fun initEditFields(clothe: Clothe) {
-        editName.value = clothe.name
-        editStoreUrl.value = clothe.storeUrl ?: ""
-        editSeason.value = clothe.season ?: ""
-        editFit.value = clothe.fit ?: ""
-        editMaterial.value = clothe.material ?: ""
-        editBrand.value = clothe.brand ?: ""
-        editOccasion.value = clothe.occasion ?: ""
-        editStyleTags.value = clothe.styleTags ?: ""
-    }
-
-    fun saveToWardrobe() {
-        val id = state.value.clothe?.id ?: return
-        state.value = state.value.copy(isSavingToWardrobe = true, error = null)
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching { useCase.saveToWardrobe(id) }
-                .onSuccess {
-                    wardrobeRefreshSignal.emit()
-                    state.value = state.value.copy(isOwned = true, isSavingToWardrobe = false)
-                    savedToWardrobeEvent.tryEmit(Unit)
-                }
-                .onFailure { ex ->
-                    state.value = state.value.copy(isSavingToWardrobe = false, error = ex.message ?: "Ошибка сохранения")
-                }
         }
     }
 
     fun onEditToggle() {
         val current = state.value
-        if (!current.isEditMode) {
-            current.clothe?.let { initEditFields(it) }
+        if (current.isOwned != true || current.isSaving) return
+        state.value = current.copy(
+            isEditMode = !current.isEditMode,
+            draft = current.clothe?.toEditFields().orEmpty(),
+            error = null, didSave = false,
+        )
+    }
+
+    fun onFieldChange(field: ClothingField, value: String) {
+        state.update {
+            if (!it.isEditMode || it.isSaving) it
+            else it.copy(draft = it.draft + (field to value), error = null)
         }
-        state.value = current.copy(isEditMode = !current.isEditMode, error = null)
+    }
+
+    fun onStoreOpenFailed() {
+        state.update { it.copy(error = ClothingDetailError.OpenStore) }
+    }
+
+    fun saveToWardrobe() {
+        val current = state.value
+        if (current.isOwned != false || current.isSavingToWardrobe) return
+        val id = current.clothe?.id ?: return
+        state.value = current.copy(isSavingToWardrobe = true, error = null)
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                useCase.saveToWardrobe(id)
+                wardrobeRefreshSignal.emit()
+                state.update { it.copy(isOwned = true, isSavingToWardrobe = false) }
+                savedToWardrobeEvent.emit(Unit)
+            } catch (ex: Exception) {
+                if (ex is CancellationException) throw ex
+                state.update { it.copy(isSavingToWardrobe = false, error = ClothingDetailError.Add) }
+            }
+        }
     }
 
     fun onSave() {
         val current = state.value
+        if (!current.isEditMode || current.isOwned != true || current.isSaving) return
         val clothe = current.clothe ?: return
+        val id = clothe.id ?: return
+        val draft = current.draft.mapValues { it.value.trim() }
+        if (draft[ClothingField.Name].isNullOrBlank()) {
+            state.update { it.copy(error = ClothingDetailError.NameRequired) }
+            return
+        }
+        val storeUrl = draft[ClothingField.StoreUrl].orEmpty()
+        if (storeUrl.isNotEmpty() && validatedStoreUrl(storeUrl) == null) {
+            state.update { it.copy(error = ClothingDetailError.InvalidUrl) }
+            return
+        }
+        val original = clothe.toEditFields()
+        fun changed(field: ClothingField): String? = draft[field]?.takeIf { it != original[field] }
+        if (draft.all { (field, value) -> value == original[field] }) {
+            state.update { it.copy(isEditMode = false, error = null) }
+            return
+        }
         state.value = current.copy(isSaving = true, error = null)
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                useCase.updateClothe(
-                    clotheId = clothe.id!!,
-                    name = editName.value.takeIf { it.isNotBlank() },
-                    storeUrl = editStoreUrl.value.takeIf { it.isNotBlank() },
-                    season = editSeason.value.takeIf { it.isNotBlank() },
-                    fit = editFit.value.takeIf { it.isNotBlank() },
-                    material = editMaterial.value.takeIf { it.isNotBlank() },
-                    brand = editBrand.value.takeIf { it.isNotBlank() },
-                    occasion = editOccasion.value.takeIf { it.isNotBlank() },
-                    styleTags = editStyleTags.value.takeIf { it.isNotBlank() },
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                val updated = useCase.updateClothe(
+                    clotheId = id,
+                    name = changed(ClothingField.Name),
+                    storeUrl = changed(ClothingField.StoreUrl),
+                    season = changed(ClothingField.Season),
+                    fit = changed(ClothingField.Fit),
+                    material = changed(ClothingField.Material),
+                    brand = changed(ClothingField.Brand),
+                    occasion = changed(ClothingField.Occasion),
+                    styleTags = changed(ClothingField.Style),
                 )
-            }.onSuccess { updated ->
-                state.value = ClothingDetailState(clothe = updated)
-                initEditFields(updated)
-            }.onFailure { ex ->
-                state.value = state.value.copy(isSaving = false, error = ex.message ?: "Ошибка сохранения")
+                state.value = ClothingDetailState(
+                    clothe = updated, details = updated.toDetailUiModel(),
+                    isLoading = false, isOwned = true, didSave = true,
+                )
+                wardrobeRefreshSignal.emit()
+            } catch (ex: Exception) {
+                if (ex is CancellationException) throw ex
+                state.update { it.copy(isSaving = false, error = ClothingDetailError.Save) }
             }
         }
     }

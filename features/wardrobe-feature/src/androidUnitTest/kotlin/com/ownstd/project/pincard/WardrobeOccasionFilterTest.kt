@@ -49,6 +49,13 @@ private class FakeWardrobeRepository : WardrobeRepository {
         return Clothe.empty()
     }
 
+    override suspend fun updateClothe(
+        clotheId: Int, name: String?, storeUrl: String?, season: String?, fit: String?,
+        material: String?, brand: String?, occasion: String?, styleTags: String?,
+    ): Clothe = error("Not used by occasion filter tests")
+
+    override suspend fun saveToWardrobe(clotheId: Int): Clothe = error("Not used by occasion filter tests")
+
     override suspend fun deleteClothe(clotheId: Int) {
         callLog.add("deleteClothe($clotheId)")
     }
