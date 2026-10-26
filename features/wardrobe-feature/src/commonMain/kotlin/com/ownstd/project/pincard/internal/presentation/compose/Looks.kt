@@ -87,7 +87,6 @@ internal fun Looks(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 14.dp)
-            .padding(top = statusBarTop + 12.dp)
             .pullRefresh(pullRefreshState)
     ) {
         when {
@@ -98,7 +97,7 @@ internal fun Looks(
                 OutfitsEmptyState(
                     onBuildOutfitClick = onNavigateToConstructor,
                     onGenerateOutfitsClick = { if (!isGenerating) viewModel.generateLooks() },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().padding(top = statusBarTop + 12.dp)
                 )
             }
             else -> {
@@ -106,7 +105,7 @@ internal fun Looks(
                 LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(bottom = navBarBottom + 76.dp),
+                    contentPadding = PaddingValues(top = statusBarTop + 8.dp, bottom = navBarBottom + 76.dp),
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -174,7 +173,7 @@ private fun SkeletonLooksGrid() {
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(top = statusBarTop + 12.dp, bottom = navBarBottom + 76.dp),
+        contentPadding = PaddingValues(top = statusBarTop + 8.dp, bottom = navBarBottom + 76.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
