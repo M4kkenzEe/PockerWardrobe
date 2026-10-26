@@ -59,6 +59,7 @@ kotlin {
 
             implementation(project(":core:network"))
             implementation(project(":core:storage"))
+            implementation(project(":design-system"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

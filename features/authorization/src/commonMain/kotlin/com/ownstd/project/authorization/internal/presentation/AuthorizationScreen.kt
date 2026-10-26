@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,10 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ownstd.project.authorization.internal.presentation.design_system.BG_GREY_COLOR
-import com.ownstd.project.authorization.internal.presentation.design_system.BLUE_COLOR
-import com.ownstd.project.authorization.internal.presentation.design_system.ERROR_COLOR
-import com.ownstd.project.authorization.internal.presentation.design_system.GREY_COLOR
+import com.ownstd.project.designsystem.theme.ClothisTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -70,7 +66,7 @@ fun AuthorizationScreen(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(BG_GREY_COLOR)
+            .background(ClothisTheme.colors.canvas)
             .statusBarsPadding()
     ) {
         when (viewState) {
@@ -141,16 +137,19 @@ private fun ValidatedTextField(
             isError = errorMessage != null,
             visualTransformation = visualTransformation,
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = BLUE_COLOR,
-                unfocusedBorderColor = GREY_COLOR,
-                cursorColor = BLUE_COLOR
+                focusedBorderColor = ClothisTheme.colors.clay,
+                unfocusedBorderColor = ClothisTheme.colors.onSurfaceMuted,
+                cursorColor = ClothisTheme.colors.clay,
+                focusedLabelColor = ClothisTheme.colors.clay,
+                errorBorderColor = ClothisTheme.colors.error,
+                errorLabelColor = ClothisTheme.colors.error
             ),
             shape = RoundedCornerShape(12.dp)
         )
         if (errorMessage != null) {
             Text(
                 text = errorMessage,
-                color = ERROR_COLOR,
+                color = ClothisTheme.colors.error,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
@@ -189,7 +188,7 @@ fun LoginScreen(
             text = "Добро пожаловать",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = ClothisTheme.colors.onCanvas,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -197,7 +196,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
+                .background(ClothisTheme.colors.surface)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -205,7 +204,7 @@ fun LoginScreen(
                 text = "Вход в аккаунт",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = ClothisTheme.colors.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -228,7 +227,7 @@ fun LoginScreen(
             Text(
                 text = "Забыли пароль?",
                 fontSize = 13.sp,
-                color = BLUE_COLOR,
+                color = ClothisTheme.colors.clay,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onForgotPassword() }
@@ -247,22 +246,22 @@ fun LoginScreen(
                     checked = passwordVisible,
                     onCheckedChange = { passwordVisible = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = BLUE_COLOR,
-                        uncheckedColor = GREY_COLOR
+                        checkedColor = ClothisTheme.colors.clay,
+                        uncheckedColor = ClothisTheme.colors.onSurfaceMuted
                     )
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Показать пароль",
                     fontSize = 14.sp,
-                    color = GREY_COLOR
+                    color = ClothisTheme.colors.onSurfaceMuted
                 )
             }
 
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = Color.Red,
+                    color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -277,10 +276,10 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White,
-                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
-                    disabledContentColor = Color.White
+                    backgroundColor = ClothisTheme.colors.clay,
+                    contentColor = ClothisTheme.colors.onClay,
+                    disabledBackgroundColor = ClothisTheme.colors.clay.copy(alpha = 0.4f),
+                    disabledContentColor = ClothisTheme.colors.onClay
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -296,7 +295,7 @@ fun LoginScreen(
             Text(
                 text = "Нет аккаунта? Зарегистрироваться",
                 fontSize = 14.sp,
-                color = GREY_COLOR,
+                color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onSwitchToRegister() }
@@ -350,7 +349,7 @@ fun RegistrationScreen(
             text = "Создать аккаунт",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = ClothisTheme.colors.onCanvas,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -358,7 +357,7 @@ fun RegistrationScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
+                .background(ClothisTheme.colors.surface)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -366,7 +365,7 @@ fun RegistrationScreen(
                 text = "Регистрация",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = ClothisTheme.colors.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -412,15 +411,15 @@ fun RegistrationScreen(
                     checked = passwordVisible,
                     onCheckedChange = { passwordVisible = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = BLUE_COLOR,
-                        uncheckedColor = GREY_COLOR
+                        checkedColor = ClothisTheme.colors.clay,
+                        uncheckedColor = ClothisTheme.colors.onSurfaceMuted
                     )
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Показать пароль",
                     fontSize = 14.sp,
-                    color = GREY_COLOR
+                    color = ClothisTheme.colors.onSurfaceMuted
                 )
             }
 
@@ -439,9 +438,9 @@ fun RegistrationScreen(
                     enabled = false,
                     readOnly = true,
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        disabledBorderColor = GREY_COLOR,
-                        disabledTextColor = Color.Black,
-                        disabledLabelColor = GREY_COLOR
+                        disabledBorderColor = ClothisTheme.colors.onSurfaceMuted,
+                        disabledTextColor = ClothisTheme.colors.onSurface,
+                        disabledLabelColor = ClothisTheme.colors.onSurfaceMuted
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -474,7 +473,7 @@ fun RegistrationScreen(
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = Color.Red,
+                    color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -489,10 +488,10 @@ fun RegistrationScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White,
-                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
-                    disabledContentColor = Color.White
+                    backgroundColor = ClothisTheme.colors.clay,
+                    contentColor = ClothisTheme.colors.onClay,
+                    disabledBackgroundColor = ClothisTheme.colors.clay.copy(alpha = 0.4f),
+                    disabledContentColor = ClothisTheme.colors.onClay
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -508,7 +507,7 @@ fun RegistrationScreen(
             Text(
                 text = "Уже есть аккаунт? Войти",
                 fontSize = 14.sp,
-                color = GREY_COLOR,
+                color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onSwitchToLogin() }
@@ -544,7 +543,7 @@ fun ForgotPasswordScreen(
             text = "Восстановление",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = ClothisTheme.colors.onCanvas,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -552,7 +551,7 @@ fun ForgotPasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
+                .background(ClothisTheme.colors.surface)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -560,7 +559,7 @@ fun ForgotPasswordScreen(
                 text = "Восстановление пароля",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = ClothisTheme.colors.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -575,7 +574,7 @@ fun ForgotPasswordScreen(
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = Color.Red,
+                    color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -590,17 +589,17 @@ fun ForgotPasswordScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White,
-                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
-                    disabledContentColor = Color.White
+                    backgroundColor = ClothisTheme.colors.clay,
+                    contentColor = ClothisTheme.colors.onClay,
+                    disabledBackgroundColor = ClothisTheme.colors.clay.copy(alpha = 0.4f),
+                    disabledContentColor = ClothisTheme.colors.onClay
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = ClothisTheme.colors.onClay,
                         strokeWidth = 2.dp
                     )
                 } else {
@@ -615,7 +614,7 @@ fun ForgotPasswordScreen(
             Text(
                 text = "Вернуться к входу",
                 fontSize = 14.sp,
-                color = GREY_COLOR,
+                color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onBack() }
@@ -665,7 +664,7 @@ fun ResetPasswordScreen(
             text = "Новый пароль",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = ClothisTheme.colors.onCanvas,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -673,7 +672,7 @@ fun ResetPasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
+                .background(ClothisTheme.colors.surface)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -681,14 +680,14 @@ fun ResetPasswordScreen(
                 text = "Введите код",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = ClothisTheme.colors.onSurface
             )
 
             if (email.isNotEmpty()) {
                 Text(
                     text = "Код отправлен на $email",
                     fontSize = 13.sp,
-                    color = GREY_COLOR
+                    color = ClothisTheme.colors.onSurfaceMuted
                 )
             }
 
@@ -701,9 +700,9 @@ fun ResetPasswordScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = BLUE_COLOR,
-                    unfocusedBorderColor = GREY_COLOR,
-                    cursorColor = BLUE_COLOR
+                    focusedBorderColor = ClothisTheme.colors.clay,
+                    unfocusedBorderColor = ClothisTheme.colors.onSurfaceMuted,
+                    cursorColor = ClothisTheme.colors.clay
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -711,7 +710,7 @@ fun ResetPasswordScreen(
             Text(
                 text = formatResendText(resendCountdown),
                 fontSize = 13.sp,
-                color = if (resendActive) BLUE_COLOR else GREY_COLOR,
+                color = if (resendActive) ClothisTheme.colors.clay else ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(if (resendActive) Modifier.clickable { onResendCode(email) } else Modifier)
@@ -746,22 +745,22 @@ fun ResetPasswordScreen(
                     checked = passwordVisible,
                     onCheckedChange = { passwordVisible = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = BLUE_COLOR,
-                        uncheckedColor = GREY_COLOR
+                        checkedColor = ClothisTheme.colors.clay,
+                        uncheckedColor = ClothisTheme.colors.onSurfaceMuted
                     )
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Показать пароль",
                     fontSize = 14.sp,
-                    color = GREY_COLOR
+                    color = ClothisTheme.colors.onSurfaceMuted
                 )
             }
 
             if (errorMessage != null) {
                 Text(
                     text = errorMessage,
-                    color = Color.Red,
+                    color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -776,17 +775,17 @@ fun ResetPasswordScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = BLUE_COLOR,
-                    contentColor = Color.White,
-                    disabledBackgroundColor = BLUE_COLOR.copy(alpha = 0.4f),
-                    disabledContentColor = Color.White
+                    backgroundColor = ClothisTheme.colors.clay,
+                    contentColor = ClothisTheme.colors.onClay,
+                    disabledBackgroundColor = ClothisTheme.colors.clay.copy(alpha = 0.4f),
+                    disabledContentColor = ClothisTheme.colors.onClay
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = ClothisTheme.colors.onClay,
                         strokeWidth = 2.dp
                     )
                 } else {
@@ -801,7 +800,7 @@ fun ResetPasswordScreen(
             Text(
                 text = "Вернуться к входу",
                 fontSize = 14.sp,
-                color = GREY_COLOR,
+                color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onBack() }
