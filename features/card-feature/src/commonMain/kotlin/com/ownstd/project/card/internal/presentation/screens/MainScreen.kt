@@ -38,6 +38,9 @@ import kotlinprojecttesting.design_system.generated.resources.ic_search
 import kotlinprojecttesting.design_system.generated.resources.ic_tune
 import org.jetbrains.compose.resources.painterResource
 
+// TODO: включить, когда будет реализован фильтр и поиск
+private const val SHOW_FILTERS_AND_SEARCH = false
+
 @Composable
 internal fun MainScreen(parentNavController: NavHostController) {
     val bottomNavController = rememberNavController()
@@ -86,7 +89,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 AnimatedVisibility(
-                    visible = selectedTab == NavTab.Wardrobe,
+                    visible = SHOW_FILTERS_AND_SEARCH && selectedTab == NavTab.Wardrobe,
                     enter = fadeIn(tween(200)),
                     exit = fadeOut(tween(200)),
                 ) {
@@ -115,7 +118,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     applyInsets = false,
                 )
                 AnimatedVisibility(
-                    visible = selectedTab == NavTab.Wardrobe,
+                    visible = SHOW_FILTERS_AND_SEARCH && selectedTab == NavTab.Wardrobe,
                     enter = fadeIn(tween(200)),
                     exit = fadeOut(tween(200)),
                 ) {
