@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Button
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ownstd.project.designsystem.components.SkeletonCard
 import com.ownstd.project.designsystem.components.rememberShimmerTranslation
+import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.profile.resources.Res
 import com.ownstd.project.profile.resources.img_profile_default
 import org.jetbrains.compose.resources.painterResource
@@ -37,6 +39,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ProfileScreen(onLogout: () -> Unit = {}) {
     val viewModel: ProfileViewModel = koinViewModel()
     val userState by viewModel.profileState.collectAsState()
+    val dimens = ClothisTheme.dimens
 
     if (userState != null) {
         val user = userState!!
@@ -67,6 +70,8 @@ fun ProfileScreen(onLogout: () -> Unit = {}) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = dimens.navIslandHeight + dimens.navIslandBottomGap)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
