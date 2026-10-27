@@ -67,6 +67,7 @@ kotlin {
         androidUnitTest.dependencies {
             implementation(libs.kotlin.test.junit)
             implementation(libs.junit)
+            implementation(libs.ktor.client.mock)
             implementation(libs.kotlinx.coroutines.test)
         }
     }

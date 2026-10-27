@@ -72,6 +72,9 @@ private class FakeAuthorizationRepository(
         logoutCalled = true
         tokenStorage.clearSession()
     }
+
+    override suspend fun verifyEmail(code: String): String? = null
+    override suspend fun resendVerification(): String? = null
 }
 
 // ---------------------------------------------------------------------------
@@ -165,6 +168,8 @@ class LogoutUseCaseTest {
             override suspend fun requestPasswordReset(email: String): String? = null
             override suspend fun resetPassword(email: String, code: String, newPassword: String): String? = null
             override suspend fun logout() { order.add("logout") }
+            override suspend fun verifyEmail(code: String): String? = null
+            override suspend fun resendVerification(): String? = null
         }
         val orderedNet = object : NetworkRepository {
             override fun getClient(): HttpClient = throw UnsupportedOperationException()

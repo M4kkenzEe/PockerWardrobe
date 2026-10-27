@@ -7,10 +7,12 @@ import com.ownstd.project.authorization.internal.data.model.LoginRequest
 import com.ownstd.project.authorization.internal.data.model.LogoutRequest
 import com.ownstd.project.authorization.internal.data.model.RegisterRequest
 import com.ownstd.project.authorization.internal.data.model.ResetPasswordRequest
+import com.ownstd.project.authorization.internal.data.model.VerifyEmailRequest
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
 import com.ownstd.project.network.api.NetworkRepository
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -121,11 +123,45 @@ class AuthServiceImpl(
         }
     }
 
+    override suspend fun verifyEmail(code: String): Result<Unit> {
+        return try {
+            val response = client.post(baseUrl + VERIFY_EMAIL_URL) {
+                contentType(ContentType.Application.Json)
+                setBody(VerifyEmailRequest(code))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(Unit)
+                HttpStatusCode.BadRequest,
+                HttpStatusCode.Gone -> Result.failure(Exception(INVALID_OR_EXPIRED_CODE_MESSAGE))
+                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun resendVerification(): Result<Unit> {
+        return try {
+            val response = client.post(baseUrl + RESEND_VERIFICATION_URL) {
+                contentType(ContentType.Application.Json)
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(Unit)
+                HttpStatusCode.TooManyRequests -> Result.failure(Exception(RESEND_RATE_LIMIT_MESSAGE))
+                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     companion object {
         const val REGISTER_URL = "register"
         const val LOGIN_URL = "login"
         const val LOGOUT_URL = "logout"
         const val FORGOT_PASSWORD_URL = "auth/forgot-password"
         const val RESET_PASSWORD_URL = "auth/reset-password"
+        const val VERIFY_EMAIL_URL = "auth/verify-email"
+        const val RESEND_VERIFICATION_URL = "auth/resend-verification"
     }
 }

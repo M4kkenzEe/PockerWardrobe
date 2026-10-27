@@ -16,12 +16,10 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -52,11 +50,15 @@ fun AuthorizationScreen(
     val viewState by viewModel.viewState.collectAsState()
     val isError by viewModel.errorState.collectAsState()
     val isSessionOpen by viewModel.isSessionOpen.collectAsState()
-    val prefillEmail by viewModel.prefillEmail.collectAsState()
-    val prefillPassword by viewModel.prefillPassword.collectAsState()
     val forgotPasswordEmail by viewModel.forgotPasswordEmail.collectAsState()
     val isForgotPasswordLoading by viewModel.isForgotPasswordLoading.collectAsState()
     val resendCountdown by viewModel.resendCountdown.collectAsState()
+
+    val registrationFirstName by viewModel.registrationFirstName.collectAsState()
+    val registrationEmail by viewModel.registrationEmail.collectAsState()
+    val isRegistrationLoading by viewModel.isRegistrationLoading.collectAsState()
+    val otpError by viewModel.otpError.collectAsState()
+    val registrationResendCountdown by viewModel.registrationResendCountdown.collectAsState()
 
     if (isSessionOpen) {
         openSession()
@@ -72,24 +74,33 @@ fun AuthorizationScreen(
         when (viewState) {
             ViewState.LOGIN -> LoginScreen(
                 errorMessage = isError,
-                initialEmail = prefillEmail,
-                initialPassword = prefillPassword,
                 onLogin = viewModel::loginUser,
                 onForgotPassword = {
                     viewModel.errorState.value = null
                     viewModel.viewState.value = ViewState.FORGOT_PASSWORD
                 },
-                onSwitchToRegister = {
-                    viewModel.viewState.value = ViewState.REGISTRATION
-                }
+                onSwitchToRegister = { viewModel.startRegistration() }
             )
 
-            ViewState.REGISTRATION -> RegistrationScreen(
+            ViewState.ONBOARDING_NAME,
+            ViewState.ONBOARDING_EMAIL,
+            ViewState.ONBOARDING_PASSWORD,
+            ViewState.ONBOARDING_OTP -> OnboardingFlow(
+                viewState = viewState,
                 errorMessage = isError,
-                onRegister = viewModel::registerUser,
-                onSwitchToLogin = {
-                    viewModel.viewState.value = ViewState.LOGIN
-                }
+                otpError = otpError,
+                initialName = registrationFirstName,
+                initialEmail = registrationEmail,
+                registrationResendCountdown = registrationResendCountdown,
+                isLoading = isRegistrationLoading,
+                onNameNext = viewModel::onNameNext,
+                onEmailNext = viewModel::onEmailNext,
+                onPasswordSubmit = viewModel::submitRegistration,
+                onOtpComplete = viewModel::verifyEmail,
+                onOtpChange = viewModel::clearOtpError,
+                onResendOtp = viewModel::resendRegistrationVerification,
+                onBack = viewModel::navigateBackFromOnboarding,
+                onSkipOtp = viewModel::skipOtpVerification,
             )
 
             ViewState.FORGOT_PASSWORD -> ForgotPasswordScreen(
@@ -306,217 +317,6 @@ fun LoginScreen(
     }
 }
 
-@Composable
-fun RegistrationScreen(
-    errorMessage: String?,
-    onRegister: (String, String, String, Gender) -> Unit,
-    onSwitchToLogin: () -> Unit
-) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-    var gender by remember { mutableStateOf(Gender.OTHER) }
-    var dropDownExpanded by remember { mutableStateOf(false) }
-
-    var usernameTouched by remember { mutableStateOf(false) }
-    var emailTouched by remember { mutableStateOf(false) }
-    var passwordTouched by remember { mutableStateOf(false) }
-    var confirmPasswordTouched by remember { mutableStateOf(false) }
-
-    val usernameErr = if (usernameTouched && username.isBlank()) "Введите имя пользователя" else null
-    val emailErr = emailErrorMessage(email, emailTouched)
-    val passwordErr = passwordErrorMessage(password, passwordTouched)
-    val confirmPasswordErr = confirmPasswordErrorMessage(password, confirmPassword, confirmPasswordTouched)
-
-    val isFormValid = username.isNotBlank() &&
-        isValidEmail(email) &&
-        isValidPassword(password) &&
-        password == confirmPassword
-
-    val passwordTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 44.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Создать аккаунт",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = ClothisTheme.colors.onCanvas,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(ClothisTheme.colors.surface)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = "Регистрация",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = ClothisTheme.colors.onSurface
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ValidatedTextField(
-                value = username,
-                onValueChange = { username = it; usernameTouched = true },
-                label = "Имя пользователя",
-                errorMessage = usernameErr
-            )
-
-            ValidatedTextField(
-                value = email,
-                onValueChange = { email = it; emailTouched = true },
-                label = "Email",
-                errorMessage = emailErr
-            )
-
-            ValidatedTextField(
-                value = password,
-                onValueChange = { password = it; passwordTouched = true },
-                label = "Пароль",
-                errorMessage = passwordErr,
-                visualTransformation = passwordTransformation
-            )
-
-            ValidatedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it; confirmPasswordTouched = true },
-                label = "Подтвердите пароль",
-                errorMessage = confirmPasswordErr,
-                visualTransformation = passwordTransformation
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { passwordVisible = !passwordVisible }
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = passwordVisible,
-                    onCheckedChange = { passwordVisible = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = ClothisTheme.colors.clay,
-                        uncheckedColor = ClothisTheme.colors.onSurfaceMuted
-                    )
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Показать пароль",
-                    fontSize = 14.sp,
-                    color = ClothisTheme.colors.onSurfaceMuted
-                )
-            }
-
-            Box {
-                OutlinedTextField(
-                    value = when (gender) {
-                        Gender.MALE -> "Мужской"
-                        Gender.FEMALE -> "Женский"
-                        Gender.OTHER -> "Другое"
-                    },
-                    onValueChange = {},
-                    label = { Text("Пол") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { dropDownExpanded = true },
-                    enabled = false,
-                    readOnly = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        disabledBorderColor = ClothisTheme.colors.onSurfaceMuted,
-                        disabledTextColor = ClothisTheme.colors.onSurface,
-                        disabledLabelColor = ClothisTheme.colors.onSurfaceMuted
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                DropdownMenu(
-                    expanded = dropDownExpanded,
-                    onDismissRequest = { dropDownExpanded = false }
-                ) {
-                    DropdownMenuItem(onClick = {
-                        gender = Gender.MALE
-                        dropDownExpanded = false
-                    }) {
-                        Text(text = "Мужской")
-                    }
-                    DropdownMenuItem(onClick = {
-                        gender = Gender.FEMALE
-                        dropDownExpanded = false
-                    }) {
-                        Text(text = "Женский")
-                    }
-                    DropdownMenuItem(onClick = {
-                        gender = Gender.OTHER
-                        dropDownExpanded = false
-                    }) {
-                        Text(text = "Другое")
-                    }
-                }
-            }
-
-            if (errorMessage != null) {
-                Text(
-                    text = errorMessage,
-                    color = ClothisTheme.colors.error,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { onRegister(username, email, password, gender) },
-                enabled = isFormValid,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = ClothisTheme.colors.clay,
-                    contentColor = ClothisTheme.colors.onClay,
-                    disabledBackgroundColor = ClothisTheme.colors.clay.copy(alpha = 0.4f),
-                    disabledContentColor = ClothisTheme.colors.onClay
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Зарегистрироваться",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Уже есть аккаунт? Войти",
-                fontSize = 14.sp,
-                color = ClothisTheme.colors.onSurfaceMuted,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onSwitchToLogin() }
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
 
 @Composable
 fun ForgotPasswordScreen(

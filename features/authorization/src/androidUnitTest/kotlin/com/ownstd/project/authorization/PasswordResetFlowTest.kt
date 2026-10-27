@@ -166,4 +166,7 @@ private class FakeAuthRepository : AuthorizationRepository {
     }
 
     override suspend fun logout() = Unit
+
+    override suspend fun verifyEmail(code: String): String? = null
+    override suspend fun resendVerification(): String? = null
 }

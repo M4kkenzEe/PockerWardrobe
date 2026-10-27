@@ -22,17 +22,25 @@ internal class AuthorizationViewModel(
     val viewState = MutableStateFlow(ViewState.LOGIN)
     val errorState = MutableStateFlow<String?>(null)
     val isSessionOpen = MutableStateFlow(false)
-    val prefillEmail = MutableStateFlow("")
-    val prefillPassword = MutableStateFlow("")
     val forgotPasswordEmail = MutableStateFlow("")
     val isForgotPasswordLoading = MutableStateFlow(false)
 
     private val _resendCountdown = MutableStateFlow(0)
-
-    /** Seconds remaining on resend cooldown. 0 = button is active. */
     val resendCountdown: StateFlow<Int> = _resendCountdown.asStateFlow()
 
     private var resendTimerJob: Job? = null
+
+    val registrationFirstName = MutableStateFlow("")
+    val registrationEmail = MutableStateFlow("")
+    val isRegistrationLoading = MutableStateFlow(false)
+
+    private val _otpError = MutableStateFlow<String?>(null)
+    val otpError: StateFlow<String?> = _otpError.asStateFlow()
+
+    private val _registrationResendCountdown = MutableStateFlow(0)
+    val registrationResendCountdown: StateFlow<Int> = _registrationResendCountdown.asStateFlow()
+
+    private var registrationResendTimerJob: Job? = null
 
     fun loginUser(username: String, password: String) {
         viewModelScope.launch(dispatcher) {
@@ -41,20 +49,6 @@ internal class AuthorizationViewModel(
                 errorState.value = result
             } else {
                 isSessionOpen.value = true
-            }
-        }
-    }
-
-    fun registerUser(username: String, email: String, password: String, gender: Gender) {
-        viewModelScope.launch(dispatcher) {
-            val result = authorizationRepository.registerUser(username, email, password, gender)
-            if (result != null) {
-                errorState.value = result
-            } else {
-                prefillEmail.value = email
-                prefillPassword.value = password
-                errorState.value = null
-                viewState.value = ViewState.LOGIN
             }
         }
     }
@@ -107,16 +101,115 @@ internal class AuthorizationViewModel(
         }
     }
 
-    private fun startResendTimer() {
-        resendTimerJob?.cancel()
-        resendTimerJob = viewModelScope.launch {
+    private fun startResendTimerFor(target: MutableStateFlow<Int>): Job {
+        return viewModelScope.launch {
             var seconds = RESEND_COOLDOWN_SECONDS
             while (seconds > 0) {
-                _resendCountdown.value = seconds
+                target.value = seconds
                 delay(1_000L)
                 seconds--
             }
-            _resendCountdown.value = 0
+            target.value = 0
         }
+    }
+
+    private fun startResendTimer() {
+        resendTimerJob?.cancel()
+        resendTimerJob = startResendTimerFor(_resendCountdown)
+    }
+
+    fun startRegistration() {
+        errorState.value = null
+        registrationFirstName.value = ""
+        registrationEmail.value = ""
+        _otpError.value = null
+        viewState.value = ViewState.ONBOARDING_NAME
+    }
+
+    fun onNameNext(firstName: String) {
+        registrationFirstName.value = firstName
+        errorState.value = null
+        viewState.value = ViewState.ONBOARDING_EMAIL
+    }
+
+    fun onEmailNext(email: String) {
+        registrationEmail.value = email
+        errorState.value = null
+        viewState.value = ViewState.ONBOARDING_PASSWORD
+    }
+
+    fun submitRegistration(password: String) {
+        viewModelScope.launch(dispatcher) {
+            isRegistrationLoading.value = true
+            errorState.value = null
+            val error = authorizationRepository.registerUser(
+                username = registrationFirstName.value,
+                email = registrationEmail.value,
+                password = password,
+                gender = Gender.OTHER
+            )
+            isRegistrationLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                startRegistrationResendTimer()
+                viewState.value = ViewState.ONBOARDING_OTP
+            }
+        }
+    }
+
+    fun clearOtpError() {
+        _otpError.value = null
+    }
+
+    fun verifyEmail(code: String) {
+        if (isRegistrationLoading.value) return
+        isRegistrationLoading.value = true
+        viewModelScope.launch(dispatcher) {
+            try {
+                _otpError.value = null
+                val error = authorizationRepository.verifyEmail(code)
+                if (error != null) {
+                    _otpError.value = error
+                } else {
+                    isSessionOpen.value = true
+                }
+            } finally {
+                isRegistrationLoading.value = false
+            }
+        }
+    }
+
+    fun resendRegistrationVerification() {
+        viewModelScope.launch(dispatcher) {
+            isRegistrationLoading.value = true
+            val error = authorizationRepository.resendVerification()
+            isRegistrationLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                startRegistrationResendTimer()
+            }
+        }
+    }
+
+    fun skipOtpVerification() {
+        isSessionOpen.value = true
+    }
+
+    fun navigateBackFromOnboarding() {
+        errorState.value = null
+        _otpError.value = null
+        viewState.value = when (viewState.value) {
+            ViewState.ONBOARDING_EMAIL -> ViewState.ONBOARDING_NAME
+            ViewState.ONBOARDING_PASSWORD -> ViewState.ONBOARDING_EMAIL
+            ViewState.ONBOARDING_OTP -> ViewState.LOGIN
+            else -> ViewState.LOGIN
+        }
+    }
+
+    private fun startRegistrationResendTimer() {
+        registrationResendTimerJob?.cancel()
+        registrationResendTimerJob = startResendTimerFor(_registrationResendCountdown)
     }
 }

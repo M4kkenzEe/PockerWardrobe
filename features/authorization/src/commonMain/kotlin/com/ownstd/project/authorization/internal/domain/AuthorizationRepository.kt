@@ -13,4 +13,6 @@ interface AuthorizationRepository {
     suspend fun requestPasswordReset(email: String): String?
     suspend fun resetPassword(email: String, code: String, newPassword: String): String?
     suspend fun logout()
+    suspend fun verifyEmail(code: String): String?
+    suspend fun resendVerification(): String?
 }

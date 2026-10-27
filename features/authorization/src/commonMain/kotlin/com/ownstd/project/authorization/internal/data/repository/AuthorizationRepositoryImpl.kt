@@ -1,6 +1,8 @@
 package com.ownstd.project.authorization.internal.data.repository
 
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
 import com.ownstd.project.storage.TokenStorage
@@ -88,6 +90,33 @@ class AuthorizationRepositoryImpl(
         }
         tokenStorage.clearSession()
         println("[AuthRepository] logout - session cleared")
+    }
+
+    override suspend fun verifyEmail(code: String): String? {
+        return authService.verifyEmail(code)
+            .fold(
+                onSuccess = { null },
+                onFailure = { exception ->
+                    if (exception.message == INVALID_OR_EXPIRED_CODE_MESSAGE) {
+                        "Неверный или истёкший код. Запроси новый"
+                    } else {
+                        "Не удалось подтвердить email. Попробуй снова"
+                    }
+                }
+            )
+    }
+
+    override suspend fun resendVerification(): String? {
+        return authService.resendVerification()
+            .fold(
+                onSuccess = { null },
+                onFailure = { exception ->
+                    when {
+                        exception.message == RESEND_RATE_LIMIT_MESSAGE -> RESEND_RATE_LIMIT_MESSAGE
+                        else -> "Не удалось отправить код. Проверь интернет-соединение"
+                    }
+                }
+            )
     }
 
     private fun mapErrorMessage(message: String?): String {

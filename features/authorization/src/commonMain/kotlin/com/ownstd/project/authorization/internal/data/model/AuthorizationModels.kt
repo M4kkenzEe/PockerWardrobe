@@ -21,7 +21,7 @@ data class AuthTokenResponse(
     val accessToken: String,
     val refreshToken: String,
     val expiresAt: Long,
-    val userId: Long
+    val userId: Long,
 )
 
 @Serializable
@@ -41,3 +41,6 @@ data class ResetPasswordRequest(
     val code: String,
     val newPassword: String
 )
+
+@Serializable
+data class VerifyEmailRequest(val code: String)
