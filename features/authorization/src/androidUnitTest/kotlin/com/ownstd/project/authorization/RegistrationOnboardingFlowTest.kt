@@ -161,6 +161,21 @@ class RegistrationOnboardingFlowTest {
         assertEquals("yura@example.com", vm.registrationEmail.value)
     }
 
+    @Test fun `typed email survives back and forward without pressing next`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.startRegistration()
+        vm.onNameChange("Yura")
+        vm.onNameNext(vm.registrationFirstName.value)
+        vm.onEmailChange("yura.test@example.com")
+
+        vm.navigateBackFromOnboarding()
+        assertEquals("Yura", vm.registrationFirstName.value)
+        vm.onNameNext(vm.registrationFirstName.value)
+
+        assertEquals(ViewState.ONBOARDING_EMAIL, vm.viewState.value)
+        assertEquals("yura.test@example.com", vm.registrationEmail.value)
+    }
+
     @Test fun `repeated verifyEmail while first is in flight calls repository once`() = runTest(dispatcher) {
         val vm = viewModel()
         vm.verifyEmail("123456")

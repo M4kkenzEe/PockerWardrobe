@@ -126,6 +126,14 @@ internal class AuthorizationViewModel(
         viewState.value = ViewState.ONBOARDING_NAME
     }
 
+    fun onNameChange(firstName: String) {
+        registrationFirstName.value = firstName
+    }
+
+    fun onEmailChange(email: String) {
+        registrationEmail.value = email
+    }
+
     fun onNameNext(firstName: String) {
         registrationFirstName.value = firstName
         errorState.value = null

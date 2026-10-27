@@ -68,7 +68,9 @@ internal fun OnboardingFlow(
     initialEmail: String,
     registrationResendCountdown: Int,
     isLoading: Boolean,
+    onNameChange: (String) -> Unit,
     onNameNext: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onEmailNext: (String) -> Unit,
     onPasswordSubmit: (String) -> Unit,
     onOtpComplete: (String) -> Unit,
@@ -97,11 +99,13 @@ internal fun OnboardingFlow(
             when (state) {
                 ViewState.ONBOARDING_NAME -> NameStep(
                     initialName = initialName,
+                    onNameChange = onNameChange,
                     errorMessage = errorMessage,
                     onNext = onNameNext,
                 )
                 ViewState.ONBOARDING_EMAIL -> EmailStep(
                     initialEmail = initialEmail,
+                    onEmailChange = onEmailChange,
                     errorMessage = errorMessage,
                     onNext = onEmailNext,
                 )
@@ -195,13 +199,14 @@ private fun OnboardingStepLayout(
 @Composable
 private fun NameStep(
     initialName: String,
+    onNameChange: (String) -> Unit,
     errorMessage: String?,
     onNext: (String) -> Unit,
 ) {
     val colors = ClothisTheme.colors
     val dimens = ClothisTheme.dimens
     var name by remember { mutableStateOf(initialName) }
-    var touched by remember { mutableStateOf(false) }
+    var touched by remember { mutableStateOf(initialName.isNotEmpty()) }
     val isValid = name.isNotBlank()
 
     Column(
@@ -218,7 +223,7 @@ private fun NameStep(
 
         OnboardingTextField(
             value = name,
-            onValueChange = { name = it; touched = true },
+            onValueChange = { name = it; touched = true; onNameChange(it) },
             placeholder = "Имя",
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Text),
             keyboardActions = KeyboardActions(onNext = { if (isValid) onNext(name.trim()) }),
@@ -243,13 +248,14 @@ private fun NameStep(
 @Composable
 private fun EmailStep(
     initialEmail: String,
+    onEmailChange: (String) -> Unit,
     errorMessage: String?,
     onNext: (String) -> Unit,
 ) {
     val colors = ClothisTheme.colors
     val dimens = ClothisTheme.dimens
     var email by remember { mutableStateOf(initialEmail) }
-    var touched by remember { mutableStateOf(false) }
+    var touched by remember { mutableStateOf(initialEmail.isNotEmpty()) }
     val emailErr = emailErrorMessage(email, touched)
     val isValid = isValidEmail(email)
 
@@ -267,7 +273,7 @@ private fun EmailStep(
 
         OnboardingTextField(
             value = email,
-            onValueChange = { email = it; touched = true },
+            onValueChange = { email = it; touched = true; onEmailChange(it) },
             placeholder = "example@mail.com",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { if (isValid) onNext(email.trim()) }),
