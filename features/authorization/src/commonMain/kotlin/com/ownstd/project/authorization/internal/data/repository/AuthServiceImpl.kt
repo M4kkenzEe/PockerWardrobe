@@ -7,9 +7,15 @@ import com.ownstd.project.authorization.internal.data.model.LoginRequest
 import com.ownstd.project.authorization.internal.data.model.LogoutRequest
 import com.ownstd.project.authorization.internal.data.model.RegisterRequest
 import com.ownstd.project.authorization.internal.data.model.ResetPasswordRequest
+import com.ownstd.project.authorization.internal.data.model.StartRegistrationRequest
+import com.ownstd.project.authorization.internal.data.model.VerifyRegistrationRequest
+import com.ownstd.project.authorization.internal.data.model.VerifyRegistrationResponse
 import com.ownstd.project.authorization.internal.data.model.VerifyEmailRequest
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
+import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
 import com.ownstd.project.network.api.NetworkRepository
 import io.ktor.client.call.body
@@ -31,19 +37,21 @@ class AuthServiceImpl(
     }
 
     override suspend fun register(
-        username: String,
+        username: String?,
         email: String,
         password: String,
-        gender: String
+        gender: String,
+        verificationToken: String
     ): Result<AuthTokenResponse> {
         return try {
             val response = client.post(baseUrl + REGISTER_URL) {
                 contentType(ContentType.Application.Json)
-                setBody(RegisterRequest(username, email, password, gender))
+                setBody(RegisterRequest(username, email, password, gender, verificationToken))
             }
             when (response.status) {
                 HttpStatusCode.Created -> Result.success(response.body<AuthTokenResponse>())
                 HttpStatusCode.Conflict -> Result.failure(Exception("User with this username or email already exists"))
+                HttpStatusCode.BadRequest -> Result.failure(Exception(REGISTRATION_REJECTED_MESSAGE))
                 else -> Result.failure(Exception("Unexpected response: ${response.status}"))
             }
         } catch (e: Exception) {
@@ -155,6 +163,40 @@ class AuthServiceImpl(
         }
     }
 
+    override suspend fun requestRegistrationCode(email: String): Result<Unit> {
+        return try {
+            val response = client.post(baseUrl + REGISTRATION_START_URL) {
+                contentType(ContentType.Application.Json)
+                setBody(StartRegistrationRequest(email))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(Unit)
+                HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_EMAIL_MESSAGE))
+                HttpStatusCode.Conflict -> Result.failure(Exception(EMAIL_ALREADY_REGISTERED_MESSAGE))
+                HttpStatusCode.TooManyRequests -> Result.failure(Exception(RESEND_RATE_LIMIT_MESSAGE))
+                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> {
+        return try {
+            val response = client.post(baseUrl + REGISTRATION_VERIFY_URL) {
+                contentType(ContentType.Application.Json)
+                setBody(VerifyRegistrationRequest(email, code))
+            }
+            when (response.status) {
+                HttpStatusCode.OK -> Result.success(response.body<VerifyRegistrationResponse>().verificationToken)
+                HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_OR_EXPIRED_CODE_MESSAGE))
+                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     companion object {
         const val REGISTER_URL = "register"
         const val LOGIN_URL = "login"
@@ -163,5 +205,7 @@ class AuthServiceImpl(
         const val RESET_PASSWORD_URL = "auth/reset-password"
         const val VERIFY_EMAIL_URL = "auth/verify-email"
         const val RESEND_VERIFICATION_URL = "auth/resend-verification"
+        const val REGISTRATION_START_URL = "auth/registration/start"
+        const val REGISTRATION_VERIFY_URL = "auth/registration/verify"
     }
 }

@@ -6,7 +6,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -54,8 +54,8 @@ import com.ownstd.project.designsystem.theme.ClothisTheme
 private fun stepIndex(state: ViewState): Int = when (state) {
     ViewState.ONBOARDING_NAME -> 0
     ViewState.ONBOARDING_EMAIL -> 1
-    ViewState.ONBOARDING_PASSWORD -> 2
-    ViewState.ONBOARDING_OTP -> 3
+    ViewState.ONBOARDING_OTP -> 2
+    ViewState.ONBOARDING_PASSWORD -> 3
     else -> -1
 }
 
@@ -68,6 +68,7 @@ internal fun OnboardingFlow(
     initialEmail: String,
     registrationResendCountdown: Int,
     isLoading: Boolean,
+    isEmailVerified: Boolean,
     onNameChange: (String) -> Unit,
     onNameNext: (String) -> Unit,
     onEmailChange: (String) -> Unit,
@@ -76,8 +77,8 @@ internal fun OnboardingFlow(
     onOtpComplete: (String) -> Unit,
     onOtpChange: () -> Unit,
     onResendOtp: () -> Unit,
+    onContinueVerified: () -> Unit,
     onBack: () -> Unit,
-    onSkipOtp: () -> Unit,
 ) {
     AnimatedContent(
         targetState = viewState,
@@ -93,8 +94,7 @@ internal fun OnboardingFlow(
         OnboardingStepLayout(
             currentStep = stepIndex(state) + 1,
             totalSteps = 4,
-            onBack = if (state == ViewState.ONBOARDING_OTP) onSkipOtp else onBack,
-            backLabel = if (state == ViewState.ONBOARDING_OTP) "Подтвердить позже" else null,
+            onBack = onBack,
         ) {
             when (state) {
                 ViewState.ONBOARDING_NAME -> NameStep(
@@ -107,6 +107,7 @@ internal fun OnboardingFlow(
                     initialEmail = initialEmail,
                     onEmailChange = onEmailChange,
                     errorMessage = errorMessage,
+                    isLoading = isLoading,
                     onNext = onEmailNext,
                 )
                 ViewState.ONBOARDING_PASSWORD -> PasswordStep(
@@ -119,9 +120,11 @@ internal fun OnboardingFlow(
                     otpError = otpError,
                     resendCountdown = registrationResendCountdown,
                     isLoading = isLoading,
+                    isEmailVerified = isEmailVerified,
                     onOtpComplete = onOtpComplete,
                     onOtpChange = onOtpChange,
                     onResend = onResendOtp,
+                    onContinue = onContinueVerified,
                 )
                 else -> Unit
             }
@@ -134,7 +137,6 @@ private fun OnboardingStepLayout(
     currentStep: Int,
     totalSteps: Int,
     onBack: () -> Unit,
-    backLabel: String? = null,
     content: @Composable () -> Unit,
 ) {
     val colors = ClothisTheme.colors
@@ -145,6 +147,7 @@ private fun OnboardingStepLayout(
             .fillMaxSize()
             .background(colors.canvas)
             .statusBarsPadding()
+            .navigationBarsPadding()
             .imePadding(),
     ) {
         Row(
@@ -153,24 +156,13 @@ private fun OnboardingStepLayout(
                 .padding(horizontal = dimens.spaceLg, vertical = dimens.spaceMd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (backLabel != null) {
+            IconButton(onClick = onBack, modifier = Modifier.size(dimens.touchTargetMin)) {
                 Text(
-                    text = backLabel,
-                    modifier = Modifier
-                        .clickable { onBack() }
-                        .padding(horizontal = dimens.spaceSm, vertical = 10.dp),
-                    color = colors.onCanvasMuted,
-                    fontSize = 14.sp,
+                    text = "←",
+                    modifier = Modifier.semantics { contentDescription = "Назад" },
+                    color = colors.onCanvas,
+                    fontSize = 22.sp,
                 )
-            } else {
-                IconButton(onClick = onBack, modifier = Modifier.size(dimens.touchTargetMin)) {
-                    Text(
-                        text = "←",
-                        modifier = Modifier.semantics { contentDescription = "Назад" },
-                        color = colors.onCanvas,
-                        fontSize = 22.sp,
-                    )
-                }
             }
             Spacer(modifier = Modifier.width(dimens.spaceSm))
             Row(
@@ -250,6 +242,7 @@ private fun EmailStep(
     initialEmail: String,
     onEmailChange: (String) -> Unit,
     errorMessage: String?,
+    isLoading: Boolean,
     onNext: (String) -> Unit,
 ) {
     val colors = ClothisTheme.colors
@@ -268,7 +261,7 @@ private fun EmailStep(
     ) {
         Text(text = "Твой email", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = colors.onCanvas)
         Spacer(modifier = Modifier.height(dimens.spaceXs))
-        Text(text = "Мы отправим код подтверждения после регистрации", fontSize = 14.sp, color = colors.onCanvasMuted)
+        Text(text = "Мы отправим код подтверждения на эту почту", fontSize = 14.sp, color = colors.onCanvasMuted)
         Spacer(modifier = Modifier.height(dimens.space3xl))
 
         OnboardingTextField(
@@ -289,7 +282,8 @@ private fun EmailStep(
         ClothisPrimaryButton(
             text = "Далее",
             onClick = { onNext(email.trim()) },
-            enabled = isValid,
+            enabled = isValid && !isLoading,
+            isLoading = isLoading,
             modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
         )
     }
@@ -310,7 +304,7 @@ private fun PasswordStep(
 
     val passwordErr = passwordErrorMessage(password, passwordTouched)
     val confirmErr = confirmPasswordErrorMessage(password, confirm, confirmTouched)
-    val isValid = isValidPassword(password) && password == confirm
+    val canSubmit = canSubmitPassword(password, confirm, isLoading)
     val visualTransformation = PasswordVisualTransformation()
 
     Column(
@@ -341,7 +335,7 @@ private fun PasswordStep(
             placeholder = "Повтори пароль",
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { if (isValid && !isLoading) onSubmit(password) }),
+            keyboardActions = KeyboardActions(onDone = { if (canSubmit) onSubmit(password) }),
             errorMessage = confirmErr,
         )
 
@@ -354,7 +348,7 @@ private fun PasswordStep(
         ClothisPrimaryButton(
             text = "Создать аккаунт",
             onClick = { onSubmit(password) },
-            enabled = isValid && !isLoading,
+            enabled = canSubmit,
             isLoading = isLoading,
             modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
         )
@@ -367,9 +361,11 @@ private fun OtpStep(
     otpError: String?,
     resendCountdown: Int,
     isLoading: Boolean,
+    isEmailVerified: Boolean,
     onOtpComplete: (String) -> Unit,
     onOtpChange: () -> Unit,
     onResend: () -> Unit,
+    onContinue: () -> Unit,
 ) {
     val colors = ClothisTheme.colors
     val dimens = ClothisTheme.dimens
@@ -385,7 +381,11 @@ private fun OtpStep(
     ) {
         Text(text = "Код из письма", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = colors.onCanvas)
         Spacer(modifier = Modifier.height(dimens.spaceXs))
-        Text(text = "Введи 6-значный код из письма", fontSize = 14.sp, color = colors.onCanvasMuted)
+        Text(
+            text = if (isEmailVerified) "Email уже подтверждён, можно продолжить" else "Введи 6-значный код из письма",
+            fontSize = 14.sp,
+            color = colors.onCanvasMuted,
+        )
         Spacer(modifier = Modifier.height(dimens.space3xl))
 
         ClothisOtpInputField(
@@ -415,6 +415,13 @@ private fun OtpStep(
                 CircularProgressIndicator(modifier = Modifier.size(32.dp), color = colors.clay, strokeWidth = 2.dp)
             }
         } else {
+            if (isEmailVerified) {
+                ClothisPrimaryButton(
+                    text = "Продолжить",
+                    onClick = onContinue,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = dimens.spaceMd),
+                )
+            }
             if (code.length == 6) {
                 ClothisPrimaryButton(
                     text = "Подтвердить",

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,6 +59,7 @@ fun AuthorizationScreen(
     val registrationEmail by viewModel.registrationEmail.collectAsState()
     val isRegistrationLoading by viewModel.isRegistrationLoading.collectAsState()
     val otpError by viewModel.otpError.collectAsState()
+    val isEmailVerified by viewModel.isEmailVerified.collectAsState()
     val registrationResendCountdown by viewModel.registrationResendCountdown.collectAsState()
 
     if (isSessionOpen) {
@@ -70,6 +72,7 @@ fun AuthorizationScreen(
             .fillMaxSize()
             .background(ClothisTheme.colors.canvas)
             .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         when (viewState) {
             ViewState.LOGIN -> LoginScreen(
@@ -93,6 +96,7 @@ fun AuthorizationScreen(
                 initialEmail = registrationEmail,
                 registrationResendCountdown = registrationResendCountdown,
                 isLoading = isRegistrationLoading,
+                isEmailVerified = isEmailVerified,
                 onNameChange = viewModel::onNameChange,
                 onNameNext = viewModel::onNameNext,
                 onEmailChange = viewModel::onEmailChange,
@@ -101,8 +105,8 @@ fun AuthorizationScreen(
                 onOtpComplete = viewModel::verifyEmail,
                 onOtpChange = viewModel::clearOtpError,
                 onResendOtp = viewModel::resendRegistrationVerification,
+                onContinueVerified = viewModel::continueToPassword,
                 onBack = viewModel::navigateBackFromOnboarding,
-                onSkipOtp = viewModel::skipOtpVerification,
             )
 
             ViewState.FORGOT_PASSWORD -> ForgotPasswordScreen(

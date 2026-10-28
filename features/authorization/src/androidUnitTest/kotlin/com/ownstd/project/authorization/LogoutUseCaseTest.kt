@@ -58,10 +58,11 @@ private class FakeAuthorizationRepository(
     override suspend fun loginUser(username: String, password: String): String? = null
 
     override suspend fun registerUser(
-        username: String,
+        username: String?,
         email: String,
         password: String,
-        gender: Gender
+        gender: Gender,
+        verificationToken: String
     ): String? = null
 
     override suspend fun requestPasswordReset(email: String): String? = null
@@ -75,6 +76,8 @@ private class FakeAuthorizationRepository(
 
     override suspend fun verifyEmail(code: String): String? = null
     override suspend fun resendVerification(): String? = null
+    override suspend fun requestRegistrationCode(email: String): String? = null
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = Result.success("token")
 }
 
 // ---------------------------------------------------------------------------
@@ -164,12 +167,14 @@ class LogoutUseCaseTest {
         val order = mutableListOf<String>()
         val orderedRepo = object : AuthorizationRepository {
             override suspend fun loginUser(username: String, password: String): String? = null
-            override suspend fun registerUser(username: String, email: String, password: String, gender: Gender): String? = null
+            override suspend fun registerUser(username: String?, email: String, password: String, gender: Gender, verificationToken: String): String? = null
             override suspend fun requestPasswordReset(email: String): String? = null
             override suspend fun resetPassword(email: String, code: String, newPassword: String): String? = null
             override suspend fun logout() { order.add("logout") }
             override suspend fun verifyEmail(code: String): String? = null
             override suspend fun resendVerification(): String? = null
+            override suspend fun requestRegistrationCode(email: String): String? = null
+            override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = Result.success("token")
         }
         val orderedNet = object : NetworkRepository {
             override fun getClient(): HttpClient = throw UnsupportedOperationException()

@@ -29,6 +29,9 @@ internal fun passwordErrorMessage(password: String, touched: Boolean): String? =
 internal fun confirmPasswordErrorMessage(password: String, confirm: String, touched: Boolean): String? =
     if (touched && confirm.isNotEmpty() && password != confirm) "Пароли не совпадают" else null
 
+internal fun canSubmitPassword(password: String, confirmation: String, isLoading: Boolean): Boolean =
+    isValidPassword(password) && password == confirmation && !isLoading
+
 internal fun isResendEnabled(countdown: Int, isLoading: Boolean): Boolean =
     countdown == 0 && !isLoading
 

@@ -1,7 +1,10 @@
 package com.ownstd.project.authorization.internal.data.repository
 
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
+import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
@@ -31,13 +34,14 @@ class AuthorizationRepositoryImpl(
     }
 
     override suspend fun registerUser(
-        username: String,
+        username: String?,
         email: String,
         password: String,
-        gender: Gender
+        gender: Gender,
+        verificationToken: String
     ): String? {
         var errorMessage: String? = null
-        authService.register(username, email, password, gender.name)
+        authService.register(username, email, password, gender.name, verificationToken)
             .onSuccess { tokenResponse ->
                 tokenStorage.saveSession(
                     accessToken = tokenResponse.accessToken,
@@ -119,11 +123,43 @@ class AuthorizationRepositoryImpl(
             )
     }
 
+    override suspend fun requestRegistrationCode(email: String): String? {
+        return authService.requestRegistrationCode(email)
+            .fold(
+                onSuccess = { null },
+                onFailure = { exception ->
+                    when (exception.message) {
+                        INVALID_EMAIL_MESSAGE -> "Некорректный email"
+                        EMAIL_ALREADY_REGISTERED_MESSAGE -> "Пользователь с таким email уже существует"
+                        RESEND_RATE_LIMIT_MESSAGE -> RESEND_RATE_LIMIT_MESSAGE
+                        else -> "Не удалось отправить код. Проверь интернет-соединение"
+                    }
+                }
+            )
+    }
+
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> {
+        return authService.verifyRegistrationCode(email, code)
+            .fold(
+                onSuccess = { verificationToken -> Result.success(verificationToken) },
+                onFailure = { exception ->
+                    val message = if (exception.message == INVALID_OR_EXPIRED_CODE_MESSAGE) {
+                        "Неверный или истёкший код. Запроси новый"
+                    } else {
+                        "Не удалось подтвердить email. Попробуй снова"
+                    }
+                    Result.failure(Exception(message))
+                }
+            )
+    }
+
     private fun mapErrorMessage(message: String?): String {
         return when {
             message == null -> "Неизвестная ошибка"
             message.contains("already exists", ignoreCase = true) -> "Пользователь с таким именем или email уже существует"
             message.contains("Invalid credentials", ignoreCase = true) -> "Неверное имя пользователя или пароль"
+            message.contains(REGISTRATION_REJECTED_MESSAGE) ->
+                "Не удалось создать аккаунт. Проверь пароль или вернись назад и запроси код заново"
             message.contains("Unexpected response", ignoreCase = true) -> "Ошибка сервера: $message"
             else -> "Не удалось подключиться к серверу"
         }

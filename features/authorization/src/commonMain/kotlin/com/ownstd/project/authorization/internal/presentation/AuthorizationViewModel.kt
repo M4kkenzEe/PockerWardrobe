@@ -37,10 +37,17 @@ internal class AuthorizationViewModel(
     private val _otpError = MutableStateFlow<String?>(null)
     val otpError: StateFlow<String?> = _otpError.asStateFlow()
 
+    private val _isEmailVerified = MutableStateFlow(false)
+    val isEmailVerified: StateFlow<Boolean> = _isEmailVerified.asStateFlow()
+
     private val _registrationResendCountdown = MutableStateFlow(0)
     val registrationResendCountdown: StateFlow<Int> = _registrationResendCountdown.asStateFlow()
 
     private var registrationResendTimerJob: Job? = null
+
+    // Registration data lives in memory only: no account or session exists until /register succeeds.
+    private var verificationToken: String? = null
+    private var codeSentToEmail: String? = null
 
     fun loginUser(username: String, password: String) {
         viewModelScope.launch(dispatcher) {
@@ -123,6 +130,11 @@ internal class AuthorizationViewModel(
         registrationFirstName.value = ""
         registrationEmail.value = ""
         _otpError.value = null
+        verificationToken = null
+        codeSentToEmail = null
+        _isEmailVerified.value = false
+        registrationResendTimerJob?.cancel()
+        _registrationResendCountdown.value = 0
         viewState.value = ViewState.ONBOARDING_NAME
     }
 
@@ -141,28 +153,27 @@ internal class AuthorizationViewModel(
     }
 
     fun onEmailNext(email: String) {
+        if (isRegistrationLoading.value) return
         registrationEmail.value = email
         errorState.value = null
-        viewState.value = ViewState.ONBOARDING_PASSWORD
-    }
-
-    fun submitRegistration(password: String) {
+        // A code for this email is already on its way (user stepped back from OTP): the server would answer 429.
+        if (email == codeSentToEmail) {
+            viewState.value = ViewState.ONBOARDING_OTP
+            return
+        }
+        isRegistrationLoading.value = true
         viewModelScope.launch(dispatcher) {
-            isRegistrationLoading.value = true
-            errorState.value = null
-            val error = authorizationRepository.registerUser(
-                username = registrationFirstName.value,
-                email = registrationEmail.value,
-                password = password,
-                gender = Gender.OTHER
-            )
+            val error = authorizationRepository.requestRegistrationCode(email)
             isRegistrationLoading.value = false
             if (error != null) {
                 errorState.value = error
-            } else {
-                startRegistrationResendTimer()
-                viewState.value = ViewState.ONBOARDING_OTP
+                return@launch
             }
+            codeSentToEmail = email
+            verificationToken = null
+            _isEmailVerified.value = false
+            startRegistrationResendTimer()
+            viewState.value = ViewState.ONBOARDING_OTP
         }
     }
 
@@ -176,22 +187,34 @@ internal class AuthorizationViewModel(
         viewModelScope.launch(dispatcher) {
             try {
                 _otpError.value = null
-                val error = authorizationRepository.verifyEmail(code)
-                if (error != null) {
-                    _otpError.value = error
-                } else {
-                    isSessionOpen.value = true
-                }
+                authorizationRepository.verifyRegistrationCode(registrationEmail.value, code)
+                    .onSuccess { token ->
+                        verificationToken = token
+                        _isEmailVerified.value = true
+                        // The server deletes the code on success, so a later "Next" must request a fresh one.
+                        codeSentToEmail = null
+                        viewState.value = ViewState.ONBOARDING_PASSWORD
+                    }
+                    .onFailure { exception ->
+                        _otpError.value = exception.message ?: "Не удалось подтвердить email. Попробуй снова"
+                    }
             } finally {
                 isRegistrationLoading.value = false
             }
         }
     }
 
+    fun continueToPassword() {
+        if (verificationToken == null) return
+        viewState.value = ViewState.ONBOARDING_PASSWORD
+    }
+
     fun resendRegistrationVerification() {
+        if (isRegistrationLoading.value) return
+        isRegistrationLoading.value = true
+        errorState.value = null
         viewModelScope.launch(dispatcher) {
-            isRegistrationLoading.value = true
-            val error = authorizationRepository.resendVerification()
+            val error = authorizationRepository.requestRegistrationCode(registrationEmail.value)
             isRegistrationLoading.value = false
             if (error != null) {
                 errorState.value = error
@@ -201,8 +224,30 @@ internal class AuthorizationViewModel(
         }
     }
 
-    fun skipOtpVerification() {
-        isSessionOpen.value = true
+    fun submitRegistration(password: String) {
+        if (isRegistrationLoading.value) return
+        val token = verificationToken
+        if (token == null) {
+            errorState.value = "Сначала подтверди email"
+            return
+        }
+        isRegistrationLoading.value = true
+        errorState.value = null
+        viewModelScope.launch(dispatcher) {
+            val error = authorizationRepository.registerUser(
+                username = null,
+                email = registrationEmail.value,
+                password = password,
+                gender = Gender.OTHER,
+                verificationToken = token
+            )
+            isRegistrationLoading.value = false
+            if (error != null) {
+                errorState.value = error
+            } else {
+                isSessionOpen.value = true
+            }
+        }
     }
 
     fun navigateBackFromOnboarding() {
@@ -210,8 +255,8 @@ internal class AuthorizationViewModel(
         _otpError.value = null
         viewState.value = when (viewState.value) {
             ViewState.ONBOARDING_EMAIL -> ViewState.ONBOARDING_NAME
-            ViewState.ONBOARDING_PASSWORD -> ViewState.ONBOARDING_EMAIL
-            ViewState.ONBOARDING_OTP -> ViewState.LOGIN
+            ViewState.ONBOARDING_OTP -> ViewState.ONBOARDING_EMAIL
+            ViewState.ONBOARDING_PASSWORD -> ViewState.ONBOARDING_OTP
             else -> ViewState.LOGIN
         }
     }

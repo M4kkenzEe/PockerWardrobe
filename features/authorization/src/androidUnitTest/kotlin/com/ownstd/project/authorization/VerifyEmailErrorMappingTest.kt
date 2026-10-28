@@ -33,12 +33,14 @@ class VerifyEmailErrorMappingTest {
 
 private class FakeAuthService(private val verifyResult: Result<Unit>) : AuthService {
     override suspend fun verifyEmail(code: String): Result<Unit> = verifyResult
-    override suspend fun register(username: String, email: String, password: String, gender: String): Result<AuthTokenResponse> = unsupported()
+    override suspend fun register(username: String?, email: String, password: String, gender: String, verificationToken: String): Result<AuthTokenResponse> = unsupported()
     override suspend fun login(username: String, password: String): Result<AuthTokenResponse> = unsupported()
     override suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse> = unsupported()
     override suspend fun resetPassword(email: String, code: String, newPassword: String): Result<AuthTokenResponse> = unsupported()
     override suspend fun logout(refreshToken: String): Result<Unit> = unsupported()
     override suspend fun resendVerification(): Result<Unit> = unsupported()
+    override suspend fun requestRegistrationCode(email: String): Result<Unit> = unsupported()
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = unsupported()
 
     private fun unsupported(): Nothing = error("not used in this test")
 }

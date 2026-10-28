@@ -146,10 +146,11 @@ private class FakeAuthRepository : AuthorizationRepository {
     override suspend fun loginUser(username: String, password: String): String? = null
 
     override suspend fun registerUser(
-        username: String,
+        username: String?,
         email: String,
         password: String,
         gender: Gender,
+        verificationToken: String,
     ): String? = null
 
     override suspend fun requestPasswordReset(email: String): String? {
@@ -169,4 +170,6 @@ private class FakeAuthRepository : AuthorizationRepository {
 
     override suspend fun verifyEmail(code: String): String? = null
     override suspend fun resendVerification(): String? = null
+    override suspend fun requestRegistrationCode(email: String): String? = null
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = Result.success("token")
 }

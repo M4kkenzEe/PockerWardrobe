@@ -4,10 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegisterRequest(
-    val username: String,
+    val username: String? = null,
     val email: String,
     val password: String,
-    val gender: String
+    val gender: String,
+    val verificationToken: String
 )
 
 @Serializable
@@ -44,3 +45,12 @@ data class ResetPasswordRequest(
 
 @Serializable
 data class VerifyEmailRequest(val code: String)
+
+@Serializable
+data class StartRegistrationRequest(val email: String)
+
+@Serializable
+data class VerifyRegistrationRequest(val email: String, val code: String)
+
+@Serializable
+data class VerifyRegistrationResponse(val verificationToken: String)

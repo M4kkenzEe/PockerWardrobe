@@ -1,5 +1,6 @@
 package com.ownstd.project.authorization
 
+import com.ownstd.project.authorization.internal.presentation.canSubmitPassword
 import com.ownstd.project.authorization.internal.presentation.confirmPasswordErrorMessage
 import com.ownstd.project.authorization.internal.presentation.emailErrorMessage
 import com.ownstd.project.authorization.internal.presentation.formatResendText
@@ -281,5 +282,37 @@ class FormatResendTextTest {
     @Test
     fun `shows 1 second remaining correctly`() {
         assertEquals("Повторно через 1с", formatResendText(1))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// canSubmitPassword
+// ---------------------------------------------------------------------------
+
+class CanSubmitPasswordTest {
+
+    @Test
+    fun `matching valid passwords can be submitted`() {
+        assertTrue(canSubmitPassword("SecurePass1", "SecurePass1", isLoading = false))
+    }
+
+    @Test
+    fun `password differing from its repeat cannot be submitted`() {
+        assertFalse(canSubmitPassword("SecurePass1", "SecurePass2", isLoading = false))
+    }
+
+    @Test
+    fun `empty repeat cannot be submitted`() {
+        assertFalse(canSubmitPassword("SecurePass1", "", isLoading = false))
+    }
+
+    @Test
+    fun `weak password cannot be submitted even when repeated correctly`() {
+        assertFalse(canSubmitPassword("weak", "weak", isLoading = false))
+    }
+
+    @Test
+    fun `valid passwords cannot be submitted while a request is in flight`() {
+        assertFalse(canSubmitPassword("SecurePass1", "SecurePass1", isLoading = true))
     }
 }
