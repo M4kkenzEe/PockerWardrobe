@@ -21,7 +21,7 @@ class RegistrationRepositoryTest {
 
     private val storage = RecordingTokenStorage()
     private val service = ScriptedAuthService()
-    private val repository = AuthorizationRepositoryImpl(service, storage)
+    private val repository = AuthorizationRepositoryImpl(service, storage, RecordingNetworkRepository())
 
     @Test fun `requesting a code does not save a session`() = runTest {
         assertNull(repository.requestRegistrationCode("a@b.com"))

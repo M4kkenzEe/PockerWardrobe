@@ -305,7 +305,7 @@ class PasswordResetFlowTest {
             override fun getClient() = client
             override fun clearAuthCache() = Unit
         }
-        return AuthorizationRepositoryImpl(AuthServiceImpl(network), DiscardingTokenStorage())
+        return AuthorizationRepositoryImpl(AuthServiceImpl(network), DiscardingTokenStorage(), network)
     }
 }
 

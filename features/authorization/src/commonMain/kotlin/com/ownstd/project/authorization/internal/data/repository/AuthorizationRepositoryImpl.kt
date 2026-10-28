@@ -1,5 +1,6 @@
 package com.ownstd.project.authorization.internal.data.repository
 
+import com.ownstd.project.authorization.internal.data.model.AuthTokenResponse
 import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.BAD_REQUEST_MESSAGE
 import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
@@ -17,26 +18,24 @@ import com.ownstd.project.authorization.internal.domain.USER_ALREADY_EXISTS_MESS
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
 import com.ownstd.project.authorization.internal.presentation.PASSWORD_RULE_ERROR
+import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.storage.TokenStorage
 
 class AuthorizationRepositoryImpl(
     private val authService: AuthService,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
+    private val networkRepository: NetworkRepository
 ) : AuthorizationRepository {
     override suspend fun loginUser(username: String, password: String): String? {
         var errorMessage: String? = null
         authService.login(username, password)
             .onSuccess { tokenResponse ->
-                tokenStorage.saveSession(
-                    accessToken = tokenResponse.accessToken,
-                    refreshToken = tokenResponse.refreshToken,
-                    expiresAt = tokenResponse.expiresAt
-                )
+                saveSession(tokenResponse)
                 println("[AuthRepository] login success, userId=${tokenResponse.userId}")
             }
             .onFailure { exception ->
                 println("[AuthRepository] login failed: ${exception.message}")
-                tokenStorage.clearSession()
+                clearSession()
                 errorMessage = loginRegisterErrorMessage(exception.message)
             }
         return errorMessage
@@ -52,11 +51,7 @@ class AuthorizationRepositoryImpl(
         var errorMessage: String? = null
         authService.register(username, email, password, gender.name, verificationToken)
             .onSuccess { tokenResponse ->
-                tokenStorage.saveSession(
-                    accessToken = tokenResponse.accessToken,
-                    refreshToken = tokenResponse.refreshToken,
-                    expiresAt = tokenResponse.expiresAt
-                )
+                saveSession(tokenResponse)
                 println("[AuthRepository] register success, userId=${tokenResponse.userId}")
             }
             .onFailure { exception ->
@@ -84,11 +79,7 @@ class AuthorizationRepositoryImpl(
         return authService.resetPassword(email, code, newPassword)
             .fold(
                 onSuccess = { tokenResponse ->
-                    tokenStorage.saveSession(
-                        accessToken = tokenResponse.accessToken,
-                        refreshToken = tokenResponse.refreshToken,
-                        expiresAt = tokenResponse.expiresAt
-                    )
+                    saveSession(tokenResponse)
                     null
                 },
                 onFailure = { exception -> resetPasswordErrorMessage(exception.message) }
@@ -167,6 +158,21 @@ class AuthorizationRepositoryImpl(
         SERVER_ERROR_MESSAGE -> "Сервер временно недоступен. Попробуй позже"
         NETWORK_ERROR_MESSAGE -> "Нет связи с сервером. Проверь интернет-соединение"
         else -> "Не удалось сменить пароль. Проверь код из последнего письма или запроси новый"
+    }
+
+    // The HTTP client caches the tokens it loaded, so a changed session must drop that cache too.
+    private fun saveSession(tokenResponse: AuthTokenResponse) {
+        tokenStorage.saveSession(
+            accessToken = tokenResponse.accessToken,
+            refreshToken = tokenResponse.refreshToken,
+            expiresAt = tokenResponse.expiresAt
+        )
+        networkRepository.clearAuthCache()
+    }
+
+    private fun clearSession() {
+        tokenStorage.clearSession()
+        networkRepository.clearAuthCache()
     }
 
     private fun verifyRegistrationCodeErrorMessage(message: String?): String = when (message) {

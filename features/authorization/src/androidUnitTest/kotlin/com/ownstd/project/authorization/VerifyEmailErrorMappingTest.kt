@@ -28,7 +28,7 @@ class VerifyEmailErrorMappingTest {
     }
 
     private fun repository(verifyResult: Result<Unit>) =
-        AuthorizationRepositoryImpl(FakeAuthService(verifyResult), NoOpTokenStorage())
+        AuthorizationRepositoryImpl(FakeAuthService(verifyResult), NoOpTokenStorage(), RecordingNetworkRepository())
 }
 
 private class FakeAuthService(private val verifyResult: Result<Unit>) : AuthService {

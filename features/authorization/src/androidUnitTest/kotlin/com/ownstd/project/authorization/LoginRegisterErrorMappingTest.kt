@@ -20,6 +20,7 @@ import kotlin.test.assertNull
 class LoginRegisterErrorMappingTest {
 
     private val storage = InMemoryTokenStorage(accessToken = "stale-access", refreshToken = "stale-refresh")
+    private var network = RecordingNetworkRepository()
 
     @Test fun `login success saves the tokens and returns no error`() = runTest {
         val repository = repository(respondingWith(HttpStatusCode.OK, TOKENS_BODY))
@@ -29,6 +30,44 @@ class LoginRegisterErrorMappingTest {
         assertEquals(1, storage.saveSessionCalls)
         assertEquals("fresh-access", storage.getAccessToken())
         assertEquals("fresh-refresh", storage.getRefreshToken())
+    }
+
+    @Test fun `login success drops the cached http client tokens after saving the session`() = runTest {
+        val repository = repository(respondingWith(HttpStatusCode.OK, TOKENS_BODY))
+
+        repository.loginUser("user@example.com", "SecurePass1")
+
+        assertEquals(1, network.authCacheClears)
+    }
+
+    @Test fun `register success drops the cached http client tokens`() = runTest {
+        val repository = repository(respondingWith(HttpStatusCode.Created, TOKENS_BODY))
+
+        repository.registerUser(null, "a@b.com", "SecurePass1", Gender.OTHER, "verification-token")
+
+        assertEquals(1, network.authCacheClears)
+    }
+
+    @Test fun `password reset success drops the cached http client tokens`() = runTest {
+        val repository = repository(respondingWith(HttpStatusCode.OK, TOKENS_BODY))
+
+        assertNull(repository.resetPassword("a@b.com", "123456", "SecurePass1"))
+
+        assertEquals(1, network.authCacheClears)
+    }
+
+    @Test fun `failed login drops the cached http client tokens along with the stored session`() = runTest {
+        val repository = repository(respondingWith(HttpStatusCode.Unauthorized))
+
+        repository.loginUser("user@example.com", "wrong")
+
+        assertEquals(1, network.authCacheClears)
+    }
+
+    @Test fun `failed register keeps the cached http client tokens`() = runTest {
+        registerError(respondingWith(HttpStatusCode.Conflict))
+
+        assertEquals(0, network.authCacheClears)
     }
 
     @Test fun `login failure clears the session`() = runTest {
@@ -187,8 +226,10 @@ class LoginRegisterErrorMappingTest {
     private suspend fun verifyCodeError(engine: MockEngine): String =
         checkNotNull(repository(engine).verifyRegistrationCode("a@b.com", "123456").exceptionOrNull()?.message)
 
-    private fun repository(engine: MockEngine) =
-        AuthorizationRepositoryImpl(AuthServiceImpl(networkRepositoryOver(engine)), storage)
+    private fun repository(engine: MockEngine): AuthorizationRepositoryImpl {
+        network = networkRepositoryOver(engine)
+        return AuthorizationRepositoryImpl(AuthServiceImpl(network), storage, network)
+    }
 
     private fun respondingWith(status: HttpStatusCode, body: String = "") = MockEngine {
         respond(body, status, headersOf(HttpHeaders.ContentType, "application/json"))

@@ -69,11 +69,13 @@ internal class ControllableAuthorizationRepository : AuthorizationRepository {
     override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = Result.success("token")
 }
 
-internal fun networkRepositoryOver(engine: MockEngine): NetworkRepository {
-    val client = HttpClient(engine) { install(ContentNegotiation) { json() } }
-    return object : NetworkRepository {
-        override val baseUrl = "http://localhost/"
-        override fun getClient() = client
-        override fun clearAuthCache() = Unit
-    }
+/** Counts how often the HTTP client's cached tokens were dropped. */
+internal class RecordingNetworkRepository(private val client: HttpClient? = null) : NetworkRepository {
+    var authCacheClears = 0
+    override val baseUrl = "http://localhost/"
+    override fun getClient() = client ?: error("this test does not use the HTTP client")
+    override fun clearAuthCache() { authCacheClears++ }
 }
+
+internal fun networkRepositoryOver(engine: MockEngine): RecordingNetworkRepository =
+    RecordingNetworkRepository(HttpClient(engine) { install(ContentNegotiation) { json() } })

@@ -19,7 +19,8 @@ fun authorizationModule(): Module = module {
     factory<AuthorizationRepository> {
         AuthorizationRepositoryImpl(
             authService = get(),
-            tokenStorage = get()
+            tokenStorage = get(),
+            networkRepository = get()
         )
     }
 

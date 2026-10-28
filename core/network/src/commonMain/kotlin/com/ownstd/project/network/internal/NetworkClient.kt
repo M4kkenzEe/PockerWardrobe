@@ -16,8 +16,10 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CancellationException
@@ -36,6 +38,25 @@ private data class RefreshResponse(
 // Anything else (network failure, 429, 5xx) says nothing about the token, so the session must survive it.
 private val refreshRejectedStatus = HttpStatusCode.Unauthorized
 
+// Endpoints used before a session exists. Their 401 means "wrong credentials", not "expired token":
+// without an exception the Auth plugin resends the very same request, so one tap makes two /login calls.
+private val unauthenticatedEndpoints = listOf(
+    "login",
+    "register",
+    "refresh",
+    "auth/registration/start",
+    "auth/registration/verify",
+    "auth/forgot-password",
+    "auth/reset-password"
+)
+
+// Exact path match under the API base path: a query string or a trailing slash does not matter,
+// and a protected route such as "events/register" is not mistaken for "register".
+private fun unauthenticatedPaths(baseUrl: String): Set<String> {
+    val basePath = Url(baseUrl).encodedPath.trimEnd('/')
+    return unauthenticatedEndpoints.map { "$basePath/$it" }.toSet()
+}
+
 internal object NetworkClient {
     fun getClient(
         tokenStorage: TokenStorage,
@@ -43,6 +64,9 @@ internal object NetworkClient {
         sessionManager: SessionManager,
         engine: HttpClientEngine? = null
     ): HttpClient {
+        val unauthenticatedPaths = unauthenticatedPaths(baseUrl)
+        fun isUnauthenticatedEndpoint(url: Url) = url.encodedPath.trimEnd('/') in unauthenticatedPaths
+
         fun clearSessionAndNotify() {
             tokenStorage.clearSession()
             sessionManager.notifySessionExpired()
@@ -61,6 +85,10 @@ internal object NetworkClient {
                 })
             }
             install(Auth) {
+                reAuthorizeOnResponse { response ->
+                    response.status == HttpStatusCode.Unauthorized &&
+                        !isUnauthenticatedEndpoint(response.request.url)
+                }
                 bearer {
                     loadTokens {
                         val access = tokenStorage.getAccessToken() ?: return@loadTokens null
@@ -103,12 +131,7 @@ internal object NetworkClient {
                         )
                         BearerTokens(body.accessToken, body.refreshToken)
                     }
-                    sendWithoutRequest { request ->
-                        val url = request.url.toString()
-                        !url.endsWith("login") &&
-                        !url.endsWith("register") &&
-                        !url.endsWith("refresh")
-                    }
+                    sendWithoutRequest { request -> !isUnauthenticatedEndpoint(request.url.build()) }
                 }
             }
         }
