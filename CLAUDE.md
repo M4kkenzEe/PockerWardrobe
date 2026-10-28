@@ -24,6 +24,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 For iOS app development, open `iosApp/` in Xcode after building the framework.
 
+## UI-тесты (Compose + Robolectric, без эмулятора)
+
+Есть в `features/authorization` (`src/androidUnitTest/.../ui/`). Бегут вместе с unit-тестами модуля:
+
+```bash
+./gradlew :features:authorization:testDebugUnitTest
+./gradlew :features:authorization:testDebugUnitTest --tests '*.ui.*'   # только UI-тесты
+```
+
+- **Первый запуск требует сети:** Robolectric скачивает `android-all-instrumented` (~150 МБ) в `~/.m2/repository/org/robolectric/`. Дальше — из кэша, офлайн.
+- Конфиг: `src/androidUnitTest/resources/robolectric.properties` (SDK 34, экран 412×915dp — как у Samsung A53; на дефолтном 320×470 кнопки сплющиваются и клики мимо), `testOptions.unitTests.isIncludeAndroidResources = true`. Зависимости (`robolectric`, `ui-test-junit4`, `ui-test-manifest`) — только в `androidUnitTest`, версия `ui-test` = версия androidx `compose.ui`, которую тянет Compose Multiplatform.
+- **Как добавить тест:** `@RunWith(RobolectricTestRunner::class) internal class ...`, `@get:Rule val rule = AuthScreenRule(ControllableAuthorizationRepository())`. Правило поднимает реальный `AuthorizationScreen`, VM получает через изолированный Koin-контекст (`KoinIsolatedContext`; глобальный `startKoin/stopKoin` в тестах не работает — Compose кэширует root scope между тестами) и переданный репозиторий: обычно управляемый fake из `AuthTestDoubles.kt`, для сквозной проверки текста — настоящий `AuthorizationRepositoryImpl` поверх `networkRepositoryOver(MockEngine)` (см. `LoginWithRealRepositoryUiTest`; ответ MockEngine приходит с потоков Ktor — ждать через `waitUntilExactlyOneExists`).
+- Прод-проводку `authorizationModule()` проверяет `AuthorizationModuleTest` (резолвит репозиторий, use case, VM); UI-тесты её не видят.
+- Элементы ищем по тегам из `internal object AuthTestTags` (`commonMain`); новый элемент экрана → новая константа + `Modifier.testTag(...)`. Тег поля висит на обёртке: вводить через `typeInto(tag, text)`, ошибку поля искать через `textInside(tag, text)`.
+- Тексты в ассертах — из кода (`PASSWORD_RULE_ERROR`, `emailErrorMessage(...)`, `formatResendText(...)`, коды из `AuthService.kt`), не копипастой.
+- Время виртуальное: корутины VM на `UnconfinedTestDispatcher`, таймеры двигает `rule.runPendingTimers()`. `Thread.sleep` и реальные задержки запрещены. После действия, за которым идёт проверка не-Compose состояния (`rule.isSessionOpened`, вызовы fake), — `compose.waitForIdle()`.
+
 ## Architecture Overview
 
 This is a **Kotlin Multiplatform** (KMP) project targeting Android and iOS, using **Compose Multiplatform** for shared UI.

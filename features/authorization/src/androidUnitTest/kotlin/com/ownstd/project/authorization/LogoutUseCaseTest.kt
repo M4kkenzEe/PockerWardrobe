@@ -4,7 +4,6 @@ import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.domain.LogoutUseCase
 import com.ownstd.project.authorization.internal.presentation.Gender
 import com.ownstd.project.network.api.NetworkRepository
-import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
@@ -13,44 +12,12 @@ import org.junit.Before
 import org.junit.Test
 
 // ---------------------------------------------------------------------------
-// Fake TokenStorage
-// ---------------------------------------------------------------------------
-private class FakeTokenStorage(
-    initialAccess: String? = "access-token",
-    initialRefresh: String? = "refresh-token-abc",
-    initialExpiry: Long? = Long.MAX_VALUE
-) : TokenStorage {
-    private var accessToken: String? = initialAccess
-    private var refreshToken: String? = initialRefresh
-    private var expiresAt: Long? = initialExpiry
-
-    var sessionCleared = false
-
-    override fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long) {
-        this.accessToken = accessToken
-        this.refreshToken = refreshToken
-        this.expiresAt = expiresAt
-    }
-
-    override fun getAccessToken(): String? = accessToken
-    override fun getRefreshToken(): String? = refreshToken
-    override fun getExpiresAt(): Long? = expiresAt
-
-    override fun clearSession() {
-        accessToken = null
-        refreshToken = null
-        expiresAt = null
-        sessionCleared = true
-    }
-}
-
-// ---------------------------------------------------------------------------
 // Fake AuthorizationRepository — minimal stub tracking contract calls only.
 // Does NOT replicate AuthorizationRepositoryImpl internals.
 // Best-effort server call + session clear logic belongs to impl tests.
 // ---------------------------------------------------------------------------
 private class FakeAuthorizationRepository(
-    private val tokenStorage: FakeTokenStorage
+    private val tokenStorage: InMemoryTokenStorage
 ) : AuthorizationRepository {
 
     var logoutCalled = false
@@ -81,31 +48,20 @@ private class FakeAuthorizationRepository(
 }
 
 // ---------------------------------------------------------------------------
-// Fake NetworkRepository
-// ---------------------------------------------------------------------------
-private class FakeNetworkRepository : NetworkRepository {
-    var authCacheCleared = false
-
-    override fun getClient(): HttpClient = throw UnsupportedOperationException()
-    override val baseUrl: String get() = "https://test.example.com/api/v1/"
-    override fun clearAuthCache() { authCacheCleared = true }
-}
-
-// ---------------------------------------------------------------------------
 // Tests: LogoutUseCase contract only (not AuthorizationRepositoryImpl logic)
 // ---------------------------------------------------------------------------
 class LogoutUseCaseTest {
 
-    private lateinit var tokenStorage: FakeTokenStorage
+    private lateinit var tokenStorage: InMemoryTokenStorage
     private lateinit var authorizationRepository: FakeAuthorizationRepository
-    private lateinit var networkRepository: FakeNetworkRepository
+    private lateinit var networkRepository: RecordingNetworkRepository
     private lateinit var useCase: LogoutUseCase
 
     @Before
     fun setUp() {
-        tokenStorage = FakeTokenStorage()
+        tokenStorage = InMemoryTokenStorage(accessToken = "access-token", refreshToken = "refresh-token-abc")
         authorizationRepository = FakeAuthorizationRepository(tokenStorage)
-        networkRepository = FakeNetworkRepository()
+        networkRepository = RecordingNetworkRepository()
         useCase = LogoutUseCase(
             authorizationRepository = authorizationRepository,
             networkRepository = networkRepository
@@ -137,7 +93,7 @@ class LogoutUseCaseTest {
 
         useCase.execute()
 
-        assertTrue("networkRepository.clearAuthCache() должен быть вызван", networkRepository.authCacheCleared)
+        assertTrue("networkRepository.clearAuthCache() должен быть вызван", networkRepository.authCacheClears > 0)
         println("  PASSED")
     }
 
@@ -150,7 +106,7 @@ class LogoutUseCaseTest {
 
         useCase.execute()
 
-        assertTrue("tokenStorage.clearSession() должен быть вызван", tokenStorage.sessionCleared)
+        assertTrue("tokenStorage.clearSession() должен быть вызван", tokenStorage.clearSessionCalls > 0)
         assertNull("Access token должен быть null", tokenStorage.getAccessToken())
         assertNull("Refresh token должен быть null", tokenStorage.getRefreshToken())
         println("  PASSED")

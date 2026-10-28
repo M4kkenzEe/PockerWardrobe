@@ -1,0 +1,47 @@
+package com.ownstd.project.authorization.internal.presentation
+
+/** Stable handles for UI tests; a tag on a text field wrapper also covers its error text. */
+internal object AuthTestTags {
+    const val LOGIN_SCREEN = "login_screen"
+    const val LOGIN_EMAIL_FIELD = "login_email_field"
+    const val LOGIN_PASSWORD_FIELD = "login_password_field"
+    const val LOGIN_SUBMIT_BUTTON = "login_submit_button"
+    const val LOGIN_PROGRESS = "login_progress"
+    const val LOGIN_ERROR = "login_error"
+    const val LOGIN_FORGOT_PASSWORD_LINK = "login_forgot_password_link"
+    const val LOGIN_REGISTER_LINK = "login_register_link"
+
+    const val ONBOARDING_BACK_BUTTON = "onboarding_back_button"
+    const val ONBOARDING_ERROR = "onboarding_error"
+    const val NAME_STEP = "onboarding_name_step"
+    const val NAME_FIELD = "onboarding_name_field"
+    const val NAME_NEXT_BUTTON = "onboarding_name_next_button"
+    const val EMAIL_STEP = "onboarding_email_step"
+    const val EMAIL_FIELD = "onboarding_email_field"
+    const val EMAIL_NEXT_BUTTON = "onboarding_email_next_button"
+    const val OTP_STEP = "onboarding_otp_step"
+    const val OTP_INPUT = "onboarding_otp_input"
+    const val OTP_CONFIRM_BUTTON = "onboarding_otp_confirm_button"
+    const val OTP_CONTINUE_BUTTON = "onboarding_otp_continue_button"
+    const val OTP_RESEND_BUTTON = "onboarding_otp_resend_button"
+    const val PASSWORD_STEP = "onboarding_password_step"
+    const val PASSWORD_FIELD = "onboarding_password_field"
+    const val PASSWORD_CONFIRM_FIELD = "onboarding_password_confirm_field"
+    const val PASSWORD_SUBMIT_BUTTON = "onboarding_password_submit_button"
+
+    const val FORGOT_PASSWORD_SCREEN = "forgot_password_screen"
+    const val FORGOT_PASSWORD_EMAIL_FIELD = "forgot_password_email_field"
+    const val FORGOT_PASSWORD_SUBMIT_BUTTON = "forgot_password_submit_button"
+    const val FORGOT_PASSWORD_ERROR = "forgot_password_error"
+    const val FORGOT_PASSWORD_BACK_LINK = "forgot_password_back_link"
+
+    const val RESET_PASSWORD_SCREEN = "reset_password_screen"
+    const val RESET_CODE_SENT_TEXT = "reset_code_sent_text"
+    const val RESET_CODE_FIELD = "reset_code_field"
+    const val RESET_RESEND_LINK = "reset_resend_link"
+    const val RESET_NEW_PASSWORD_FIELD = "reset_new_password_field"
+    const val RESET_CONFIRM_PASSWORD_FIELD = "reset_confirm_password_field"
+    const val RESET_SUBMIT_BUTTON = "reset_submit_button"
+    const val RESET_ERROR = "reset_error"
+    const val RESET_BACK_LINK = "reset_back_link"
+}

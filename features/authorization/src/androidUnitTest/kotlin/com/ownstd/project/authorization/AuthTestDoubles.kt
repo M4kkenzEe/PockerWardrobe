@@ -38,12 +38,26 @@ internal class InMemoryTokenStorage(
     }
 }
 
-/** Login answer and latency are controlled by the test; every other call succeeds. */
+/**
+ * Answers and login latency are controlled by the test; by default every call succeeds.
+ * Error strings are returned to the screen as-is: the mapping to user-facing texts has its own tests.
+ */
 internal class ControllableAuthorizationRepository : AuthorizationRepository {
     var loginError: String? = null
     var loginDelayMs = 0L
     var loginCalls = 0
     var lastLogin: Pair<String, String>? = null
+
+    var registrationCodeError: String? = null
+    val registrationCodeEmails = mutableListOf<String>()
+    var verifyCodeError: String? = null
+    var registerError: String? = null
+    var lastRegistration: Pair<String, String>? = null
+
+    var passwordResetRequestError: String? = null
+    val passwordResetRequestEmails = mutableListOf<String>()
+    var resetPasswordError: String? = null
+    var lastReset: Triple<String, String, String>? = null
 
     override suspend fun loginUser(username: String, password: String): String? {
         loginCalls++
@@ -58,15 +72,32 @@ internal class ControllableAuthorizationRepository : AuthorizationRepository {
         password: String,
         gender: Gender,
         verificationToken: String
-    ): String? = null
+    ): String? {
+        lastRegistration = email to password
+        return registerError
+    }
 
-    override suspend fun requestPasswordReset(email: String): String? = null
-    override suspend fun resetPassword(email: String, code: String, newPassword: String): String? = null
+    override suspend fun requestPasswordReset(email: String): String? {
+        passwordResetRequestEmails += email
+        return passwordResetRequestError
+    }
+
+    override suspend fun resetPassword(email: String, code: String, newPassword: String): String? {
+        lastReset = Triple(email, code, newPassword)
+        return resetPasswordError
+    }
+
     override suspend fun logout() = Unit
     override suspend fun verifyEmail(code: String): String? = null
     override suspend fun resendVerification(): String? = null
-    override suspend fun requestRegistrationCode(email: String): String? = null
-    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = Result.success("token")
+
+    override suspend fun requestRegistrationCode(email: String): String? {
+        registrationCodeEmails += email
+        return registrationCodeError
+    }
+
+    override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> =
+        verifyCodeError?.let { Result.failure(Exception(it)) } ?: Result.success("verification-token")
 }
 
 /** Counts how often the HTTP client's cached tokens were dropped. */

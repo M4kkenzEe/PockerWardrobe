@@ -10,16 +10,11 @@ import com.ownstd.project.authorization.internal.presentation.ViewState
 import com.ownstd.project.authorization.internal.presentation.isResendEnabled
 import com.ownstd.project.authorization.internal.presentation.resetCodeSentText
 import com.ownstd.project.authorization.internal.presentation.sanitizeResetCode
-import com.ownstd.project.network.api.NetworkRepository
-import com.ownstd.project.storage.TokenStorage
-import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -299,22 +294,9 @@ class PasswordResetFlowTest {
     }
 
     private fun realRepository(engine: MockEngine): AuthorizationRepository {
-        val client = HttpClient(engine) { install(ContentNegotiation) { json() } }
-        val network = object : NetworkRepository {
-            override val baseUrl = "http://localhost/"
-            override fun getClient() = client
-            override fun clearAuthCache() = Unit
-        }
-        return AuthorizationRepositoryImpl(AuthServiceImpl(network), DiscardingTokenStorage(), network)
+        val network = networkRepositoryOver(engine)
+        return AuthorizationRepositoryImpl(AuthServiceImpl(network), InMemoryTokenStorage(), network)
     }
-}
-
-private class DiscardingTokenStorage : TokenStorage {
-    override fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long) = Unit
-    override fun getAccessToken(): String? = null
-    override fun getRefreshToken(): String? = null
-    override fun getExpiresAt(): Long? = null
-    override fun clearSession() = Unit
 }
 
 private class FakeAuthRepository : AuthorizationRepository {

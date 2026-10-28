@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -156,7 +157,10 @@ private fun OnboardingStepLayout(
                 .padding(horizontal = dimens.spaceLg, vertical = dimens.spaceMd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(dimens.touchTargetMin)) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.testTag(AuthTestTags.ONBOARDING_BACK_BUTTON).size(dimens.touchTargetMin),
+            ) {
                 Text(
                     text = "←",
                     modifier = Modifier.semantics { contentDescription = "Назад" },
@@ -203,6 +207,7 @@ private fun NameStep(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.NAME_STEP)
             .fillMaxSize()
             .padding(horizontal = dimens.screenHorizontalPadding)
             .padding(top = dimens.space3xl),
@@ -217,14 +222,20 @@ private fun NameStep(
             value = name,
             onValueChange = { name = it; touched = true; onNameChange(it) },
             placeholder = "Имя",
+            modifier = Modifier.testTag(AuthTestTags.NAME_FIELD),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Text),
             keyboardActions = KeyboardActions(onNext = { if (isValid) onNext(name.trim()) }),
-            errorMessage = if (touched && name.isBlank()) "Введи своё имя" else null,
+            errorMessage = if (touched && name.isBlank()) NAME_REQUIRED_ERROR else null,
         )
 
         if (errorMessage != null) {
             Spacer(modifier = Modifier.height(dimens.spaceMd))
-            Text(text = errorMessage, color = colors.error, fontSize = 13.sp)
+            Text(
+                text = errorMessage,
+                color = colors.error,
+                fontSize = 13.sp,
+                modifier = Modifier.testTag(AuthTestTags.ONBOARDING_ERROR),
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -232,7 +243,10 @@ private fun NameStep(
             text = "Далее",
             onClick = { onNext(name.trim()) },
             enabled = isValid,
-            modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
+            modifier = Modifier
+                .testTag(AuthTestTags.NAME_NEXT_BUTTON)
+                .fillMaxWidth()
+                .padding(bottom = dimens.space3xl),
         )
     }
 }
@@ -254,6 +268,7 @@ private fun EmailStep(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.EMAIL_STEP)
             .fillMaxSize()
             .padding(horizontal = dimens.screenHorizontalPadding)
             .padding(top = dimens.space3xl),
@@ -268,6 +283,7 @@ private fun EmailStep(
             value = email,
             onValueChange = { email = it; touched = true; onEmailChange(it) },
             placeholder = "example@mail.com",
+            modifier = Modifier.testTag(AuthTestTags.EMAIL_FIELD),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { if (isValid) onNext(email.trim()) }),
             errorMessage = emailErr,
@@ -275,7 +291,12 @@ private fun EmailStep(
 
         if (errorMessage != null) {
             Spacer(modifier = Modifier.height(dimens.spaceMd))
-            Text(text = errorMessage, color = colors.error, fontSize = 13.sp)
+            Text(
+                text = errorMessage,
+                color = colors.error,
+                fontSize = 13.sp,
+                modifier = Modifier.testTag(AuthTestTags.ONBOARDING_ERROR),
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -284,7 +305,10 @@ private fun EmailStep(
             onClick = { onNext(email.trim()) },
             enabled = isValid && !isLoading,
             isLoading = isLoading,
-            modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
+            modifier = Modifier
+                .testTag(AuthTestTags.EMAIL_NEXT_BUTTON)
+                .fillMaxWidth()
+                .padding(bottom = dimens.space3xl),
         )
     }
 }
@@ -309,6 +333,7 @@ private fun PasswordStep(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.PASSWORD_STEP)
             .fillMaxSize()
             .padding(horizontal = dimens.screenHorizontalPadding)
             .padding(top = dimens.space3xl),
@@ -323,6 +348,7 @@ private fun PasswordStep(
             value = password,
             onValueChange = { password = it; passwordTouched = true },
             placeholder = "Пароль",
+            modifier = Modifier.testTag(AuthTestTags.PASSWORD_FIELD),
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
             errorMessage = passwordErr,
@@ -333,6 +359,7 @@ private fun PasswordStep(
             value = confirm,
             onValueChange = { confirm = it; confirmTouched = true },
             placeholder = "Повтори пароль",
+            modifier = Modifier.testTag(AuthTestTags.PASSWORD_CONFIRM_FIELD),
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { if (canSubmit) onSubmit(password) }),
@@ -341,7 +368,12 @@ private fun PasswordStep(
 
         if (errorMessage != null) {
             Spacer(modifier = Modifier.height(dimens.spaceMd))
-            Text(text = errorMessage, color = colors.error, fontSize = 13.sp)
+            Text(
+                text = errorMessage,
+                color = colors.error,
+                fontSize = 13.sp,
+                modifier = Modifier.testTag(AuthTestTags.ONBOARDING_ERROR),
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -350,7 +382,10 @@ private fun PasswordStep(
             onClick = { onSubmit(password) },
             enabled = canSubmit,
             isLoading = isLoading,
-            modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
+            modifier = Modifier
+                .testTag(AuthTestTags.PASSWORD_SUBMIT_BUTTON)
+                .fillMaxWidth()
+                .padding(bottom = dimens.space3xl),
         )
     }
 }
@@ -374,6 +409,7 @@ private fun OtpStep(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.OTP_STEP)
             .fillMaxSize()
             .padding(horizontal = dimens.screenHorizontalPadding)
             .padding(top = dimens.space3xl),
@@ -396,13 +432,19 @@ private fun OtpStep(
                 if (newCode.length == 6) onOtpComplete(newCode)
             },
             error = otpError,
+            modifier = Modifier.testTag(AuthTestTags.OTP_INPUT),
         )
 
         Spacer(modifier = Modifier.height(dimens.spaceLg))
 
         if (errorMessage != null) {
             Spacer(modifier = Modifier.height(dimens.spaceMd))
-            Text(text = errorMessage, color = colors.error, fontSize = 13.sp)
+            Text(
+                text = errorMessage,
+                color = colors.error,
+                fontSize = 13.sp,
+                modifier = Modifier.testTag(AuthTestTags.ONBOARDING_ERROR),
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -419,21 +461,30 @@ private fun OtpStep(
                 ClothisPrimaryButton(
                     text = "Продолжить",
                     onClick = onContinue,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = dimens.spaceMd),
+                    modifier = Modifier
+                        .testTag(AuthTestTags.OTP_CONTINUE_BUTTON)
+                        .fillMaxWidth()
+                        .padding(bottom = dimens.spaceMd),
                 )
             }
             if (code.length == 6) {
                 ClothisPrimaryButton(
                     text = "Подтвердить",
                     onClick = { onOtpComplete(code) },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = dimens.spaceMd),
+                    modifier = Modifier
+                        .testTag(AuthTestTags.OTP_CONFIRM_BUTTON)
+                        .fillMaxWidth()
+                        .padding(bottom = dimens.spaceMd),
                 )
             }
             ClothisGhostButton(
                 text = formatResendText(resendCountdown),
                 onClick = onResend,
                 enabled = resendActive,
-                modifier = Modifier.fillMaxWidth().padding(bottom = dimens.space3xl),
+                modifier = Modifier
+                    .testTag(AuthTestTags.OTP_RESEND_BUTTON)
+                    .fillMaxWidth()
+                    .padding(bottom = dimens.space3xl),
             )
         }
     }

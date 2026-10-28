@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -200,6 +201,7 @@ fun LoginScreen(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.LOGIN_SCREEN)
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .padding(bottom = 44.dp),
@@ -235,6 +237,7 @@ fun LoginScreen(
                 value = email,
                 onValueChange = { email = it; emailTouched = true },
                 label = "Email",
+                modifier = Modifier.testTag(AuthTestTags.LOGIN_EMAIL_FIELD),
                 errorMessage = emailErr
             )
 
@@ -242,6 +245,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it; passwordTouched = true },
                 label = "Пароль",
+                modifier = Modifier.testTag(AuthTestTags.LOGIN_PASSWORD_FIELD),
                 errorMessage = passwordErr,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation()
             )
@@ -251,6 +255,7 @@ fun LoginScreen(
                 fontSize = 13.sp,
                 color = ClothisTheme.colors.clay,
                 modifier = Modifier
+                    .testTag(AuthTestTags.LOGIN_FORGOT_PASSWORD_LINK)
                     .fillMaxWidth()
                     .clickable { onForgotPassword() }
                     .padding(vertical = 2.dp)
@@ -285,7 +290,7 @@ fun LoginScreen(
                     text = errorMessage,
                     color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.testTag(AuthTestTags.LOGIN_ERROR).padding(top = 4.dp)
                 )
             }
 
@@ -295,6 +300,7 @@ fun LoginScreen(
                 onClick = { onLogin(email, password) },
                 enabled = !isLoading && isFormValid,
                 modifier = Modifier
+                    .testTag(AuthTestTags.LOGIN_SUBMIT_BUTTON)
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -307,7 +313,7 @@ fun LoginScreen(
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.testTag(AuthTestTags.LOGIN_PROGRESS).size(20.dp),
                         color = ClothisTheme.colors.onClay,
                         strokeWidth = 2.dp
                     )
@@ -327,6 +333,7 @@ fun LoginScreen(
                 fontSize = 14.sp,
                 color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
+                    .testTag(AuthTestTags.LOGIN_REGISTER_LINK)
                     .fillMaxWidth()
                     .clickable { onSwitchToRegister() }
                     .padding(vertical = 8.dp),
@@ -352,6 +359,7 @@ fun ForgotPasswordScreen(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.FORGOT_PASSWORD_SCREEN)
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .padding(bottom = 44.dp),
@@ -387,6 +395,7 @@ fun ForgotPasswordScreen(
                 value = email,
                 onValueChange = { email = it; emailTouched = true },
                 label = "Email",
+                modifier = Modifier.testTag(AuthTestTags.FORGOT_PASSWORD_EMAIL_FIELD),
                 errorMessage = emailErr
             )
 
@@ -395,7 +404,7 @@ fun ForgotPasswordScreen(
                     text = errorMessage,
                     color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.testTag(AuthTestTags.FORGOT_PASSWORD_ERROR).padding(top = 4.dp)
                 )
             }
 
@@ -405,6 +414,7 @@ fun ForgotPasswordScreen(
                 onClick = { if (!isLoading) onRequestReset(email) },
                 enabled = !isLoading && isFormValid,
                 modifier = Modifier
+                    .testTag(AuthTestTags.FORGOT_PASSWORD_SUBMIT_BUTTON)
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -435,6 +445,7 @@ fun ForgotPasswordScreen(
                 fontSize = 14.sp,
                 color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
+                    .testTag(AuthTestTags.FORGOT_PASSWORD_BACK_LINK)
                     .fillMaxWidth()
                     .clickable { onBack() }
                     .padding(vertical = 8.dp),
@@ -474,6 +485,7 @@ fun ResetPasswordScreen(
 
     Column(
         modifier = Modifier
+            .testTag(AuthTestTags.RESET_PASSWORD_SCREEN)
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .padding(bottom = 44.dp),
@@ -507,7 +519,8 @@ fun ResetPasswordScreen(
                 Text(
                     text = resetCodeSentText(email, isCodeResent),
                     fontSize = 13.sp,
-                    color = ClothisTheme.colors.onSurfaceMuted
+                    color = ClothisTheme.colors.onSurfaceMuted,
+                    modifier = Modifier.testTag(AuthTestTags.RESET_CODE_SENT_TEXT)
                 )
             }
 
@@ -517,7 +530,7 @@ fun ResetPasswordScreen(
                 value = code,
                 onValueChange = { code = sanitizeResetCode(it) },
                 label = { Text("Код из письма") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.testTag(AuthTestTags.RESET_CODE_FIELD).fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = ClothisTheme.colors.clay,
@@ -532,6 +545,7 @@ fun ResetPasswordScreen(
                 fontSize = 13.sp,
                 color = if (resendActive) ClothisTheme.colors.clay else ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
+                    .testTag(AuthTestTags.RESET_RESEND_LINK)
                     .fillMaxWidth()
                     .then(if (resendActive) Modifier.clickable { onResendCode(email) } else Modifier)
                     .padding(vertical = 2.dp)
@@ -542,6 +556,7 @@ fun ResetPasswordScreen(
                 value = newPassword,
                 onValueChange = { newPassword = it; passwordTouched = true },
                 label = "Новый пароль",
+                modifier = Modifier.testTag(AuthTestTags.RESET_NEW_PASSWORD_FIELD),
                 errorMessage = passwordErr,
                 visualTransformation = passwordTransformation
             )
@@ -550,6 +565,7 @@ fun ResetPasswordScreen(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it; confirmPasswordTouched = true },
                 label = "Подтвердите пароль",
+                modifier = Modifier.testTag(AuthTestTags.RESET_CONFIRM_PASSWORD_FIELD),
                 errorMessage = confirmPasswordErr,
                 visualTransformation = passwordTransformation
             )
@@ -582,7 +598,7 @@ fun ResetPasswordScreen(
                     text = errorMessage,
                     color = ClothisTheme.colors.error,
                     fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.testTag(AuthTestTags.RESET_ERROR).padding(top = 4.dp)
                 )
             }
 
@@ -592,6 +608,7 @@ fun ResetPasswordScreen(
                 onClick = { if (!isLoading) onResetPassword(email, code, newPassword) },
                 enabled = !isLoading && isFormValid,
                 modifier = Modifier
+                    .testTag(AuthTestTags.RESET_SUBMIT_BUTTON)
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -622,6 +639,7 @@ fun ResetPasswordScreen(
                 fontSize = 14.sp,
                 color = ClothisTheme.colors.onSurfaceMuted,
                 modifier = Modifier
+                    .testTag(AuthTestTags.RESET_BACK_LINK)
                     .fillMaxWidth()
                     .clickable { onBack() }
                     .padding(vertical = 8.dp),

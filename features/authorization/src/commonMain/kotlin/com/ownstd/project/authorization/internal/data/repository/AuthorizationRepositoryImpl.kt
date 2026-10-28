@@ -21,6 +21,8 @@ import com.ownstd.project.authorization.internal.presentation.PASSWORD_RULE_ERRO
 import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.storage.TokenStorage
 
+internal const val INVALID_CREDENTIALS_TEXT = "Неверное имя пользователя или пароль"
+
 class AuthorizationRepositoryImpl(
     private val authService: AuthService,
     private val tokenStorage: TokenStorage,
@@ -181,7 +183,7 @@ class AuthorizationRepositoryImpl(
     }
 
     private fun loginRegisterErrorMessage(message: String?): String = when (message) {
-        INVALID_CREDENTIALS_MESSAGE -> "Неверное имя пользователя или пароль"
+        INVALID_CREDENTIALS_MESSAGE -> INVALID_CREDENTIALS_TEXT
         USER_ALREADY_EXISTS_MESSAGE -> "Пользователь с таким именем или email уже существует"
         REGISTRATION_REJECTED_MESSAGE ->
             "Не удалось создать аккаунт. Проверь пароль или вернись назад и запроси код заново"

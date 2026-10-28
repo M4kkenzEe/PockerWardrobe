@@ -10,7 +10,6 @@ import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_
 import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
 import com.ownstd.project.authorization.internal.presentation.Gender
-import com.ownstd.project.storage.TokenStorage
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +18,7 @@ import kotlin.test.assertTrue
 
 class RegistrationRepositoryTest {
 
-    private val storage = RecordingTokenStorage()
+    private val storage = InMemoryTokenStorage()
     private val service = ScriptedAuthService()
     private val repository = AuthorizationRepositoryImpl(service, storage, RecordingNetworkRepository())
 
@@ -83,21 +82,6 @@ class RegistrationRepositoryTest {
         assertEquals("Неверный или истёкший код. Запроси новый", result.exceptionOrNull()?.message)
         assertTrue(result.isFailure)
     }
-}
-
-private class RecordingTokenStorage : TokenStorage {
-    var saveSessionCalls = 0
-    private var accessToken: String? = null
-
-    override fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long) {
-        saveSessionCalls++
-        this.accessToken = accessToken
-    }
-
-    override fun getAccessToken(): String? = accessToken
-    override fun getRefreshToken(): String? = null
-    override fun getExpiresAt(): Long? = null
-    override fun clearSession() { accessToken = null }
 }
 
 private class ScriptedAuthService : AuthService {

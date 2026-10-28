@@ -20,6 +20,8 @@ internal fun isValidPassword(password: String): Boolean =
 
 internal const val PASSWORD_RULE_ERROR = "Мин. 8 символов, 1 цифра и 1 заглавная буква"
 
+internal const val NAME_REQUIRED_ERROR = "Введи своё имя"
+
 internal fun emailErrorMessage(email: String, touched: Boolean): String? =
     if (touched && email.isNotEmpty() && !isValidEmail(email)) "Введите корректный email" else null
 

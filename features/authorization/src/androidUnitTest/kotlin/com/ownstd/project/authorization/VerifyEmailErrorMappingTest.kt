@@ -5,7 +5,6 @@ import com.ownstd.project.authorization.internal.data.model.ForgotPasswordRespon
 import com.ownstd.project.authorization.internal.data.repository.AuthorizationRepositoryImpl
 import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
-import com.ownstd.project.storage.TokenStorage
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,7 +27,7 @@ class VerifyEmailErrorMappingTest {
     }
 
     private fun repository(verifyResult: Result<Unit>) =
-        AuthorizationRepositoryImpl(FakeAuthService(verifyResult), NoOpTokenStorage(), RecordingNetworkRepository())
+        AuthorizationRepositoryImpl(FakeAuthService(verifyResult), InMemoryTokenStorage(), RecordingNetworkRepository())
 }
 
 private class FakeAuthService(private val verifyResult: Result<Unit>) : AuthService {
@@ -43,12 +42,4 @@ private class FakeAuthService(private val verifyResult: Result<Unit>) : AuthServ
     override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> = unsupported()
 
     private fun unsupported(): Nothing = error("not used in this test")
-}
-
-private class NoOpTokenStorage : TokenStorage {
-    override fun saveSession(accessToken: String, refreshToken: String, expiresAt: Long) = Unit
-    override fun getAccessToken(): String? = null
-    override fun getRefreshToken(): String? = null
-    override fun getExpiresAt(): Long? = null
-    override fun clearSession() = Unit
 }
