@@ -54,6 +54,7 @@ fun AuthorizationScreen(
     val forgotPasswordEmail by viewModel.forgotPasswordEmail.collectAsState()
     val isForgotPasswordLoading by viewModel.isForgotPasswordLoading.collectAsState()
     val resendCountdown by viewModel.resendCountdown.collectAsState()
+    val isResetCodeResent by viewModel.isResetCodeResent.collectAsState()
 
     val registrationFirstName by viewModel.registrationFirstName.collectAsState()
     val registrationEmail by viewModel.registrationEmail.collectAsState()
@@ -123,6 +124,7 @@ fun AuthorizationScreen(
                 errorMessage = isError,
                 isLoading = isForgotPasswordLoading,
                 email = forgotPasswordEmail,
+                isCodeResent = isResetCodeResent,
                 resendCountdown = resendCountdown,
                 onResetPassword = viewModel::resetPassword,
                 onResendCode = viewModel::resendPasswordResetCode,
@@ -436,6 +438,7 @@ fun ResetPasswordScreen(
     errorMessage: String?,
     isLoading: Boolean,
     email: String,
+    isCodeResent: Boolean,
     resendCountdown: Int,
     onResetPassword: (String, String, String) -> Unit,
     onResendCode: (String) -> Unit,
@@ -491,7 +494,7 @@ fun ResetPasswordScreen(
 
             if (email.isNotEmpty()) {
                 Text(
-                    text = "Код отправлен на $email",
+                    text = resetCodeSentText(email, isCodeResent),
                     fontSize = 13.sp,
                     color = ClothisTheme.colors.onSurfaceMuted
                 )
@@ -501,7 +504,7 @@ fun ResetPasswordScreen(
 
             OutlinedTextField(
                 value = code,
-                onValueChange = { if (it.length <= 6) code = it.filter { c -> c.isDigit() } },
+                onValueChange = { code = sanitizeResetCode(it) },
                 label = { Text("Код из письма") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,

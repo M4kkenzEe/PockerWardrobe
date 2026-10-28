@@ -37,3 +37,10 @@ internal fun isResendEnabled(countdown: Int, isLoading: Boolean): Boolean =
 
 internal fun formatResendText(countdown: Int): String =
     if (countdown > 0) "Повторно через ${countdown}с" else "Отправить повторно"
+
+internal fun resetCodeSentText(email: String, isCodeResent: Boolean): String =
+    if (isCodeResent) "Новый код отправлен на $email. Действует только код из последнего письма"
+    else "Код отправлен на $email"
+
+/** A pasted "934 754" or a code with a trailing newline still fills the field; the backend accepts ASCII digits only. */
+internal fun sanitizeResetCode(input: String): String = input.filter { it in '0'..'9' }.take(6)

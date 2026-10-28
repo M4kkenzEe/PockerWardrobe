@@ -4,10 +4,16 @@ import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.NETWORK_ERROR_MESSAGE
 import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_CODE_EXPIRED_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_INVALID_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_INVALID_PASSWORD_MESSAGE
+import com.ownstd.project.authorization.internal.domain.SERVER_ERROR_MESSAGE
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
+import com.ownstd.project.authorization.internal.presentation.PASSWORD_RULE_ERROR
 import com.ownstd.project.storage.TokenStorage
 
 class AuthorizationRepositoryImpl(
@@ -61,7 +67,13 @@ class AuthorizationRepositoryImpl(
         return authService.forgotPassword(email)
             .fold(
                 onSuccess = { null },
-                onFailure = { "Не удалось отправить письмо. Проверь интернет-соединение" }
+                onFailure = { exception ->
+                    when (exception.message) {
+                        RESEND_RATE_LIMIT_MESSAGE -> RESEND_RATE_LIMIT_MESSAGE
+                        NETWORK_ERROR_MESSAGE -> "Не удалось отправить письмо. Проверь интернет-соединение"
+                        else -> "Не удалось отправить письмо. Попробуй позже"
+                    }
+                }
             )
     }
 
@@ -76,12 +88,7 @@ class AuthorizationRepositoryImpl(
                     )
                     null
                 },
-                onFailure = { exception ->
-                    when {
-                        exception.message?.contains("Неверный код") == true -> "Неверный код или email"
-                        else -> "Не удалось сбросить пароль. Проверь код и попробуй снова"
-                    }
-                }
+                onFailure = { exception -> resetPasswordErrorMessage(exception.message) }
             )
     }
 
@@ -151,6 +158,16 @@ class AuthorizationRepositoryImpl(
                     Result.failure(Exception(message))
                 }
             )
+    }
+
+    private fun resetPasswordErrorMessage(message: String?): String = when (message) {
+        RESET_INVALID_CODE_MESSAGE -> "Неверный код. Действует только код из последнего письма"
+        RESET_CODE_EXPIRED_MESSAGE -> "Код истёк или уже использован. Запроси новый"
+        RESET_INVALID_PASSWORD_MESSAGE -> "Пароль не подходит. $PASSWORD_RULE_ERROR"
+        RESEND_RATE_LIMIT_MESSAGE -> RESEND_RATE_LIMIT_MESSAGE
+        SERVER_ERROR_MESSAGE -> "Сервер временно недоступен. Попробуй позже"
+        NETWORK_ERROR_MESSAGE -> "Нет связи с сервером. Проверь интернет-соединение"
+        else -> "Не удалось сменить пароль. Проверь код из последнего письма или запроси новый"
     }
 
     private fun mapErrorMessage(message: String?): String {

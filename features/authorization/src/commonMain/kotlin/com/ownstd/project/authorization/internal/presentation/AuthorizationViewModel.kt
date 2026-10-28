@@ -30,6 +30,11 @@ internal class AuthorizationViewModel(
 
     private var resendTimerJob: Job? = null
 
+    private val _isResetCodeResent = MutableStateFlow(false)
+
+    /** True once a new reset code was sent from the code screen, so the previous email no longer works. */
+    val isResetCodeResent: StateFlow<Boolean> = _isResetCodeResent.asStateFlow()
+
     val registrationFirstName = MutableStateFlow("")
     val registrationEmail = MutableStateFlow("")
     val isRegistrationLoading = MutableStateFlow(false)
@@ -61,15 +66,14 @@ internal class AuthorizationViewModel(
     }
 
     fun requestPasswordReset(email: String) {
-        viewModelScope.launch(dispatcher) {
-            isForgotPasswordLoading.value = true
-            errorState.value = null
-            val error = authorizationRepository.requestPasswordReset(email)
-            isForgotPasswordLoading.value = false
+        val trimmedEmail = email.trim()
+        launchPasswordRecoveryRequest {
+            val error = authorizationRepository.requestPasswordReset(trimmedEmail)
             if (error != null) {
                 errorState.value = error
             } else {
-                forgotPasswordEmail.value = email
+                forgotPasswordEmail.value = trimmedEmail
+                _isResetCodeResent.value = false
                 startResendTimer()
                 viewState.value = ViewState.RESET_PASSWORD
             }
@@ -81,29 +85,39 @@ internal class AuthorizationViewModel(
      * Restarts the 60-second cooldown timer.
      */
     fun resendPasswordResetCode(email: String) {
-        viewModelScope.launch(dispatcher) {
-            isForgotPasswordLoading.value = true
-            errorState.value = null
+        launchPasswordRecoveryRequest {
             val error = authorizationRepository.requestPasswordReset(email)
-            isForgotPasswordLoading.value = false
             if (error != null) {
                 errorState.value = error
             } else {
+                _isResetCodeResent.value = true
                 startResendTimer()
             }
         }
     }
 
     fun resetPassword(email: String, code: String, newPassword: String) {
-        viewModelScope.launch(dispatcher) {
-            isForgotPasswordLoading.value = true
-            errorState.value = null
+        launchPasswordRecoveryRequest {
             val error = authorizationRepository.resetPassword(email, code, newPassword)
-            isForgotPasswordLoading.value = false
             if (error != null) {
                 errorState.value = error
             } else {
                 isSessionOpen.value = true
+            }
+        }
+    }
+
+    // The flag is raised before launching: every extra /forgot-password call silently invalidates
+    // the code already sent, so a double tap must not reach the server twice.
+    private fun launchPasswordRecoveryRequest(request: suspend () -> Unit) {
+        if (isForgotPasswordLoading.value) return
+        isForgotPasswordLoading.value = true
+        errorState.value = null
+        viewModelScope.launch(dispatcher) {
+            try {
+                request()
+            } finally {
+                isForgotPasswordLoading.value = false
             }
         }
     }

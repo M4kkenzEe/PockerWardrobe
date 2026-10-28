@@ -13,6 +13,19 @@ internal const val INVALID_EMAIL_MESSAGE = "Invalid email"
 
 internal const val REGISTRATION_REJECTED_MESSAGE = "Registration rejected"
 
+internal const val RESET_INVALID_CODE_MESSAGE = "Reset code invalid"
+
+internal const val RESET_CODE_EXPIRED_MESSAGE = "Reset code expired"
+
+internal const val RESET_INVALID_PASSWORD_MESSAGE = "New password rejected"
+
+/** 400 with an error code this app version does not know, e.g. from an older backend. */
+internal const val RESET_REJECTED_MESSAGE = "Password reset rejected"
+
+internal const val SERVER_ERROR_MESSAGE = "Server error"
+
+internal const val NETWORK_ERROR_MESSAGE = "Network error"
+
 interface AuthService {
     suspend fun register(
         username: String?,

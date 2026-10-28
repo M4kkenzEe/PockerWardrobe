@@ -1,6 +1,7 @@
 package com.ownstd.project.authorization.internal.data.repository
 
 import com.ownstd.project.authorization.internal.data.model.AuthTokenResponse
+import com.ownstd.project.authorization.internal.data.model.ErrorResponse
 import com.ownstd.project.authorization.internal.data.model.ForgotPasswordRequest
 import com.ownstd.project.authorization.internal.data.model.ForgotPasswordResponse
 import com.ownstd.project.authorization.internal.data.model.LoginRequest
@@ -15,12 +16,19 @@ import com.ownstd.project.authorization.internal.domain.AuthService
 import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.NETWORK_ERROR_MESSAGE
 import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESEND_RATE_LIMIT_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_CODE_EXPIRED_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_INVALID_CODE_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_INVALID_PASSWORD_MESSAGE
+import com.ownstd.project.authorization.internal.domain.RESET_REJECTED_MESSAGE
+import com.ownstd.project.authorization.internal.domain.SERVER_ERROR_MESSAGE
 import com.ownstd.project.network.api.NetworkRepository
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -82,18 +90,16 @@ class AuthServiceImpl(
     }
 
     override suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse> {
-        return try {
-            val response = client.post(baseUrl + FORGOT_PASSWORD_URL) {
+        val response = try {
+            client.post(baseUrl + FORGOT_PASSWORD_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(ForgotPasswordRequest(email))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(response.body<ForgotPasswordResponse>())
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
         } catch (e: Exception) {
-            Result.failure(e)
+            return Result.failure(Exception(NETWORK_ERROR_MESSAGE, e))
         }
+        if (response.status != HttpStatusCode.OK) return Result.failure(Exception(statusFailure(response.status)))
+        return runCatching { response.body<ForgotPasswordResponse>() }
     }
 
     override suspend fun resetPassword(
@@ -101,20 +107,36 @@ class AuthServiceImpl(
         code: String,
         newPassword: String
     ): Result<AuthTokenResponse> {
-        return try {
-            val response = client.post(baseUrl + RESET_PASSWORD_URL) {
+        val response = try {
+            client.post(baseUrl + RESET_PASSWORD_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(ResetPasswordRequest(email, code, newPassword))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(response.body<AuthTokenResponse>())
-                HttpStatusCode.BadRequest -> Result.failure(Exception("Неверный код или email"))
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
         } catch (e: Exception) {
-            Result.failure(e)
+            return Result.failure(Exception(NETWORK_ERROR_MESSAGE, e))
         }
+        if (response.status != HttpStatusCode.OK) return Result.failure(Exception(resetPasswordFailure(response)))
+        return runCatching { response.body<AuthTokenResponse>() }
     }
+
+    private suspend fun resetPasswordFailure(response: HttpResponse): String =
+        if (response.status == HttpStatusCode.BadRequest) resetErrorCodeFailure(response.errorCode())
+        else statusFailure(response.status)
+
+    private fun statusFailure(status: HttpStatusCode): String = when {
+        status == HttpStatusCode.TooManyRequests -> RESEND_RATE_LIMIT_MESSAGE
+        status.value in 500..599 -> SERVER_ERROR_MESSAGE
+        else -> "Unexpected response: $status"
+    }
+
+    private fun resetErrorCodeFailure(errorCode: String?): String = when (errorCode) {
+        "INVALID_CODE" -> RESET_INVALID_CODE_MESSAGE
+        "CODE_EXPIRED" -> RESET_CODE_EXPIRED_MESSAGE
+        "INVALID_PASSWORD" -> RESET_INVALID_PASSWORD_MESSAGE
+        else -> RESET_REJECTED_MESSAGE
+    }
+
+    private suspend fun HttpResponse.errorCode(): String? = runCatching { body<ErrorResponse>().error }.getOrNull()
 
     override suspend fun logout(refreshToken: String): Result<Unit> {
         return try {

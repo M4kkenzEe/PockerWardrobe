@@ -54,3 +54,7 @@ data class VerifyRegistrationRequest(val email: String, val code: String)
 
 @Serializable
 data class VerifyRegistrationResponse(val verificationToken: String)
+
+/** Error body of the backend; [error] is a stable machine-readable code. */
+@Serializable
+data class ErrorResponse(val error: String, val message: String = "")
