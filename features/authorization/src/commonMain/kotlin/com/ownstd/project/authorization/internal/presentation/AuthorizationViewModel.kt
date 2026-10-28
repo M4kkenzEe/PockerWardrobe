@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 
 private const val RESEND_COOLDOWN_SECONDS = 60
 
+internal const val PASSWORD_CHANGED_NOTICE = "Пароль изменён. Войдите с новым паролем"
+
 internal class AuthorizationViewModel(
     private val authorizationRepository: AuthorizationRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -25,6 +27,12 @@ internal class AuthorizationViewModel(
     val forgotPasswordEmail = MutableStateFlow("")
     val isForgotPasswordLoading = MutableStateFlow(false)
     val isLoginLoading = MutableStateFlow(false)
+
+    /** Shown on the login screen right after a successful password reset; dropped by the next login attempt. */
+    val passwordResetNotice = MutableStateFlow<String?>(null)
+
+    /** Email the login form starts with after a password reset. */
+    val loginPrefillEmail = MutableStateFlow("")
 
     private val _resendCountdown = MutableStateFlow(0)
     val resendCountdown: StateFlow<Int> = _resendCountdown.asStateFlow()
@@ -60,6 +68,7 @@ internal class AuthorizationViewModel(
         if (isLoginLoading.value) return
         isLoginLoading.value = true
         errorState.value = null
+        passwordResetNotice.value = null
         viewModelScope.launch(dispatcher) {
             try {
                 val error = authorizationRepository.loginUser(username, password)
@@ -111,9 +120,21 @@ internal class AuthorizationViewModel(
             if (error != null) {
                 errorState.value = error
             } else {
-                isSessionOpen.value = true
+                finishPasswordReset(email)
             }
         }
+    }
+
+    // The session stays closed: the user signs in with the new password. The recovery screens are left for good.
+    private fun finishPasswordReset(email: String) {
+        resendTimerJob?.cancel()
+        _resendCountdown.value = 0
+        _isResetCodeResent.value = false
+        forgotPasswordEmail.value = ""
+        errorState.value = null
+        loginPrefillEmail.value = email
+        passwordResetNotice.value = PASSWORD_CHANGED_NOTICE
+        viewState.value = ViewState.LOGIN
     }
 
     // The flag is raised before launching: every extra /forgot-password call silently invalidates
@@ -150,6 +171,7 @@ internal class AuthorizationViewModel(
 
     fun startRegistration() {
         errorState.value = null
+        passwordResetNotice.value = null
         registrationFirstName.value = ""
         registrationEmail.value = ""
         _otpError.value = null

@@ -105,7 +105,7 @@ class AuthServiceImpl(
         email: String,
         code: String,
         newPassword: String
-    ): Result<AuthTokenResponse> {
+    ): Result<Unit> {
         val response = try {
             client.post(baseUrl + RESET_PASSWORD_URL) {
                 contentType(ContentType.Application.Json)
@@ -115,7 +115,8 @@ class AuthServiceImpl(
             return Result.failure(Exception(NETWORK_ERROR_MESSAGE, e))
         }
         if (response.status != HttpStatusCode.OK) return Result.failure(Exception(resetPasswordFailure(response)))
-        return runCatching { response.body<AuthTokenResponse>() }
+        // The body is ignored on purpose: an older backend still answers with tokens, a newer one with a message.
+        return Result.success(Unit)
     }
 
     private suspend fun resetPasswordFailure(response: HttpResponse): String =

@@ -8,6 +8,7 @@ internal object AuthTestTags {
     const val LOGIN_SUBMIT_BUTTON = "login_submit_button"
     const val LOGIN_PROGRESS = "login_progress"
     const val LOGIN_ERROR = "login_error"
+    const val LOGIN_NOTICE = "login_notice"
     const val LOGIN_FORGOT_PASSWORD_LINK = "login_forgot_password_link"
     const val LOGIN_REGISTER_LINK = "login_register_link"
 

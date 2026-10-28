@@ -47,7 +47,8 @@ interface AuthService {
     ): Result<AuthTokenResponse>
 
     suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse>
-    suspend fun resetPassword(email: String, code: String, newPassword: String): Result<AuthTokenResponse>
+    /** Succeeds on 200 OK. The password is changed but no session is opened: the user logs in again. */
+    suspend fun resetPassword(email: String, code: String, newPassword: String): Result<Unit>
     suspend fun logout(refreshToken: String): Result<Unit>
 
     suspend fun verifyEmail(code: String): Result<Unit>

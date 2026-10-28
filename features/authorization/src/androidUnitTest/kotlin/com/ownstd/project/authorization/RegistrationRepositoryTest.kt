@@ -109,7 +109,7 @@ private class ScriptedAuthService : AuthService {
 
     override suspend fun login(username: String, password: String): Result<AuthTokenResponse> = unsupported()
     override suspend fun forgotPassword(email: String): Result<ForgotPasswordResponse> = unsupported()
-    override suspend fun resetPassword(email: String, code: String, newPassword: String): Result<AuthTokenResponse> = unsupported()
+    override suspend fun resetPassword(email: String, code: String, newPassword: String): Result<Unit> = unsupported()
     override suspend fun logout(refreshToken: String): Result<Unit> = unsupported()
     override suspend fun verifyEmail(code: String): Result<Unit> = unsupported()
     override suspend fun resendVerification(): Result<Unit> = unsupported()

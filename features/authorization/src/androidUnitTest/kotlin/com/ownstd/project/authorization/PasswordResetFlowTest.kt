@@ -5,6 +5,7 @@ import com.ownstd.project.authorization.internal.data.repository.AuthorizationRe
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.AuthorizationViewModel
 import com.ownstd.project.authorization.internal.presentation.Gender
+import com.ownstd.project.authorization.internal.presentation.PASSWORD_CHANGED_NOTICE
 import com.ownstd.project.authorization.internal.presentation.PASSWORD_RULE_ERROR
 import com.ownstd.project.authorization.internal.presentation.ViewState
 import com.ownstd.project.authorization.internal.presentation.isResendEnabled
@@ -46,7 +47,7 @@ class PasswordResetFlowTest {
 
     private fun viewModel() = AuthorizationViewModel(repo, dispatcher)
 
-    @Test fun `happy path - request code then reset password lands user in the app`() = runTest(dispatcher) {
+    @Test fun `happy path - request code then reset password lands user on the login screen`() = runTest(dispatcher) {
         val vm = viewModel()
         assertEquals(ViewState.LOGIN, vm.viewState.value)
 
@@ -63,9 +64,53 @@ class PasswordResetFlowTest {
         runCurrent()
 
         assertEquals(Triple("user@example.com", "123456", "NewPass1"), repo.lastResetArgs)
-        assertTrue(vm.isSessionOpen.value, "После сброса пароля юзер входит без повторного логина")
-        assertTrue(repo.sessionSaved, "Токены из ответа должны быть сохранены")
+        assertFalse(vm.isSessionOpen.value, "После сброса пароля сессия не открывается: юзер входит с новым паролем")
+        assertEquals(ViewState.LOGIN, vm.viewState.value)
+        assertEquals(PASSWORD_CHANGED_NOTICE, vm.passwordResetNotice.value)
+        assertEquals("user@example.com", vm.loginPrefillEmail.value)
         assertNull(vm.errorState.value)
+    }
+
+    @Test fun `successful reset drops the recovery state so the code screen cannot come back`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.requestPasswordReset("user@example.com")
+        runCurrent()
+        vm.resendPasswordResetCode("user@example.com")
+        runCurrent()
+        assertTrue(vm.isResetCodeResent.value)
+
+        vm.resetPassword("user@example.com", "123456", "NewPass1")
+        runCurrent()
+
+        assertEquals("", vm.forgotPasswordEmail.value)
+        assertFalse(vm.isResetCodeResent.value)
+        assertEquals(0, vm.resendCountdown.value)
+        assertFalse(vm.isForgotPasswordLoading.value)
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(0, vm.resendCountdown.value, "Таймер ресенда не должен тикать после выхода с экрана кода")
+    }
+
+    @Test fun `the notice disappears with the next login attempt`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.resetPassword("user@example.com", "123456", "NewPass1")
+        runCurrent()
+        assertNotNull(vm.passwordResetNotice.value)
+
+        vm.loginUser("user@example.com", "NewPass1")
+        runCurrent()
+
+        assertNull(vm.passwordResetNotice.value)
+    }
+
+    @Test fun `the notice disappears when registration starts`() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.resetPassword("user@example.com", "123456", "NewPass1")
+        runCurrent()
+
+        vm.startRegistration()
+
+        assertNull(vm.passwordResetNotice.value)
     }
 
     @Test fun `email delivery failure keeps user on the forgot password screen`() = runTest(dispatcher) {
@@ -91,6 +136,7 @@ class PasswordResetFlowTest {
 
         assertFalse(vm.isSessionOpen.value)
         assertEquals("Неверный код или email", vm.errorState.value)
+        assertNull(vm.passwordResetNotice.value)
         assertFalse(vm.isForgotPasswordLoading.value)
     }
 
@@ -105,7 +151,8 @@ class PasswordResetFlowTest {
         vm.resetPassword("user@example.com", "123456", "NewPass1")
         advanceUntilIdle()
 
-        assertTrue(vm.isSessionOpen.value)
+        assertFalse(vm.isSessionOpen.value)
+        assertEquals(ViewState.LOGIN, vm.viewState.value)
         assertNull(vm.errorState.value, "Прошлая ошибка не должна висеть после успеха")
     }
 
@@ -246,6 +293,41 @@ class PasswordResetFlowTest {
         assertEquals("Нет связи с сервером. Проверь интернет-соединение", vm.errorState.value)
     }
 
+    @Test fun `reset answered with a message writes no tokens and leaves the session closed`() = runTest(dispatcher) {
+        assertResetLeavesSessionClosed("""{"message":"Password has been reset"}""")
+    }
+
+    @Test fun `reset answered with tokens by an older backend writes no tokens either`() = runTest(dispatcher) {
+        assertResetLeavesSessionClosed(
+            """{"accessToken":"leaked-access","refreshToken":"leaked-refresh","expiresAt":4000000000000,"userId":7}"""
+        )
+    }
+
+    @Test fun `reset answered with an empty body still succeeds`() = runTest(dispatcher) {
+        assertResetLeavesSessionClosed("")
+    }
+
+    private suspend fun assertResetLeavesSessionClosed(responseBody: String) {
+        val network = networkRepositoryOver(respondingWith(HttpStatusCode.OK, responseBody))
+        val tokenStorage = InMemoryTokenStorage()
+        val vm = AuthorizationViewModel(
+            AuthorizationRepositoryImpl(AuthServiceImpl(network), tokenStorage, network),
+            dispatcher
+        )
+
+        vm.resetPassword("user@example.com", "934754", "Qwerty1234!")
+        awaitRequestFinished(vm)
+
+        assertNull(vm.errorState.value)
+        assertEquals(ViewState.LOGIN, vm.viewState.value)
+        assertEquals(PASSWORD_CHANGED_NOTICE, vm.passwordResetNotice.value)
+        assertFalse(vm.isSessionOpen.value)
+        assertEquals(0, tokenStorage.saveSessionCalls)
+        assertNull(tokenStorage.getAccessToken())
+        assertNull(tokenStorage.getRefreshToken())
+        assertEquals(0, network.authCacheClears)
+    }
+
     @Test fun `rate limit on send code is shown as too many requests`() = runTest(dispatcher) {
         assertEquals("Слишком много запросов. Подождите немного", forgotErrorShownFor(respondingWith(HttpStatusCode.TooManyRequests, "")))
     }
@@ -307,7 +389,6 @@ private class FakeAuthRepository : AuthorizationRepository {
     var lastRequestEmail: String? = null
     var resetCount = 0
     var lastResetArgs: Triple<String, String, String>? = null
-    var sessionSaved = false
 
     override suspend fun loginUser(username: String, password: String): String? = null
 
@@ -330,7 +411,6 @@ private class FakeAuthRepository : AuthorizationRepository {
         resetCount++
         lastResetArgs = Triple(email, code, newPassword)
         if (delayMs > 0) delay(delayMs)
-        if (resetPasswordError == null) sessionSaved = true
         return resetPasswordError
     }
 
