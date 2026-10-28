@@ -28,8 +28,10 @@ internal class AuthorizationViewModel(
     val isForgotPasswordLoading = MutableStateFlow(false)
     val isLoginLoading = MutableStateFlow(false)
 
+    private val _passwordResetNotice = MutableStateFlow<String?>(null)
+
     /** Shown on the login screen right after a successful password reset; dropped by the next login attempt. */
-    val passwordResetNotice = MutableStateFlow<String?>(null)
+    val passwordResetNotice: StateFlow<String?> = _passwordResetNotice.asStateFlow()
 
     /** Email the login form starts with after a password reset. */
     val loginPrefillEmail = MutableStateFlow("")
@@ -68,7 +70,7 @@ internal class AuthorizationViewModel(
         if (isLoginLoading.value) return
         isLoginLoading.value = true
         errorState.value = null
-        passwordResetNotice.value = null
+        clearPasswordResetNotice()
         viewModelScope.launch(dispatcher) {
             try {
                 val error = authorizationRepository.loginUser(username, password)
@@ -131,10 +133,13 @@ internal class AuthorizationViewModel(
         _resendCountdown.value = 0
         _isResetCodeResent.value = false
         forgotPasswordEmail.value = ""
-        errorState.value = null
         loginPrefillEmail.value = email
-        passwordResetNotice.value = PASSWORD_CHANGED_NOTICE
+        _passwordResetNotice.value = PASSWORD_CHANGED_NOTICE
         viewState.value = ViewState.LOGIN
+    }
+
+    fun clearPasswordResetNotice() {
+        _passwordResetNotice.value = null
     }
 
     // The flag is raised before launching: every extra /forgot-password call silently invalidates
@@ -171,7 +176,7 @@ internal class AuthorizationViewModel(
 
     fun startRegistration() {
         errorState.value = null
-        passwordResetNotice.value = null
+        clearPasswordResetNotice()
         registrationFirstName.value = ""
         registrationEmail.value = ""
         _otpError.value = null

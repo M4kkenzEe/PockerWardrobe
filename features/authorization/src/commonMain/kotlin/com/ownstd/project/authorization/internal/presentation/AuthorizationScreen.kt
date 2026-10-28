@@ -88,7 +88,7 @@ fun AuthorizationScreen(
                 onLogin = viewModel::loginUser,
                 onForgotPassword = {
                     viewModel.errorState.value = null
-                    viewModel.passwordResetNotice.value = null
+                    viewModel.clearPasswordResetNotice()
                     viewModel.viewState.value = ViewState.FORGOT_PASSWORD
                 },
                 onSwitchToRegister = { viewModel.startRegistration() }
