@@ -3,12 +3,14 @@ package com.ownstd.project.authorization.ui
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.ownstd.project.authorization.ControllableAuthorizationRepository
 import com.ownstd.project.authorization.internal.domain.RESET_INVALID_CODE_MESSAGE
 import com.ownstd.project.authorization.internal.presentation.AuthTestTags
+import com.ownstd.project.authorization.internal.presentation.PASSWORD_CHANGED_NOTICE
 import com.ownstd.project.authorization.internal.presentation.formatResendText
 import com.ownstd.project.authorization.internal.presentation.resetCodeSentText
 import org.junit.Rule
@@ -57,14 +59,55 @@ internal class PasswordRecoveryUiTest {
     }
 
     @Test
-    fun `code and new password open the session`() {
+    fun `code and new password lead to the login screen with a notice and no session`() {
         openForgotPassword()
         requestCode()
 
         submitNewPassword()
 
-        assertTrue(rule.isSessionOpened)
+        compose.onNodeWithTag(AuthTestTags.LOGIN_SCREEN).assertIsDisplayed()
+        compose.onNodeWithTag(AuthTestTags.LOGIN_NOTICE).assertTextEquals(PASSWORD_CHANGED_NOTICE)
+        compose.onNodeWithTag(AuthTestTags.RESET_PASSWORD_SCREEN).assertDoesNotExist()
+        compose.onNodeWithTag(AuthTestTags.FORGOT_PASSWORD_SCREEN).assertDoesNotExist()
+        assertFalse(rule.isSessionOpened)
         assertEquals(Triple(EMAIL, CODE, NEW_PASSWORD), rule.repository.lastReset)
+    }
+
+    @Test
+    fun `login form is prefilled with the email of the reset`() {
+        openForgotPassword()
+        requestCode()
+
+        submitNewPassword()
+
+        compose.textField(AuthTestTags.LOGIN_EMAIL_FIELD).assertTextContains(EMAIL)
+    }
+
+    @Test
+    fun `signing in with the new password opens the session and drops the notice`() {
+        openForgotPassword()
+        requestCode()
+        submitNewPassword()
+
+        compose.typeInto(AuthTestTags.LOGIN_PASSWORD_FIELD, NEW_PASSWORD)
+        compose.onNodeWithTag(AuthTestTags.LOGIN_SUBMIT_BUTTON).performClick()
+        compose.waitForIdle()
+
+        assertEquals(EMAIL to NEW_PASSWORD, rule.repository.lastLogin)
+        assertTrue(rule.isSessionOpened)
+        compose.onNodeWithTag(AuthTestTags.LOGIN_NOTICE).assertDoesNotExist()
+    }
+
+    @Test
+    fun `opening forgot password again hides the notice`() {
+        openForgotPassword()
+        requestCode()
+        submitNewPassword()
+
+        compose.onNodeWithTag(AuthTestTags.LOGIN_FORGOT_PASSWORD_LINK).performClick()
+        compose.onNodeWithTag(AuthTestTags.FORGOT_PASSWORD_BACK_LINK).performClick()
+
+        compose.onNodeWithTag(AuthTestTags.LOGIN_NOTICE).assertDoesNotExist()
     }
 
     @Test
@@ -77,6 +120,7 @@ internal class PasswordRecoveryUiTest {
 
         compose.onNodeWithTag(AuthTestTags.RESET_ERROR).assertTextEquals(RESET_INVALID_CODE_MESSAGE)
         compose.onNodeWithTag(AuthTestTags.RESET_PASSWORD_SCREEN).assertIsDisplayed()
+        compose.onNodeWithTag(AuthTestTags.LOGIN_NOTICE).assertDoesNotExist()
         assertFalse(rule.isSessionOpened)
     }
 

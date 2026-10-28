@@ -48,12 +48,15 @@ class LoginRegisterErrorMappingTest {
         assertEquals(1, network.authCacheClears)
     }
 
-    @Test fun `password reset success drops the cached http client tokens`() = runTest {
+    @Test fun `password reset success leaves the stored session and the http client tokens alone`() = runTest {
         val repository = repository(respondingWith(HttpStatusCode.OK, TOKENS_BODY))
 
         assertNull(repository.resetPassword("a@b.com", "123456", "SecurePass1"))
 
-        assertEquals(1, network.authCacheClears)
+        assertEquals(0, storage.saveSessionCalls)
+        assertEquals(0, storage.clearSessionCalls)
+        assertEquals("stale-access", storage.getAccessToken())
+        assertEquals(0, network.authCacheClears)
     }
 
     @Test fun `failed login drops the cached http client tokens along with the stored session`() = runTest {

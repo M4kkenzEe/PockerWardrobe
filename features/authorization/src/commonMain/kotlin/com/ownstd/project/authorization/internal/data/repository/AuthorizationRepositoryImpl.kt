@@ -80,10 +80,7 @@ class AuthorizationRepositoryImpl(
     override suspend fun resetPassword(email: String, code: String, newPassword: String): String? {
         return authService.resetPassword(email, code, newPassword)
             .fold(
-                onSuccess = { tokenResponse ->
-                    saveSession(tokenResponse)
-                    null
-                },
+                onSuccess = { null },
                 onFailure = { exception -> resetPasswordErrorMessage(exception.message) }
             )
     }

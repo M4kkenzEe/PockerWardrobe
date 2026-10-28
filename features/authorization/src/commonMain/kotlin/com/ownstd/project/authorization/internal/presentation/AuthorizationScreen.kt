@@ -61,6 +61,8 @@ fun AuthorizationScreen(
     val registrationEmail by viewModel.registrationEmail.collectAsState()
     val isRegistrationLoading by viewModel.isRegistrationLoading.collectAsState()
     val isLoginLoading by viewModel.isLoginLoading.collectAsState()
+    val passwordResetNotice by viewModel.passwordResetNotice.collectAsState()
+    val loginPrefillEmail by viewModel.loginPrefillEmail.collectAsState()
     val otpError by viewModel.otpError.collectAsState()
     val isEmailVerified by viewModel.isEmailVerified.collectAsState()
     val registrationResendCountdown by viewModel.registrationResendCountdown.collectAsState()
@@ -80,10 +82,13 @@ fun AuthorizationScreen(
         when (viewState) {
             ViewState.LOGIN -> LoginScreen(
                 errorMessage = isError,
+                noticeMessage = passwordResetNotice,
                 isLoading = isLoginLoading,
+                initialEmail = loginPrefillEmail,
                 onLogin = viewModel::loginUser,
                 onForgotPassword = {
                     viewModel.errorState.value = null
+                    viewModel.clearPasswordResetNotice()
                     viewModel.viewState.value = ViewState.FORGOT_PASSWORD
                 },
                 onSwitchToRegister = { viewModel.startRegistration() }
@@ -183,6 +188,7 @@ private fun ValidatedTextField(
 fun LoginScreen(
     errorMessage: String?,
     isLoading: Boolean,
+    noticeMessage: String? = null,
     initialEmail: String = "",
     initialPassword: String = "",
     onLogin: (String, String) -> Unit,
@@ -230,6 +236,15 @@ fun LoginScreen(
                 fontWeight = FontWeight.SemiBold,
                 color = ClothisTheme.colors.onSurface
             )
+
+            if (noticeMessage != null) {
+                Text(
+                    text = noticeMessage,
+                    color = ClothisTheme.colors.onSurface,
+                    fontSize = 14.sp,
+                    modifier = Modifier.testTag(AuthTestTags.LOGIN_NOTICE)
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
