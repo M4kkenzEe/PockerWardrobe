@@ -3,7 +3,9 @@ package com.ownstd.project.network.internal
 import com.ownstd.project.storage.SessionManager
 import com.ownstd.project.storage.TokenStorage
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -18,6 +20,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -29,18 +32,23 @@ private data class RefreshResponse(
     val userId: Long
 )
 
+// /refresh answers 401 for every dead token (invalid, expired, revoked, user gone) and never 400/403.
+// Anything else (network failure, 429, 5xx) says nothing about the token, so the session must survive it.
+private val refreshRejectedStatus = HttpStatusCode.Unauthorized
+
 internal object NetworkClient {
     fun getClient(
         tokenStorage: TokenStorage,
         baseUrl: String,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        engine: HttpClientEngine? = null
     ): HttpClient {
         fun clearSessionAndNotify() {
             tokenStorage.clearSession()
             sessionManager.notifySessionExpired()
         }
 
-        return HttpClient {
+        val configure: HttpClientConfig<*>.() -> Unit = {
             install(Logging) {
                 logger = Logger.DEFAULT
                 level = LogLevel.NONE
@@ -65,28 +73,35 @@ internal object NetworkClient {
                                 clearSessionAndNotify()
                                 return@refreshTokens null
                             }
-                        try {
-                            val response = client.post("${baseUrl}refresh") {
+                        val response = try {
+                            client.post("${baseUrl}refresh") {
                                 markAsRefreshTokenRequest()
                                 contentType(ContentType.Application.Json)
                                 setBody(mapOf("refreshToken" to oldRefresh))
                             }
-                            if (response.status == HttpStatusCode.OK) {
-                                val body = response.body<RefreshResponse>()
-                                tokenStorage.saveSession(
-                                    accessToken  = body.accessToken,
-                                    refreshToken = body.refreshToken,
-                                    expiresAt    = body.expiresAt
-                                )
-                                BearerTokens(body.accessToken, body.refreshToken)
-                            } else {
-                                clearSessionAndNotify()
-                                null
-                            }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
-                            clearSessionAndNotify()
-                            null
+                            return@refreshTokens null
                         }
+                        if (response.status == refreshRejectedStatus) {
+                            clearSessionAndNotify()
+                            return@refreshTokens null
+                        }
+                        if (response.status != HttpStatusCode.OK) return@refreshTokens null
+                        val body = try {
+                            response.body<RefreshResponse>()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            return@refreshTokens null
+                        }
+                        tokenStorage.saveSession(
+                            accessToken  = body.accessToken,
+                            refreshToken = body.refreshToken,
+                            expiresAt    = body.expiresAt
+                        )
+                        BearerTokens(body.accessToken, body.refreshToken)
                     }
                     sendWithoutRequest { request ->
                         val url = request.url.toString()
@@ -97,5 +112,7 @@ internal object NetworkClient {
                 }
             }
         }
+
+        return if (engine != null) HttpClient(engine, configure) else HttpClient(configure)
     }
 }

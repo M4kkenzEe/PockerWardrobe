@@ -77,6 +77,18 @@ class AuthServiceImplMappingTest {
         assertEquals(REGISTRATION_REJECTED_MESSAGE, result.exceptionOrNull()?.message)
     }
 
+    @Test fun `logout 204 succeeds`() = runTest {
+        assertTrue(service(HttpStatusCode.NoContent).logout("refresh-token").isSuccess)
+    }
+
+    @Test fun `logout 200 succeeds`() = runTest {
+        assertTrue(service(HttpStatusCode.OK).logout("refresh-token").isSuccess)
+    }
+
+    @Test fun `logout 500 fails`() = runTest {
+        assertTrue(service(HttpStatusCode.InternalServerError).logout("refresh-token").isFailure)
+    }
+
     private fun service(status: HttpStatusCode, body: String = ""): AuthServiceImpl {
         val client = HttpClient(MockEngine {
             respond(content = body, status = status, headers = headersOf(HttpHeaders.ContentType, "application/json"))

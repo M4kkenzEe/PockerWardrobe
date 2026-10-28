@@ -24,6 +24,7 @@ internal class AuthorizationViewModel(
     val isSessionOpen = MutableStateFlow(false)
     val forgotPasswordEmail = MutableStateFlow("")
     val isForgotPasswordLoading = MutableStateFlow(false)
+    val isLoginLoading = MutableStateFlow(false)
 
     private val _resendCountdown = MutableStateFlow(0)
     val resendCountdown: StateFlow<Int> = _resendCountdown.asStateFlow()
@@ -54,13 +55,21 @@ internal class AuthorizationViewModel(
     private var verificationToken: String? = null
     private var codeSentToEmail: String? = null
 
+    // The flag is raised before launching so a double tap cannot send a second login request.
     fun loginUser(username: String, password: String) {
+        if (isLoginLoading.value) return
+        isLoginLoading.value = true
+        errorState.value = null
         viewModelScope.launch(dispatcher) {
-            val result = authorizationRepository.loginUser(username, password)
-            if (result != null) {
-                errorState.value = result
-            } else {
-                isSessionOpen.value = true
+            try {
+                val error = authorizationRepository.loginUser(username, password)
+                if (error != null) {
+                    errorState.value = error
+                } else {
+                    isSessionOpen.value = true
+                }
+            } finally {
+                isLoginLoading.value = false
             }
         }
     }

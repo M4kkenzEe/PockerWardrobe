@@ -1,8 +1,10 @@
 package com.ownstd.project.authorization.internal.data.repository
 
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.BAD_REQUEST_MESSAGE
 import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
+import com.ownstd.project.authorization.internal.domain.INVALID_CREDENTIALS_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
 import com.ownstd.project.authorization.internal.domain.NETWORK_ERROR_MESSAGE
 import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
@@ -11,6 +13,7 @@ import com.ownstd.project.authorization.internal.domain.RESET_CODE_EXPIRED_MESSA
 import com.ownstd.project.authorization.internal.domain.RESET_INVALID_CODE_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESET_INVALID_PASSWORD_MESSAGE
 import com.ownstd.project.authorization.internal.domain.SERVER_ERROR_MESSAGE
+import com.ownstd.project.authorization.internal.domain.USER_ALREADY_EXISTS_MESSAGE
 import com.ownstd.project.authorization.internal.domain.AuthorizationRepository
 import com.ownstd.project.authorization.internal.presentation.Gender
 import com.ownstd.project.authorization.internal.presentation.PASSWORD_RULE_ERROR
@@ -34,7 +37,7 @@ class AuthorizationRepositoryImpl(
             .onFailure { exception ->
                 println("[AuthRepository] login failed: ${exception.message}")
                 tokenStorage.clearSession()
-                errorMessage = mapErrorMessage(exception.message)
+                errorMessage = loginRegisterErrorMessage(exception.message)
             }
         return errorMessage
     }
@@ -58,7 +61,7 @@ class AuthorizationRepositoryImpl(
             }
             .onFailure { exception ->
                 println("[AuthRepository] register failed: ${exception.message}")
-                errorMessage = mapErrorMessage(exception.message)
+                errorMessage = loginRegisterErrorMessage(exception.message)
             }
         return errorMessage
     }
@@ -139,6 +142,7 @@ class AuthorizationRepositoryImpl(
                         INVALID_EMAIL_MESSAGE -> "Некорректный email"
                         EMAIL_ALREADY_REGISTERED_MESSAGE -> "Пользователь с таким email уже существует"
                         RESEND_RATE_LIMIT_MESSAGE -> RESEND_RATE_LIMIT_MESSAGE
+                        SERVER_ERROR_MESSAGE -> SERVER_UNAVAILABLE_TEXT
                         else -> "Не удалось отправить код. Проверь интернет-соединение"
                     }
                 }
@@ -150,12 +154,7 @@ class AuthorizationRepositoryImpl(
             .fold(
                 onSuccess = { verificationToken -> Result.success(verificationToken) },
                 onFailure = { exception ->
-                    val message = if (exception.message == INVALID_OR_EXPIRED_CODE_MESSAGE) {
-                        "Неверный или истёкший код. Запроси новый"
-                    } else {
-                        "Не удалось подтвердить email. Попробуй снова"
-                    }
-                    Result.failure(Exception(message))
+                    Result.failure(Exception(verifyRegistrationCodeErrorMessage(exception.message)))
                 }
             )
     }
@@ -170,15 +169,30 @@ class AuthorizationRepositoryImpl(
         else -> "Не удалось сменить пароль. Проверь код из последнего письма или запроси новый"
     }
 
-    private fun mapErrorMessage(message: String?): String {
-        return when {
-            message == null -> "Неизвестная ошибка"
-            message.contains("already exists", ignoreCase = true) -> "Пользователь с таким именем или email уже существует"
-            message.contains("Invalid credentials", ignoreCase = true) -> "Неверное имя пользователя или пароль"
-            message.contains(REGISTRATION_REJECTED_MESSAGE) ->
-                "Не удалось создать аккаунт. Проверь пароль или вернись назад и запроси код заново"
-            message.contains("Unexpected response", ignoreCase = true) -> "Ошибка сервера: $message"
-            else -> "Не удалось подключиться к серверу"
-        }
+    private fun verifyRegistrationCodeErrorMessage(message: String?): String = when (message) {
+        INVALID_OR_EXPIRED_CODE_MESSAGE -> "Неверный или истёкший код. Запроси новый"
+        else -> transportErrorMessage(message) ?: "Не удалось подтвердить email. Попробуй снова"
+    }
+
+    private fun loginRegisterErrorMessage(message: String?): String = when (message) {
+        INVALID_CREDENTIALS_MESSAGE -> "Неверное имя пользователя или пароль"
+        USER_ALREADY_EXISTS_MESSAGE -> "Пользователь с таким именем или email уже существует"
+        REGISTRATION_REJECTED_MESSAGE ->
+            "Не удалось создать аккаунт. Проверь пароль или вернись назад и запроси код заново"
+        BAD_REQUEST_MESSAGE -> "Проверь введённые данные"
+        else -> transportErrorMessage(message) ?: "Что-то пошло не так. Попробуй позже"
+    }
+
+    private fun transportErrorMessage(message: String?): String? = when (message) {
+        RESEND_RATE_LIMIT_MESSAGE -> TOO_MANY_ATTEMPTS_TEXT
+        SERVER_ERROR_MESSAGE -> SERVER_UNAVAILABLE_TEXT
+        NETWORK_ERROR_MESSAGE -> NO_INTERNET_TEXT
+        else -> null
+    }
+
+    private companion object {
+        const val TOO_MANY_ATTEMPTS_TEXT = "Слишком много попыток, подожди минуту"
+        const val SERVER_UNAVAILABLE_TEXT = "Сервер временно недоступен, попробуй позже"
+        const val NO_INTERNET_TEXT = "Нет подключения к интернету"
     }
 }

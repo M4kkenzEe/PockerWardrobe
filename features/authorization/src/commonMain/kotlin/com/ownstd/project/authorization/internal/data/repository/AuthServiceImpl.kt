@@ -13,8 +13,10 @@ import com.ownstd.project.authorization.internal.data.model.VerifyRegistrationRe
 import com.ownstd.project.authorization.internal.data.model.VerifyRegistrationResponse
 import com.ownstd.project.authorization.internal.data.model.VerifyEmailRequest
 import com.ownstd.project.authorization.internal.domain.AuthService
+import com.ownstd.project.authorization.internal.domain.BAD_REQUEST_MESSAGE
 import com.ownstd.project.authorization.internal.domain.EMAIL_ALREADY_REGISTERED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_EMAIL_MESSAGE
+import com.ownstd.project.authorization.internal.domain.INVALID_CREDENTIALS_MESSAGE
 import com.ownstd.project.authorization.internal.domain.INVALID_OR_EXPIRED_CODE_MESSAGE
 import com.ownstd.project.authorization.internal.domain.NETWORK_ERROR_MESSAGE
 import com.ownstd.project.authorization.internal.domain.REGISTRATION_REJECTED_MESSAGE
@@ -24,6 +26,7 @@ import com.ownstd.project.authorization.internal.domain.RESET_INVALID_CODE_MESSA
 import com.ownstd.project.authorization.internal.domain.RESET_INVALID_PASSWORD_MESSAGE
 import com.ownstd.project.authorization.internal.domain.RESET_REJECTED_MESSAGE
 import com.ownstd.project.authorization.internal.domain.SERVER_ERROR_MESSAGE
+import com.ownstd.project.authorization.internal.domain.USER_ALREADY_EXISTS_MESSAGE
 import com.ownstd.project.network.api.NetworkRepository
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -32,6 +35,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 
 class AuthServiceImpl(
     private val networkRepository: NetworkRepository
@@ -51,19 +56,17 @@ class AuthServiceImpl(
         gender: String,
         verificationToken: String
     ): Result<AuthTokenResponse> {
-        return try {
-            val response = client.post(baseUrl + REGISTER_URL) {
+        val response = send {
+            client.post(baseUrl + REGISTER_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(RegisterRequest(username, email, password, gender, verificationToken))
             }
-            when (response.status) {
-                HttpStatusCode.Created -> Result.success(response.body<AuthTokenResponse>())
-                HttpStatusCode.Conflict -> Result.failure(Exception("User with this username or email already exists"))
-                HttpStatusCode.BadRequest -> Result.failure(Exception(REGISTRATION_REJECTED_MESSAGE))
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        }.getOrElse { return Result.failure(it) }
+        return when (response.status) {
+            HttpStatusCode.Created -> runCatching { response.body<AuthTokenResponse>() }
+            HttpStatusCode.Conflict -> Result.failure(Exception(USER_ALREADY_EXISTS_MESSAGE))
+            HttpStatusCode.BadRequest -> Result.failure(Exception(REGISTRATION_REJECTED_MESSAGE))
+            else -> Result.failure(Exception(statusFailure(response.status)))
         }
     }
 
@@ -71,21 +74,17 @@ class AuthServiceImpl(
         username: String,
         password: String
     ): Result<AuthTokenResponse> {
-        return try {
-            val fullUrl = baseUrl + LOGIN_URL
-            println("🔧 AuthService.login - attempting login with URL: $fullUrl")
-            val response = client.post(fullUrl) {
+        val response = send {
+            client.post(baseUrl + LOGIN_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(LoginRequest(login = username, password = password))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(response.body<AuthTokenResponse>())
-                HttpStatusCode.Unauthorized -> Result.failure(Exception("Invalid credentials"))
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
-        } catch (e: Exception) {
-            println("Login failed: ${e.message}")
-            Result.failure(e)
+        }.getOrElse { return Result.failure(it) }
+        return when (response.status) {
+            HttpStatusCode.OK -> runCatching { response.body<AuthTokenResponse>() }
+            HttpStatusCode.Unauthorized -> Result.failure(Exception(INVALID_CREDENTIALS_MESSAGE))
+            HttpStatusCode.BadRequest -> Result.failure(Exception(BAD_REQUEST_MESSAGE))
+            else -> Result.failure(Exception(statusFailure(response.status)))
         }
     }
 
@@ -144,10 +143,9 @@ class AuthServiceImpl(
                 contentType(ContentType.Application.Json)
                 setBody(LogoutRequest(refreshToken))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(Unit)
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
+            // The backend answers 204 to /logout.
+            if (response.status.isSuccess()) Result.success(Unit)
+            else Result.failure(Exception("Unexpected response: ${response.status}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -186,37 +184,40 @@ class AuthServiceImpl(
     }
 
     override suspend fun requestRegistrationCode(email: String): Result<Unit> {
-        return try {
-            val response = client.post(baseUrl + REGISTRATION_START_URL) {
+        val response = send {
+            client.post(baseUrl + REGISTRATION_START_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(StartRegistrationRequest(email))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(Unit)
-                HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_EMAIL_MESSAGE))
-                HttpStatusCode.Conflict -> Result.failure(Exception(EMAIL_ALREADY_REGISTERED_MESSAGE))
-                HttpStatusCode.TooManyRequests -> Result.failure(Exception(RESEND_RATE_LIMIT_MESSAGE))
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        }.getOrElse { return Result.failure(it) }
+        return when (response.status) {
+            HttpStatusCode.OK -> Result.success(Unit)
+            HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_EMAIL_MESSAGE))
+            HttpStatusCode.Conflict -> Result.failure(Exception(EMAIL_ALREADY_REGISTERED_MESSAGE))
+            else -> Result.failure(Exception(statusFailure(response.status)))
         }
     }
 
     override suspend fun verifyRegistrationCode(email: String, code: String): Result<String> {
-        return try {
-            val response = client.post(baseUrl + REGISTRATION_VERIFY_URL) {
+        val response = send {
+            client.post(baseUrl + REGISTRATION_VERIFY_URL) {
                 contentType(ContentType.Application.Json)
                 setBody(VerifyRegistrationRequest(email, code))
             }
-            when (response.status) {
-                HttpStatusCode.OK -> Result.success(response.body<VerifyRegistrationResponse>().verificationToken)
-                HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_OR_EXPIRED_CODE_MESSAGE))
-                else -> Result.failure(Exception("Unexpected response: ${response.status}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+        }.getOrElse { return Result.failure(it) }
+        return when (response.status) {
+            HttpStatusCode.OK -> runCatching { response.body<VerifyRegistrationResponse>().verificationToken }
+            HttpStatusCode.BadRequest -> Result.failure(Exception(INVALID_OR_EXPIRED_CODE_MESSAGE))
+            else -> Result.failure(Exception(statusFailure(response.status)))
         }
+    }
+
+    private suspend fun send(request: suspend () -> HttpResponse): Result<HttpResponse> = try {
+        Result.success(request())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(Exception(NETWORK_ERROR_MESSAGE, e))
     }
 
     companion object {

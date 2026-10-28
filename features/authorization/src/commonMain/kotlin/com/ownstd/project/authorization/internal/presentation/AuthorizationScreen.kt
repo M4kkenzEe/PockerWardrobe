@@ -59,6 +59,7 @@ fun AuthorizationScreen(
     val registrationFirstName by viewModel.registrationFirstName.collectAsState()
     val registrationEmail by viewModel.registrationEmail.collectAsState()
     val isRegistrationLoading by viewModel.isRegistrationLoading.collectAsState()
+    val isLoginLoading by viewModel.isLoginLoading.collectAsState()
     val otpError by viewModel.otpError.collectAsState()
     val isEmailVerified by viewModel.isEmailVerified.collectAsState()
     val registrationResendCountdown by viewModel.registrationResendCountdown.collectAsState()
@@ -78,6 +79,7 @@ fun AuthorizationScreen(
         when (viewState) {
             ViewState.LOGIN -> LoginScreen(
                 errorMessage = isError,
+                isLoading = isLoginLoading,
                 onLogin = viewModel::loginUser,
                 onForgotPassword = {
                     viewModel.errorState.value = null
@@ -179,6 +181,7 @@ private fun ValidatedTextField(
 @Composable
 fun LoginScreen(
     errorMessage: String?,
+    isLoading: Boolean,
     initialEmail: String = "",
     initialPassword: String = "",
     onLogin: (String, String) -> Unit,
@@ -290,7 +293,7 @@ fun LoginScreen(
 
             Button(
                 onClick = { onLogin(email, password) },
-                enabled = isFormValid,
+                enabled = !isLoading && isFormValid,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -302,11 +305,19 @@ fun LoginScreen(
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(
-                    text = "Войти",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = ClothisTheme.colors.onClay,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Войти",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))

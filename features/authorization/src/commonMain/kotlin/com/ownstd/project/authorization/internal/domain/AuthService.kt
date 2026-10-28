@@ -22,6 +22,12 @@ internal const val RESET_INVALID_PASSWORD_MESSAGE = "New password rejected"
 /** 400 with an error code this app version does not know, e.g. from an older backend. */
 internal const val RESET_REJECTED_MESSAGE = "Password reset rejected"
 
+internal const val INVALID_CREDENTIALS_MESSAGE = "Invalid credentials"
+
+internal const val USER_ALREADY_EXISTS_MESSAGE = "User with this username or email already exists"
+
+internal const val BAD_REQUEST_MESSAGE = "Bad request"
+
 internal const val SERVER_ERROR_MESSAGE = "Server error"
 
 internal const val NETWORK_ERROR_MESSAGE = "Network error"
