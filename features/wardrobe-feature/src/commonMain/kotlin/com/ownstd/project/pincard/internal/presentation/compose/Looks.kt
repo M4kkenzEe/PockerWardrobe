@@ -72,6 +72,10 @@ internal fun Looks(
                 snackbarHostState.showSnackbar("Не удалось сгенерировать образы. Попробуйте позже")
                 viewModel.clearGenerateError()
             }
+            is GenerateLooksError.NoNewLooks -> {
+                snackbarHostState.showSnackbar("Новых образов пока нет. Добавьте ещё вещей — появятся новые сочетания")
+                viewModel.clearGenerateError()
+            }
             null -> {}
         }
     }

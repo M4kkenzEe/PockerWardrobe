@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,9 +14,13 @@ import kotlinx.coroutines.launch
 internal sealed class GenerateLooksError {
     data object NotEnoughClothes : GenerateLooksError()
     data object NetworkError : GenerateLooksError()
+    data object NoNewLooks : GenerateLooksError()
 }
 
-internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
+internal class LooksViewModel(
+    private val useCase: LookUseCase,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : ViewModel() {
     val looks = MutableStateFlow<List<Look>>(emptyList())
     val isLoading = MutableStateFlow(true)
     val isGenerating = MutableStateFlow(false)
@@ -25,7 +30,7 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
 
     fun getLooks() {
         println("GGG : getlooks")
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             runCatching {
                 useCase.getLooks()
             }.onSuccess {
@@ -44,14 +49,14 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     }
 
     fun deleteLook(lookId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             useCase.deleteLook(lookId)
             getLooks()
         }
     }
 
     fun shareLook(lookId: Int, onSuccess: (String) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             runCatching {
                 useCase.shareLook(lookId)
             }.onSuccess { response ->
@@ -65,10 +70,11 @@ internal class LooksViewModel(private val useCase: LookUseCase) : ViewModel() {
     }
 
     fun generateLooks() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             isGenerating.value = true
             when (val result = useCase.generateLooks()) {
-                is GenerateLooksResult.Success -> getLooks()
+                is GenerateLooksResult.Success ->
+                    if (result.lookIds.isEmpty()) generateError.value = GenerateLooksError.NoNewLooks else getLooks()
                 is GenerateLooksResult.NotEnoughClothes -> generateError.value = GenerateLooksError.NotEnoughClothes
                 is GenerateLooksResult.NetworkError -> generateError.value = GenerateLooksError.NetworkError
             }
