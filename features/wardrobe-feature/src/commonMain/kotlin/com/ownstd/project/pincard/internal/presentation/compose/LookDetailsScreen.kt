@@ -232,7 +232,11 @@ internal fun LookDetailsTopBar(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier
+                .weight(1f, fill = false)
+                .padding(horizontal = 8.dp)
                 .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         )
@@ -255,6 +259,7 @@ internal fun LookDetailsTopBar(
                             color = Color.White,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.sp,
                             maxLines = 1,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis
@@ -286,6 +291,7 @@ internal fun LookDetailsTopBar(
                                 color = Color.Black,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.sp,
                                 maxLines = 1,
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis
