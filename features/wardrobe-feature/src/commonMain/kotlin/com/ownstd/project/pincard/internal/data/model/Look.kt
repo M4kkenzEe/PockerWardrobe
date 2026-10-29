@@ -18,7 +18,8 @@ data class Look(
     val id: Int? = null,
     val name: String,
     val url: String,
-    val lookItems: List<LookItem>? = null
+    val lookItems: List<LookItem>? = null,
+    val isDraft: Boolean = false
 )
 
 @Serializable

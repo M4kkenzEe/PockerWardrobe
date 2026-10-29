@@ -53,10 +53,20 @@ import com.ownstd.project.designsystem.components.rememberShimmerTranslation
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookItem
+import com.ownstd.project.pincard.internal.presentation.viewmodel.AddLookMode
+import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsError
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LookDetailsViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_add_clothe_error
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_add_draft
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_add_error
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_add_to_wardrobe
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_draft_added
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.look_in_wardrobe
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -75,6 +85,7 @@ fun LookDetailsScreen(
     val pendingAffiliateUrl by viewModel.pendingAffiliateUrl.collectAsState()
     val addingClotheIds by viewModel.addingClotheIds.collectAsState()
     val addedClotheIds by viewModel.addedClotheIds.collectAsState()
+    val addLookMode by viewModel.addLookMode.collectAsState()
     val isAddingLook by viewModel.isAddingLook.collectAsState()
     val lookAdded by viewModel.lookAdded.collectAsState()
     val uriHandler = LocalUriHandler.current
@@ -87,9 +98,16 @@ fun LookDetailsScreen(
         }
     }
 
+    val addLookError = stringResource(Res.string.look_add_error)
+    val addClotheError = stringResource(Res.string.look_add_clothe_error)
     LaunchedEffect(Unit) {
-        viewModel.errorEvent.collect { message ->
-            snackbarHostState.showSnackbar(message)
+        viewModel.errorEvent.collect { error ->
+            snackbarHostState.showSnackbar(
+                when (error) {
+                    LookDetailsError.AddLook -> addLookError
+                    LookDetailsError.AddClothe -> addClotheError
+                }
+            )
         }
     }
 
@@ -167,12 +185,8 @@ fun LookDetailsScreen(
         LookDetailsTopBar(
             lookName = currentLook.name,
             onBackClick = onBackClick,
-            onAddToWardrobe = {
-                if (shareToken != null) {
-                    viewModel.addToWardrobe(shareToken)
-                }
-            },
-            showAddToWardrobe = shareToken != null,
+            onAddToWardrobe = viewModel::onAddLookClick,
+            addLookMode = addLookMode,
             isAddingLook = isAddingLook,
             lookAdded = lookAdded,
             modifier = Modifier.align(Alignment.TopCenter)
@@ -188,11 +202,11 @@ fun LookDetailsScreen(
 }
 
 @Composable
-private fun LookDetailsTopBar(
+internal fun LookDetailsTopBar(
     lookName: String,
     onBackClick: () -> Unit,
     onAddToWardrobe: () -> Unit,
-    showAddToWardrobe: Boolean = false,
+    addLookMode: AddLookMode? = null,
     isAddingLook: Boolean = false,
     lookAdded: Boolean = false,
     modifier: Modifier = Modifier
@@ -224,7 +238,7 @@ private fun LookDetailsTopBar(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         )
 
-        if (showAddToWardrobe) {
+        if (addLookMode != null) {
             when {
                 lookAdded -> {
                     Box(
@@ -236,7 +250,9 @@ private fun LookDetailsTopBar(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "✓ В гардеробе",
+                            text = stringResource(
+                                if (addLookMode == AddLookMode.Draft) Res.string.look_draft_added else Res.string.look_in_wardrobe
+                            ),
                             color = Color.White,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold
@@ -262,7 +278,9 @@ private fun LookDetailsTopBar(
                             )
                         } else {
                             Text(
-                                text = "В гардероб",
+                                text = stringResource(
+                                    if (addLookMode == AddLookMode.Draft) Res.string.look_add_draft else Res.string.look_add_to_wardrobe
+                                ),
                                 color = Color.Black,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold

@@ -149,6 +149,11 @@ class LookRepositoryImpl(
         }
     }
 
+    override suspend fun saveDraft(lookId: Int) {
+        val response = client.post("$baseUrl$ENDPOINT/$lookId/save")
+        check(response.status.isSuccess()) { "HTTP ${response.status.value}" }
+    }
+
     override suspend fun shareLook(lookId: Int): ShareResponse? {
         return try {
             client.post("$baseUrl$ENDPOINT/$lookId/share") {

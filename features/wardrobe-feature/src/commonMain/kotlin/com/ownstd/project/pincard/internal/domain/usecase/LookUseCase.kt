@@ -35,6 +35,10 @@ internal class LookUseCase(private val lookRepository: LookRepository) {
         lookRepository.deleteLook(lookId)
     }
 
+    suspend fun saveDraft(lookId: Int) {
+        lookRepository.saveDraft(lookId)
+    }
+
     suspend fun shareLook(lookId: Int): ShareResponse? {
         return lookRepository.shareLook(lookId)
     }

@@ -14,6 +14,7 @@ internal interface LookRepository {
     suspend fun addLookByShareToken(sharedToken: String)
     suspend fun addClotheByShareToken(shareToken: String, clotheId: Int)
     suspend fun deleteLook(lookId: Int)
+    suspend fun saveDraft(lookId: Int)
     suspend fun shareLook(lookId: Int): ShareResponse?
     suspend fun generateLooks(): GenerateLooksResult
     suspend fun getAffiliateLink(storeUrl: String): String?
