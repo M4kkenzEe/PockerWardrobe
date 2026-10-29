@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -30,11 +32,14 @@ import com.ownstd.project.designsystem.components.WardrobeSegmentedControl
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.presentation.compose.Looks
 import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
+import com.ownstd.project.pincard.internal.presentation.compose.ScrollActivePageToTopEffect
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -44,10 +49,13 @@ fun WardrobeMainScreen(
     openDetails: (url: Int) -> Unit = {},
     openTinderOutfit: () -> Unit = {},
     openClotheDetail: (clotheId: Int) -> Unit = {},
+    scrollToTopEvents: Flow<Unit> = emptyFlow(),
 ) {
     val looksViewModel: LooksViewModel = koinViewModel()
     val wardrobeViewModel: WardrobeViewModel = koinViewModel()
     val pagerState = rememberPagerState(pageCount = { 2 })
+    val wardrobeGridState = rememberLazyStaggeredGridState()
+    val looksGridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     val colors = ClothisTheme.colors
 
@@ -65,15 +73,22 @@ fun WardrobeMainScreen(
             }
     }
 
+    ScrollActivePageToTopEffect(scrollToTopEvents, pagerState, wardrobeGridState, looksGridState)
+
     Box(modifier = Modifier.fillMaxSize().background(colors.canvas)) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
-                0 -> Wardrobe(wardrobeViewModel, onClotheClick = openClotheDetail)
+                0 -> Wardrobe(
+                    viewModel = wardrobeViewModel,
+                    gridState = wardrobeGridState,
+                    onClotheClick = openClotheDetail,
+                )
                 else -> Looks(
                     viewModel = looksViewModel,
+                    gridState = looksGridState,
                     onNavigateToConstructor = openConstructor,
                     navigateToDetails = openDetails,
                 )

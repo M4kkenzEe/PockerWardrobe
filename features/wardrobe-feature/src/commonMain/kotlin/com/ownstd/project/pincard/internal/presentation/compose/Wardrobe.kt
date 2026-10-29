@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
@@ -52,7 +53,11 @@ private val CLOTHE_SKELETON_HEIGHTS = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit = {}) {
+internal fun Wardrobe(
+    viewModel: WardrobeViewModel,
+    gridState: LazyStaggeredGridState,
+    onClotheClick: (Int) -> Unit = {},
+) {
     val clothes by viewModel.clothes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val isUploading by viewModel.isUploading.collectAsState()
@@ -95,6 +100,7 @@ internal fun Wardrobe(viewModel: WardrobeViewModel, onClotheClick: (Int) -> Unit
                     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                     val shimmer by rememberShimmerTranslation()
                     LazyVerticalStaggeredGrid(
+                        state = gridState,
                         columns = StaggeredGridCells.Fixed(2),
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(

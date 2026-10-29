@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.internal.deeplink.DeepLink
@@ -30,12 +31,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import com.ownstd.project.designsystem.components.ClothisNavIsland
+import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.designsystem.components.GlassIconButton
 import com.ownstd.project.designsystem.components.NavTab
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import kotlinprojecttesting.design_system.generated.resources.Res
 import kotlinprojecttesting.design_system.generated.resources.ic_search
 import kotlinprojecttesting.design_system.generated.resources.ic_tune
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.jetbrains.compose.resources.painterResource
 
 // TODO: включить, когда будет реализован фильтр и поиск
@@ -48,6 +51,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
     val currentDeepLink by deepLinkManager.deepLinkFlow.collectAsState()
     val initialDeepLink = remember { currentDeepLink }
     var selectedTab by remember { mutableStateOf(NavTab.Wardrobe) }
+    val wardrobeReselectEvents = remember { MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
     val colors = ClothisTheme.colors
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
@@ -74,6 +78,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     launchSingleTop = true
                 }
             },
+            wardrobeScrollToTopEvents = wardrobeReselectEvents,
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -102,6 +107,12 @@ internal fun MainScreen(parentNavController: NavHostController) {
                 ClothisNavIsland(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
+                        val isWardrobeShown = navBackStackEntry?.destination
+                            ?.hasRoute<WardrobeNavScreens.Wardrobe>() == true
+                        if (tab == NavTab.Wardrobe && tab == selectedTab && isWardrobeShown) {
+                            wardrobeReselectEvents.tryEmit(Unit)
+                            return@ClothisNavIsland
+                        }
                         selectedTab = tab
                         val destination = when (tab) {
                             NavTab.Wardrobe -> BottomNavigationScreens.Shop()

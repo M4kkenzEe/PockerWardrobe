@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.CircularProgressIndicator
@@ -47,6 +48,7 @@ import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 @Composable
 internal fun Looks(
     viewModel: LooksViewModel,
+    gridState: LazyGridState,
     onNavigateToConstructor: () -> Unit,
     navigateToDetails: (lookId: Int) -> Unit,
 ) {
@@ -107,6 +109,7 @@ internal fun Looks(
             else -> {
                 val navBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 LazyVerticalGrid(
+                    state = gridState,
                     modifier = Modifier.fillMaxSize(),
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(top = statusBarTop + 8.dp, bottom = navBarBottom + 76.dp),
