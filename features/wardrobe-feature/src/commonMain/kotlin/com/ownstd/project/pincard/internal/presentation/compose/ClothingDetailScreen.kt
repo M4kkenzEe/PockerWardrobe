@@ -269,7 +269,7 @@ private fun LookWithoutImageCard(onClick: () -> Unit) {
     val dimens = ClothisTheme.dimens
     Box(
         modifier = Modifier.fillMaxWidth().height(LOOK_CARD_HEIGHT)
-            .clip(RoundedCornerShape(dimens.radiusCard)).background(ClothisTheme.colors.surface)
+            .clip(RoundedCornerShape(LOOK_CARD_CORNER_PERCENT)).background(ClothisTheme.colors.surface)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -296,6 +296,8 @@ private fun <T> OutfitRows(items: List<T>, card: @Composable (T) -> Unit) {
 private const val OUTFIT_COLUMNS = 2
 private const val WEAR_WITH_SKELETON_COUNT = 3
 private val LOOK_CARD_HEIGHT = 300.dp
+// Как у LookCard: скругление в процентах, чтобы плейсхолдер и карточка в одном ряду совпадали.
+private const val LOOK_CARD_CORNER_PERCENT = 20
 
 private fun missingCategoryResource(category: MissingCategory): StringResource = when (category) {
     MissingCategory.Top -> Res.string.wear_with_missing_top

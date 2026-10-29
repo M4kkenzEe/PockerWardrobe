@@ -17,6 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 internal data class ClothingDetailState(
@@ -106,6 +107,7 @@ internal class ClothingDetailViewModel(
                 if (ex is CancellationException) throw ex
                 GenerateDraftsResult.Error
             }
+            ensureActive()
             wearWith.value = result.toWearWithState()
         }
     }
