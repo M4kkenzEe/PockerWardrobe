@@ -60,8 +60,8 @@
     <string name="item_detail_open_error">Не удалось открыть магазин. Проверьте, что на устройстве есть браузер, и попробуйте ещё раз.</string>
     <string name="look_add_to_wardrobe">В гардероб</string>
     <string name="look_in_wardrobe">✓ В гардеробе</string>
-    <string name="look_add_draft">Добавить в мои образы</string>
-    <string name="look_draft_added">✓ В твоих образах</string>
+    <string name="look_add_draft">+ В мои образы</string>
+    <string name="look_draft_added">✓ В образах</string>
     <string name="look_add_error">Не удалось добавить образ</string>
     <string name="look_add_clothe_error">Не удалось добавить вещь</string>
 </resources>
