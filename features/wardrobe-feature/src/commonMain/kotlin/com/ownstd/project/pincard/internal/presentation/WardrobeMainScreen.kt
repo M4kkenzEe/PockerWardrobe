@@ -74,7 +74,8 @@ fun WardrobeMainScreen(
     }
 
     LaunchedEffect(scrollToTopEvents) {
-        scrollToTopEvents.collect {
+        // collectLatest: жест пользователя прерывает скролл CancellationException, collect бы на ней завершился
+        scrollToTopEvents.collectLatest {
             when (pagerState.currentPage) {
                 0 -> wardrobeGridState.scrollToTop()
                 else -> looksGridState.scrollToTop()
@@ -88,7 +89,11 @@ fun WardrobeMainScreen(
             modifier = Modifier.fillMaxSize(),
         ) { page ->
             when (page) {
-                0 -> Wardrobe(wardrobeViewModel, gridState = wardrobeGridState, onClotheClick = openClotheDetail)
+                0 -> Wardrobe(
+                    viewModel = wardrobeViewModel,
+                    gridState = wardrobeGridState,
+                    onClotheClick = openClotheDetail,
+                )
                 else -> Looks(
                     viewModel = looksViewModel,
                     gridState = looksGridState,

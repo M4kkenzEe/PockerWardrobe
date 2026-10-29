@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ownstd.project.card.internal.deeplink.DeepLink
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import com.ownstd.project.designsystem.components.ClothisNavIsland
+import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.designsystem.components.GlassIconButton
 import com.ownstd.project.designsystem.components.NavTab
 import com.ownstd.project.designsystem.theme.ClothisTheme
@@ -105,7 +107,9 @@ internal fun MainScreen(parentNavController: NavHostController) {
                 ClothisNavIsland(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
-                        if (tab == NavTab.Wardrobe && tab == selectedTab) {
+                        val isWardrobeShown = navBackStackEntry?.destination
+                            ?.hasRoute<WardrobeNavScreens.Wardrobe>() == true
+                        if (tab == NavTab.Wardrobe && tab == selectedTab && isWardrobeShown) {
                             wardrobeReselectEvents.tryEmit(Unit)
                             return@ClothisNavIsland
                         }
