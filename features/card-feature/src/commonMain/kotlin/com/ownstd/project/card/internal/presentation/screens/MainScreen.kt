@@ -36,6 +36,7 @@ import com.ownstd.project.designsystem.theme.ClothisTheme
 import kotlinprojecttesting.design_system.generated.resources.Res
 import kotlinprojecttesting.design_system.generated.resources.ic_search
 import kotlinprojecttesting.design_system.generated.resources.ic_tune
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.jetbrains.compose.resources.painterResource
 
 // TODO: включить, когда будет реализован фильтр и поиск
@@ -48,6 +49,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
     val currentDeepLink by deepLinkManager.deepLinkFlow.collectAsState()
     val initialDeepLink = remember { currentDeepLink }
     var selectedTab by remember { mutableStateOf(NavTab.Wardrobe) }
+    val wardrobeReselectEvents = remember { MutableSharedFlow<Unit>(extraBufferCapacity = 1) }
     val colors = ClothisTheme.colors
     val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
@@ -74,6 +76,7 @@ internal fun MainScreen(parentNavController: NavHostController) {
                     launchSingleTop = true
                 }
             },
+            wardrobeScrollToTopEvents = wardrobeReselectEvents,
             modifier = Modifier.fillMaxSize(),
         )
 
@@ -102,6 +105,10 @@ internal fun MainScreen(parentNavController: NavHostController) {
                 ClothisNavIsland(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
+                        if (tab == NavTab.Wardrobe && tab == selectedTab) {
+                            wardrobeReselectEvents.tryEmit(Unit)
+                            return@ClothisNavIsland
+                        }
                         selectedTab = tab
                         val destination = when (tab) {
                             NavTab.Wardrobe -> BottomNavigationScreens.Shop()

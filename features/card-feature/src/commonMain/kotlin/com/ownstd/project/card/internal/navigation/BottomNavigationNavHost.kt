@@ -11,12 +11,15 @@ import com.ownstd.project.card.internal.deeplink.DeepLink
 import com.ownstd.project.card.internal.presentation.screens.ProfileScreen
 import com.ownstd.project.pincard.internal.presentation.navigation.WardrobeNavScreens
 import com.ownstd.project.pincard.internal.presentation.navigation.wardrobeNavGraph
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 internal fun BottomNavigationNavHost(
     navController: NavHostController,
     deepLink: DeepLink? = null,
     onLogout: () -> Unit = {},
+    wardrobeScrollToTopEvents: Flow<Unit> = emptyFlow(),
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -38,7 +41,7 @@ internal fun BottomNavigationNavHost(
             ProfileScreen(onLogout = onLogout)
         }
 
-        wardrobeNavGraph(navController)
+        wardrobeNavGraph(navController, scrollToTopEvents = wardrobeScrollToTopEvents)
     }
 
     LaunchedEffect(deepLink) {

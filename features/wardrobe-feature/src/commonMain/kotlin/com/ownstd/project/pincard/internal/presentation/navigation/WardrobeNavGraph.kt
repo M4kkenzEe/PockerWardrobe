@@ -10,11 +10,16 @@ import com.ownstd.project.pincard.internal.presentation.compose.ClothingDetailSc
 import com.ownstd.project.pincard.internal.presentation.compose.LookConstructor
 import com.ownstd.project.pincard.internal.presentation.compose.LookDetailsScreen
 import com.ownstd.project.pincard.internal.presentation.compose.TinderOutfitScreen
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
+fun NavGraphBuilder.wardrobeNavGraph(
+    navController: NavHostController,
+    scrollToTopEvents: Flow<Unit> = emptyFlow(),
+) {
     composable<WardrobeNavScreens.Wardrobe> {
         WardrobeMainScreen(
             openConstructor = {
@@ -28,7 +33,8 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             },
             openClotheDetail = { clotheId ->
                 navController.navigate(WardrobeNavScreens.ClothingDetail(clotheId = clotheId))
-            }
+            },
+            scrollToTopEvents = scrollToTopEvents,
         )
     }
     composable<WardrobeNavScreens.LookConstructor> {
