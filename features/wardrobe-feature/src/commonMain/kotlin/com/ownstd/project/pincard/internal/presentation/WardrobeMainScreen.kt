@@ -32,7 +32,7 @@ import com.ownstd.project.designsystem.components.WardrobeSegmentedControl
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.presentation.compose.Looks
 import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
-import com.ownstd.project.pincard.internal.presentation.compose.scrollToTop
+import com.ownstd.project.pincard.internal.presentation.compose.ScrollActivePageToTopEffect
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import kotlin.math.abs
@@ -73,15 +73,7 @@ fun WardrobeMainScreen(
             }
     }
 
-    LaunchedEffect(scrollToTopEvents) {
-        // collectLatest: жест пользователя прерывает скролл CancellationException, collect бы на ней завершился
-        scrollToTopEvents.collectLatest {
-            when (pagerState.currentPage) {
-                0 -> wardrobeGridState.scrollToTop()
-                else -> looksGridState.scrollToTop()
-            }
-        }
-    }
+    ScrollActivePageToTopEffect(scrollToTopEvents, pagerState, wardrobeGridState, looksGridState)
 
     Box(modifier = Modifier.fillMaxSize().background(colors.canvas)) {
         HorizontalPager(
