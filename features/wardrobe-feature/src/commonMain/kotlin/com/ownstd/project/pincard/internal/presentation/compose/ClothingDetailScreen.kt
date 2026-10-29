@@ -299,7 +299,7 @@ private val LOOK_CARD_HEIGHT = 300.dp
 // Как у LookCard: скругление в процентах, чтобы плейсхолдер и карточка в одном ряду совпадали.
 private const val LOOK_CARD_CORNER_PERCENT = 20
 
-private fun missingCategoryResource(category: MissingCategory): StringResource = when (category) {
+internal fun missingCategoryResource(category: MissingCategory): StringResource = when (category) {
     MissingCategory.Top -> Res.string.wear_with_missing_top
     MissingCategory.Bottom -> Res.string.wear_with_missing_bottom
     MissingCategory.Shoes -> Res.string.wear_with_missing_shoes

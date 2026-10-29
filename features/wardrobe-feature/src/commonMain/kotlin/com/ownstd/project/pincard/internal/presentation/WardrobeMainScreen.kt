@@ -85,6 +85,7 @@ fun WardrobeMainScreen(
                     viewModel = wardrobeViewModel,
                     gridState = wardrobeGridState,
                     onClotheClick = openClotheDetail,
+                    onOpenLook = openDetails,
                 )
                 else -> Looks(
                     viewModel = looksViewModel,

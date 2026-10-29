@@ -64,4 +64,9 @@
     <string name="look_draft_added">✓ В образах</string>
     <string name="look_add_error">Не удалось добавить образ</string>
     <string name="look_add_clothe_error">Не удалось добавить вещь</string>
+    <string name="anchor_hook_title">Новая вещь в гардеробе!</string>
+    <string name="anchor_hook_cta">Подобрать образ</string>
+    <string name="anchor_hook_dismiss">Позже</string>
+    <string name="anchor_hook_generating">Подбираем образ…</string>
+    <string name="anchor_hook_error">Не удалось подобрать образы. Попробуйте позже.</string>
 </resources>

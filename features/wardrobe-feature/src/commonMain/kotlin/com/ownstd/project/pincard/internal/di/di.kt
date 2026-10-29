@@ -24,7 +24,7 @@ val pinCardModule = module {
         ClothingDetailViewModel(useCase = get(), lookUseCase = get(), wardrobeRefreshSignal = get(), clotheId = clotheId, preloadedClothe = preloadedClothe)
     }
     viewModel { ConstructorViewModel(wardrobeUseCase = get(), lookUseCase = get()) }
-    viewModel { WardrobeViewModel(useCase = get(), wardrobeRefreshSignal = get()) }
+    viewModel { WardrobeViewModel(useCase = get(), lookUseCase = get(), wardrobeRefreshSignal = get()) }
     factory { WardrobeUseCase(wardrobeRepository = get()) }
     single<WardrobeRepository> {
         WardrobeRepositoryImpl(

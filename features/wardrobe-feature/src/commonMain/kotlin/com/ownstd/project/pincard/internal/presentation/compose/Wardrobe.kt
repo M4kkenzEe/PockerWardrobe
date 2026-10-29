@@ -45,8 +45,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ownstd.project.designsystem.components.SkeletonCard
 import com.ownstd.project.designsystem.components.rememberShimmerTranslation
+import com.ownstd.project.pincard.internal.presentation.viewmodel.AnchorHookState
 import com.ownstd.project.pincard.internal.presentation.viewmodel.WardrobeViewModel
 import com.ownstd.project.pincard.internal.replaceFragment
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
+import kotlinprojecttesting.features.wardrobe_feature.generated.resources.anchor_hook_error
+import org.jetbrains.compose.resources.stringResource
 
 // Staggered heights for 6 clothing skeleton cards — simulates natural photo proportions
 private val CLOTHE_SKELETON_HEIGHTS = listOf(180.dp, 240.dp, 200.dp, 160.dp, 220.dp, 190.dp)
@@ -57,6 +61,7 @@ internal fun Wardrobe(
     viewModel: WardrobeViewModel,
     gridState: LazyStaggeredGridState,
     onClotheClick: (Int) -> Unit = {},
+    onOpenLook: (lookId: Int) -> Unit = {},
 ) {
     val clothes by viewModel.clothes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -64,6 +69,7 @@ internal fun Wardrobe(
     val uploadError by viewModel.uploadError.collectAsState()
     val showPaywall by viewModel.showPaywall.collectAsState()
     val selectedOccasion by viewModel.selectedOccasionFilter.collectAsState()
+    val anchorHookState by viewModel.anchorHookState.collectAsState()
 
     var requestAddClothe by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullRefreshState(
@@ -71,11 +77,25 @@ internal fun Wardrobe(
         onRefresh = { if (!isUploading) requestAddClothe = true }
     )
     val snackbarHostState = remember { SnackbarHostState() }
+    val anchorHookErrorText = stringResource(Res.string.anchor_hook_error)
 
     LaunchedEffect(uploadError) {
         if (uploadError) {
             snackbarHostState.showSnackbar("Не удалось добавить вещь. Попробуйте ещё раз")
             viewModel.clearUploadError()
+        }
+    }
+
+    LaunchedEffect(anchorHookState) {
+        if (anchorHookState is AnchorHookState.Error) {
+            snackbarHostState.showSnackbar(anchorHookErrorText)
+            viewModel.dismissHook()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigateToLookEvent.collect { lookId ->
+            onOpenLook(lookId)
         }
     }
 
@@ -153,6 +173,13 @@ internal fun Wardrobe(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 76.dp)
+        )
+
+        AnchorHookSheet(
+            state = anchorHookState,
+            onGenerateDrafts = viewModel::onGenerateDrafts,
+            onDismiss = viewModel::dismissHook,
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
 
         if (showPaywall) {

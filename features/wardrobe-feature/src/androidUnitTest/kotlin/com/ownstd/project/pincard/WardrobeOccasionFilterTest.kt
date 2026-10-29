@@ -40,8 +40,9 @@ private class FakeWardrobeRepository : WardrobeRepository {
         return result
     }
 
-    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?) {
+    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?): Clothe {
         callLog.add("loadClothe(occasion=$occasion)")
+        return Clothe.empty()
     }
 
     override suspend fun uploadFromUrl(pageUrl: String): Clothe {

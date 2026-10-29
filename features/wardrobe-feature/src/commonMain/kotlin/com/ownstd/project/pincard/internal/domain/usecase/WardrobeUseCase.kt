@@ -9,8 +9,8 @@ internal class WardrobeUseCase(private val wardrobeRepository: WardrobeRepositor
         return wardrobeRepository.getClothes(occasion)
     }
 
-    suspend fun loadClothe(bitmap: ImageBitmap, occasion: String? = null) {
-        wardrobeRepository.loadClothe(bitmap, occasion)
+    suspend fun loadClothe(bitmap: ImageBitmap, occasion: String? = null): Clothe {
+        return wardrobeRepository.loadClothe(bitmap, occasion)
     }
 
     suspend fun uploadFromUrl(pageUrl: String): Clothe {

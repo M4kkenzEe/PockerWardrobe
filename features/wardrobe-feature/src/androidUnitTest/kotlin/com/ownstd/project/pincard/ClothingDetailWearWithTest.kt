@@ -200,7 +200,7 @@ private class OwnedWardrobeRepository(private val item: Clothe) : WardrobeReposi
         clotheId: Int, name: String?, storeUrl: String?, season: String?, fit: String?,
         material: String?, brand: String?, occasion: String?, styleTags: String?,
     ): Clothe = item.copy(name = name ?: item.name)
-    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?) = error("unused")
+    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?): Clothe = error("unused")
     override suspend fun uploadFromUrl(pageUrl: String): Clothe = error("unused")
     override suspend fun deleteClothe(clotheId: Int) = error("unused")
     override suspend fun saveToWardrobe(clotheId: Int): Clothe = error("unused")

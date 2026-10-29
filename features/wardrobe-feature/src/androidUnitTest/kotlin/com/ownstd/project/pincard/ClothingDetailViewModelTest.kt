@@ -156,7 +156,7 @@ private class DetailRepository(var item: Clothe) : WardrobeRepository {
         if (failLoad) error("offline")
         return if (owned) listOf(item) else emptyList()
     }
-    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?) = Unit
+    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?): Clothe = Clothe.empty()
     override suspend fun uploadFromUrl(pageUrl: String): Clothe = error("unused")
     override suspend fun deleteClothe(clotheId: Int) = Unit
     override suspend fun saveToWardrobe(clotheId: Int): Clothe { addCount++; return item }

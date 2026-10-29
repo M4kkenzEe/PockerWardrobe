@@ -57,7 +57,7 @@ class WardrobeRepositoryImpl(
         }
     }
 
-    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?) {
+    override suspend fun loadClothe(bitmap: ImageBitmap, occasion: String?): Clothe {
         val imageBytes = bitmap.toByteArray(CompressionFormat.JPEG, IMAGE_QUALITY)
 
         println("📤 [UPLOAD_START] POST ${baseUrl + ENDPOINT} occasion=$occasion")
@@ -96,7 +96,10 @@ class WardrobeRepositoryImpl(
                     println("❌ [UPLOAD_ERROR] Server error body: $errorBody")
                     throw Exception("Upload failed: ${response.status.value}")
                 }
-                else -> println("✅ [UPLOAD_SUCCESS] Photo uploaded successfully")
+                else -> {
+                    println("✅ [UPLOAD_SUCCESS] Photo uploaded successfully")
+                    return response.body()
+                }
             }
         } catch (e: FreemiumLimitException) {
             throw e
