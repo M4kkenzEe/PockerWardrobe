@@ -1,6 +1,7 @@
 package com.ownstd.project.pincard
 
 import com.ownstd.project.pincard.internal.data.model.DraftLook
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResult
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
@@ -135,6 +136,8 @@ private class DetailsLookRepository : LookRepository {
     override suspend fun getLookById(lookId: Int): Look? = look
     override suspend fun getLookByShareToken(token: String): Look? = look.copy(isDraft = false)
     override suspend fun addLookByShareToken(sharedToken: String) { importedTokens += sharedToken }
+
+    override suspend fun generateDrafts(clotheId: Int): GenerateDraftsResult = error("unused")
 
     override suspend fun saveDraft(lookId: Int) {
         if (failSave) error("HTTP 500")

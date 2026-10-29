@@ -2,11 +2,15 @@ package com.ownstd.project.pincard.internal.data.repository
 
 import com.ownstd.project.network.api.NetworkRepository
 import com.ownstd.project.pincard.internal.data.model.DraftLook
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsErrorResponse
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResponse
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResult
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.data.model.ShareResponse
 import com.ownstd.project.pincard.internal.data.model.SharedLookResponse
+import com.ownstd.project.pincard.internal.data.model.parseMissingCategories
 import com.ownstd.project.pincard.internal.domain.repository.LookRepository
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -21,6 +25,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 
 class LookRepositoryImpl(
     private val networkRepository: NetworkRepository,
@@ -154,6 +159,38 @@ class LookRepositoryImpl(
         check(response.status.isSuccess()) { "HTTP ${response.status.value}" }
     }
 
+    override suspend fun generateDrafts(clotheId: Int): GenerateDraftsResult {
+        return try {
+            val response = client.post("$baseUrl$ENDPOINT/$DRAFTS") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("anchorClotheId" to clotheId))
+            }
+            when {
+                response.status.isSuccess() -> response.body<GenerateDraftsResponse>().toResult()
+                response.status == HttpStatusCode.UnprocessableEntity -> response.body<GenerateDraftsErrorResponse>().toResult()
+                else -> GenerateDraftsResult.Error
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            println("ERR generateDrafts: ${e.message}")
+            GenerateDraftsResult.Error
+        }
+    }
+
+    private fun GenerateDraftsResponse.toResult(): GenerateDraftsResult = when {
+        allSaved -> GenerateDraftsResult.AllSaved
+        looks.isEmpty() -> GenerateDraftsResult.Error
+        else -> GenerateDraftsResult.Success(looks)
+    }
+
+    private fun GenerateDraftsErrorResponse.toResult(): GenerateDraftsResult = when (error) {
+        NOT_ENOUGH_FOR_ANCHOR -> parseMissingCategories(missing).let { categories ->
+            if (categories.isEmpty()) GenerateDraftsResult.Error else GenerateDraftsResult.NeedMore(categories)
+        }
+        UNSUPPORTED_CATEGORY -> GenerateDraftsResult.Unsupported
+        else -> GenerateDraftsResult.Error
+    }
+
     override suspend fun shareLook(lookId: Int): ShareResponse? {
         return try {
             client.post("$baseUrl$ENDPOINT/$lookId/share") {
@@ -207,5 +244,8 @@ class LookRepositoryImpl(
         private const val BY_ID = "/byId/"
         private const val SHARE_ENDPOINT = "share"
         private const val GENERATE = "generate"
+        private const val DRAFTS = "drafts"
+        private const val NOT_ENOUGH_FOR_ANCHOR = "not_enough_for_anchor"
+        private const val UNSUPPORTED_CATEGORY = "unsupported_category"
     }
 }

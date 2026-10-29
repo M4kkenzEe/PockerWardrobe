@@ -1,6 +1,7 @@
 package com.ownstd.project.pincard.internal.domain.usecase
 
 import com.ownstd.project.pincard.internal.data.model.DraftLook
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResult
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
 import com.ownstd.project.pincard.internal.data.model.ShareResponse
@@ -37,6 +38,10 @@ internal class LookUseCase(private val lookRepository: LookRepository) {
 
     suspend fun saveDraft(lookId: Int) {
         lookRepository.saveDraft(lookId)
+    }
+
+    suspend fun generateDrafts(clotheId: Int): GenerateDraftsResult {
+        return lookRepository.generateDrafts(clotheId)
     }
 
     suspend fun shareLook(lookId: Int): ShareResponse? {

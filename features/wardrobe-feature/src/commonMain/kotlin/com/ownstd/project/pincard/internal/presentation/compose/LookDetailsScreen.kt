@@ -169,9 +169,7 @@ fun LookDetailsScreen(
                         onFindSimilar = { clotheId, storeUrl ->
                             viewModel.requestAffiliateLink(clotheId, storeUrl)
                         },
-                        onAddClothe = if (shareToken != null) {
-                            { clotheId -> viewModel.addClotheToWardrobe(shareToken, clotheId) }
-                        } else null,
+                        onAddClothe = if (addLookMode == AddLookMode.Share) viewModel::onAddClotheClick else null,
                         onNavigateToClotheDetail = onNavigateToClotheDetail,
                         modifier = Modifier
                             .fillMaxWidth()

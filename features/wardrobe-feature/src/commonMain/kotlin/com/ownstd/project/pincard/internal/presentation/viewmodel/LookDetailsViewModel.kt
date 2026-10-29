@@ -168,11 +168,12 @@ internal class LookDetailsViewModel(
         }
     }
 
-    fun addClotheToWardrobe(shareToken: String, clotheId: Int) {
+    fun onAddClotheClick(clotheId: Int) {
+        val token = shareToken ?: return
         viewModelScope.launch(ioDispatcher) {
             _addingClotheIds.update { it + clotheId }
             runCatching {
-                useCase.addClotheByShareToken(shareToken, clotheId)
+                useCase.addClotheByShareToken(token, clotheId)
             }.onSuccess {
                 _addedClotheIds.update { it + clotheId }
                 wardrobeRefreshSignal.emit()

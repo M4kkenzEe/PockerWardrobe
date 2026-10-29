@@ -3,6 +3,7 @@ package com.ownstd.project.pincard.internal.presentation.navigation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.toRoute
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.presentation.WardrobeMainScreen
@@ -47,15 +48,7 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
             lookId = lookDetails.lookId,
             shareToken = lookDetails.shareToken,
             onBackClick = { navController.popBackStack() },
-            onNavigateToClotheDetail = { clothe ->
-                val clotheJson = Json.encodeToString(clothe)
-                navController.navigate(
-                    WardrobeNavScreens.ClothingDetail(
-                        clotheId = clothe.id ?: 0,
-                        clotheJson = clotheJson
-                    )
-                )
-            }
+            onNavigateToClotheDetail = { clothe -> navController.openClotheFromLook(clothe) }
         )
     }
     composable<WardrobeNavScreens.TinderOutfit> {
@@ -71,7 +64,27 @@ fun NavGraphBuilder.wardrobeNavGraph(navController: NavHostController) {
         ClothingDetailScreen(
             clotheId = route.clotheId,
             preloadedClothe = preloadedClothe,
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { navController.popBackStack() },
+            onOpenLook = { lookId ->
+                navController.navigate(WardrobeNavScreens.LookDetails(lookId = lookId))
+            }
         )
     }
+}
+
+// Вещь, с экрана которой пришли на образ, уже лежит под ним в стеке: возвращаемся к ней, а не копим копии.
+private fun NavHostController.openClotheFromLook(clothe: Clothe) {
+    val previous = previousBackStackEntry
+    val isOpenedFromThisClothe = previous?.destination?.hasRoute<WardrobeNavScreens.ClothingDetail>() == true &&
+        previous.toRoute<WardrobeNavScreens.ClothingDetail>().clotheId == clothe.id
+    if (isOpenedFromThisClothe) {
+        popBackStack()
+        return
+    }
+    navigate(
+        WardrobeNavScreens.ClothingDetail(
+            clotheId = clothe.id ?: 0,
+            clotheJson = Json.encodeToString(clothe)
+        )
+    )
 }

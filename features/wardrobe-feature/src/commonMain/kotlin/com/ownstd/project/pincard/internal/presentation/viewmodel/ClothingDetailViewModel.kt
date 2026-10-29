@@ -3,7 +3,11 @@ package com.ownstd.project.pincard.internal.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.data.model.DraftLookPreview
+import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResult
+import com.ownstd.project.pincard.internal.data.model.MissingCategory
 import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
+import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,16 +32,30 @@ internal data class ClothingDetailState(
     val didSave: Boolean = false,
 )
 
+internal sealed class WearWithState {
+    data object Idle : WearWithState()
+    data object Loading : WearWithState()
+    data class Success(val looks: List<DraftLookPreview>) : WearWithState()
+    data object AllSaved : WearWithState()
+    data class NeedMore(val missing: List<MissingCategory>) : WearWithState()
+    data object Unsupported : WearWithState()
+    data object Error : WearWithState()
+}
+
 internal class ClothingDetailViewModel(
     private val useCase: WardrobeUseCase,
+    private val lookUseCase: LookUseCase,
     private val wardrobeRefreshSignal: WardrobeRefreshSignal,
     private val clotheId: Int,
     private val preloadedClothe: Clothe? = null,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
     val state = MutableStateFlow(ClothingDetailState())
+    // Отдельно от state: retry() и onSave() пересоздают state целиком, а результат подбора должен пережить retry.
+    val wearWith = MutableStateFlow<WearWithState>(WearWithState.Idle)
     val savedToWardrobeEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private var loadJob: Job? = null
+    private var wearWithJob: Job? = null
 
     init { retry() }
 
@@ -73,6 +91,28 @@ internal class ClothingDetailViewModel(
                 }
             }
         }
+    }
+
+    fun onWearWithClick() {
+        val current = state.value
+        val id = current.clothe?.id ?: return
+        if (current.isOwned != true || current.isEditMode) return
+        if (wearWith.value != WearWithState.Idle && wearWith.value != WearWithState.Error) return
+        wearWith.value = WearWithState.Loading
+        wearWithJob = viewModelScope.launch(ioDispatcher) {
+            val result = try {
+                lookUseCase.generateDrafts(id)
+            } catch (ex: Exception) {
+                if (ex is CancellationException) throw ex
+                GenerateDraftsResult.Error
+            }
+            wearWith.value = result.toWearWithState()
+        }
+    }
+
+    private fun resetWearWith() {
+        wearWithJob?.cancel()
+        wearWith.value = WearWithState.Idle
     }
 
     fun onEditToggle() {
@@ -153,6 +193,7 @@ internal class ClothingDetailViewModel(
                     clothe = updated, details = updated.toDetailUiModel(),
                     isLoading = false, isOwned = true, didSave = true,
                 )
+                resetWearWith()
                 wardrobeRefreshSignal.emit()
             } catch (ex: Exception) {
                 if (ex is CancellationException) throw ex
@@ -160,4 +201,12 @@ internal class ClothingDetailViewModel(
             }
         }
     }
+}
+
+private fun GenerateDraftsResult.toWearWithState(): WearWithState = when (this) {
+    is GenerateDraftsResult.Success -> WearWithState.Success(looks)
+    GenerateDraftsResult.AllSaved -> WearWithState.AllSaved
+    is GenerateDraftsResult.NeedMore -> WearWithState.NeedMore(missing)
+    GenerateDraftsResult.Unsupported -> WearWithState.Unsupported
+    GenerateDraftsResult.Error -> WearWithState.Error
 }

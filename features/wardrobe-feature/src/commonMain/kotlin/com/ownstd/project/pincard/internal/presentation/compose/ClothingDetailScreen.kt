@@ -1,8 +1,11 @@
 package com.ownstd.project.pincard.internal.presentation.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
@@ -20,10 +24,13 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.ownstd.project.designsystem.components.*
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.data.model.MissingCategory
 import com.ownstd.project.pincard.internal.presentation.viewmodel.*
 import androidx.compose.ui.platform.LocalUriHandler
 import org.jetbrains.compose.resources.painterResource
@@ -39,11 +46,13 @@ fun ClothingDetailScreen(
     clotheId: Int,
     preloadedClothe: Clothe? = null,
     onBackClick: () -> Unit = {},
+    onOpenLook: (lookId: Int) -> Unit = {},
 ) {
     val viewModel: ClothingDetailViewModel = koinViewModel(key = "clothing-detail-$clotheId") {
         parametersOf(clotheId, preloadedClothe)
     }
     val state by viewModel.state.collectAsState()
+    val wearWith by viewModel.wearWith.collectAsState()
     val uriHandler = LocalUriHandler.current
     val latestOnBack by rememberUpdatedState(onBackClick)
     LaunchedEffect(viewModel) {
@@ -54,6 +63,9 @@ fun ClothingDetailScreen(
     }
     ClothingDetailContent(
         state = state,
+        wearWith = wearWith,
+        onWearWith = viewModel::onWearWithClick,
+        onOpenLook = onOpenLook,
         onBack = {
             if (state.isEditMode) viewModel.onEditToggle() else onBackClick()
         },
@@ -71,6 +83,9 @@ fun ClothingDetailScreen(
 @Composable
 internal fun ClothingDetailContent(
     state: ClothingDetailState,
+    wearWith: WearWithState = WearWithState.Idle,
+    onWearWith: () -> Unit = {},
+    onOpenLook: (lookId: Int) -> Unit = {},
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
     onSave: () -> Unit = {},
@@ -83,7 +98,13 @@ internal fun ClothingDetailContent(
     val dimens = ClothisTheme.dimens
     val details = state.details
     val scrollState = rememberScrollState()
-    LaunchedEffect(state.isEditMode) { scrollState.scrollTo(0) }
+    // Возврат с экрана образа пересоздаёт Composable: сбрасываем скролл только на реальной смене режима.
+    var shownEditMode by rememberSaveable { mutableStateOf(state.isEditMode) }
+    LaunchedEffect(state.isEditMode) {
+        if (state.isEditMode == shownEditMode) return@LaunchedEffect
+        shownEditMode = state.isEditMode
+        scrollState.scrollTo(0)
+    }
     LaunchedEffect(state.error, scrollState.maxValue) {
         if (state.error != null && details != null) scrollState.scrollTo(scrollState.maxValue)
     }
@@ -166,18 +187,7 @@ internal fun ClothingDetailContent(
                     }
                     ClothingAttributes(details)
                     MarketplaceSection(details, state.isOwned == true, onEdit, onOpenStore)
-                    if (state.isOwned == true) {
-                        Column(verticalArrangement = Arrangement.spacedBy(dimens.spaceSm)) {
-                            ClothisGhostButton(
-                                text = stringResource(Res.string.item_detail_outfit),
-                                onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth(),
-                            )
-                            Text(
-                                stringResource(Res.string.item_detail_outfit_unavailable),
-                                style = ClothisTheme.typography.caption, color = colors.onCanvasMuted,
-                            )
-                        }
-                    }
+                    if (state.isOwned == true) WearWithSection(wearWith, onWearWith, onOpenLook)
                 }
             }
             // Long errors belong to the scrollable content, never a floating overlay.
@@ -189,6 +199,108 @@ internal fun ClothingDetailContent(
             DetailActions(state, onEdit, onSave, onAdd, onRetry)
         }
     }
+}
+
+@Composable
+internal fun WearWithSection(
+    state: WearWithState,
+    onGenerate: () -> Unit,
+    onOpenLook: (lookId: Int) -> Unit,
+) {
+    val dimens = ClothisTheme.dimens
+    val sectionRequester = remember { BringIntoViewRequester() }
+    LaunchedEffect(state is WearWithState.Loading) {
+        if (state is WearWithState.Loading) sectionRequester.bringIntoView()
+    }
+    Column(
+        modifier = Modifier.bringIntoViewRequester(sectionRequester),
+        verticalArrangement = Arrangement.spacedBy(dimens.spaceLg),
+    ) {
+        if (state is WearWithState.Idle || state is WearWithState.Loading) {
+            ClothisGhostButton(
+                text = stringResource(Res.string.item_detail_wear_with),
+                onClick = onGenerate, enabled = state is WearWithState.Idle, modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (state !is WearWithState.Idle) {
+            SectionHeading(stringResource(Res.string.wear_with_title))
+            when (state) {
+                WearWithState.Idle -> Unit
+                WearWithState.Loading -> WearWithSkeletons()
+                is WearWithState.Success -> WearWithLooks(state, onOpenLook)
+                WearWithState.AllSaved -> DetailStatus(stringResource(Res.string.wear_with_all_saved))
+                is WearWithState.NeedMore -> {
+                    val missingNames = state.missing.map { stringResource(missingCategoryResource(it)) }
+                    DetailStatus(stringResource(Res.string.wear_with_need_more, missingNames.joinToString()))
+                }
+                WearWithState.Unsupported -> DetailStatus(stringResource(Res.string.wear_with_unsupported))
+                WearWithState.Error -> {
+                    DetailStatus(stringResource(Res.string.wear_with_error))
+                    ClothisGhostButton(stringResource(Res.string.wear_with_retry), onGenerate, Modifier.fillMaxWidth())
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WearWithSkeletons() {
+    val shimmer by rememberShimmerTranslation()
+    DetailStatus(stringResource(Res.string.wear_with_loading))
+    OutfitRows(List(WEAR_WITH_SKELETON_COUNT) { it }) {
+        SkeletonCard(shimmer, Modifier.fillMaxWidth().height(LOOK_CARD_HEIGHT))
+    }
+}
+
+@Composable
+private fun WearWithLooks(state: WearWithState.Success, onOpenLook: (lookId: Int) -> Unit) {
+    OutfitRows(state.looks) { look ->
+        // Рендер образа мог упасть: backend отдаёт реальный lookId с пустым url, экран образа при этом открывается.
+        if (look.url.isBlank()) {
+            LookWithoutImageCard(onClick = { onOpenLook(look.lookId) })
+        } else {
+            LookCard(lookUrl = look.url, onClick = { onOpenLook(look.lookId) }, hasContextMenu = false, modifier = Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+private fun LookWithoutImageCard(onClick: () -> Unit) {
+    val dimens = ClothisTheme.dimens
+    Box(
+        modifier = Modifier.fillMaxWidth().height(LOOK_CARD_HEIGHT)
+            .clip(RoundedCornerShape(dimens.radiusCard)).background(ClothisTheme.colors.surface)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(Res.string.wear_with_look_no_image),
+            style = ClothisTheme.typography.body, color = ClothisTheme.colors.onSurface,
+            textAlign = TextAlign.Center, modifier = Modifier.padding(dimens.spaceLg),
+        )
+    }
+}
+
+@Composable
+private fun <T> OutfitRows(items: List<T>, card: @Composable (T) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(ClothisTheme.dimens.spaceMd)) {
+        items.chunked(OUTFIT_COLUMNS).forEach { rowItems ->
+            Row(horizontalArrangement = Arrangement.spacedBy(ClothisTheme.dimens.spaceMd)) {
+                rowItems.forEach { Box(Modifier.weight(1f)) { card(it) } }
+                repeat(OUTFIT_COLUMNS - rowItems.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+private const val OUTFIT_COLUMNS = 2
+private const val WEAR_WITH_SKELETON_COUNT = 3
+private val LOOK_CARD_HEIGHT = 300.dp
+
+private fun missingCategoryResource(category: MissingCategory): StringResource = when (category) {
+    MissingCategory.Top -> Res.string.wear_with_missing_top
+    MissingCategory.Bottom -> Res.string.wear_with_missing_bottom
+    MissingCategory.Shoes -> Res.string.wear_with_missing_shoes
 }
 
 @Composable

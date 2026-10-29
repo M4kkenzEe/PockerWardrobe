@@ -113,6 +113,7 @@ internal fun LookCard(
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
     onShare: () -> Unit = {},
+    hasContextMenu: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
@@ -125,7 +126,7 @@ internal fun LookCard(
             .background(Color(0xFFF0EEE9))
             .combinedClickable(
                 onClick = onClick,
-                onLongClick = { dropDownMenuState = true }
+                onLongClick = if (hasContextMenu) ({ dropDownMenuState = true }) else null
             ),
         contentAlignment = Alignment.Center
     ) {

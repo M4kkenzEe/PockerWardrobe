@@ -1,10 +1,16 @@
 package com.ownstd.project.pincard.internal.presentation.compose
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.data.model.Clothe
+import com.ownstd.project.pincard.internal.data.model.DraftLookPreview
+import com.ownstd.project.pincard.internal.data.model.MissingCategory
 import com.ownstd.project.pincard.internal.presentation.viewmodel.*
 import kotlinprojecttesting.features.wardrobe_feature.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -81,3 +87,46 @@ fun ClothingDetailPartialPreview() {
         ClothingDetailContent(ClothingDetailState(clothe = item, details = item.toDetailUiModel(), isLoading = false, isOwned = true))
     }
 }
+
+private val previewLooks = listOf(
+    DraftLookPreview(lookId = 1, url = "https://example.com/look-1.png"),
+    DraftLookPreview(lookId = 2, url = ""),
+    DraftLookPreview(lookId = 3, url = "https://example.com/look-3.png"),
+)
+
+@Composable
+private fun WearWithPreview(state: WearWithState) {
+    ClothisTheme {
+        Column(Modifier.background(ClothisTheme.colors.canvas).padding(ClothisTheme.dimens.screenHorizontalPadding)) {
+            WearWithSection(state, onGenerate = {}, onOpenLook = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+fun WearWithIdlePreview() = WearWithPreview(WearWithState.Idle)
+
+@Preview
+@Composable
+fun WearWithLoadingPreview() = WearWithPreview(WearWithState.Loading)
+
+@Preview
+@Composable
+fun WearWithSuccessPreview() = WearWithPreview(WearWithState.Success(previewLooks))
+
+@Preview
+@Composable
+fun WearWithAllSavedPreview() = WearWithPreview(WearWithState.AllSaved)
+
+@Preview
+@Composable
+fun WearWithNeedMorePreview() = WearWithPreview(WearWithState.NeedMore(listOf(MissingCategory.Bottom, MissingCategory.Shoes)))
+
+@Preview
+@Composable
+fun WearWithUnsupportedPreview() = WearWithPreview(WearWithState.Unsupported)
+
+@Preview
+@Composable
+fun WearWithErrorPreview() = WearWithPreview(WearWithState.Error)

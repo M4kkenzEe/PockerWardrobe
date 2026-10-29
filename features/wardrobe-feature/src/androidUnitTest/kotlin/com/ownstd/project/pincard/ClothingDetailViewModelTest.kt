@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import com.ownstd.project.pincard.internal.data.model.Clothe
 import com.ownstd.project.pincard.internal.domain.WardrobeRefreshSignal
 import com.ownstd.project.pincard.internal.domain.repository.WardrobeRepository
+import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import com.ownstd.project.pincard.internal.domain.usecase.WardrobeUseCase
 import com.ownstd.project.pincard.internal.presentation.viewmodel.*
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ class ClothingDetailViewModelTest {
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun tearDown() { Dispatchers.resetMain() }
     private fun viewModel(preloaded: Clothe? = null) = ClothingDetailViewModel(
-        WardrobeUseCase(repo), WardrobeRefreshSignal(), 1, preloaded, dispatcher,
+        WardrobeUseCase(repo), LookUseCase(StubLookRepository()), WardrobeRefreshSignal(), 1, preloaded, dispatcher,
     )
 
     @Test fun `saving keeps ownership and only sends changed fields`() = runTest(dispatcher) {
