@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -55,6 +56,15 @@ kotlin {
     }
 }
 
+val releaseKeystoreProperties = Properties().apply {
+    val propertiesFile = File(
+        System.getenv("CLOTHIS_KEYSTORE_PROPERTIES")
+            ?: "${System.getProperty("user.home")}/.clothis/keystore.properties"
+    )
+    if (propertiesFile.isFile) propertiesFile.inputStream().use { load(it) }
+}
+val hasReleaseKeystore = releaseKeystoreProperties.containsKey("storeFile")
+
 android {
     namespace = "com.ownstd.project"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -67,8 +77,18 @@ android {
         applicationId = "com.ownstd.project"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2.0-alpha"
+    }
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = file(releaseKeystoreProperties.getProperty("storeFile"))
+                storePassword = releaseKeystoreProperties.getProperty("storePassword")
+                keyAlias = releaseKeystoreProperties.getProperty("keyAlias")
+                keyPassword = releaseKeystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
     packaging {
         resources {
@@ -78,6 +98,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            if (hasReleaseKeystore) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
