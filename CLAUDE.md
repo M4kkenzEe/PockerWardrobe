@@ -50,7 +50,6 @@ This is a **Kotlin Multiplatform** (KMP) project targeting Android and iOS, usin
 ```
 ├── composeApp/          # Main application entry point
 ├── core/                # Shared infrastructure modules
-│   ├── database/        # Room database (KSP for codegen)
 │   ├── network/         # Ktor HTTP client
 │   └── storage/         # Token storage (multiplatform-settings)
 ├── features/            # Feature modules following Clean Architecture
@@ -99,7 +98,7 @@ Uses **Jetpack Navigation Compose** (multiplatform):
 - **UI**: Compose Multiplatform
 - **DI**: Koin 4.x
 - **Networking**: Ktor 3.x with kotlinx.serialization
-- **Local Storage**: Room (database), multiplatform-settings (preferences)
+- **Local Storage**: multiplatform-settings with encrypted preferences (Android) and Keychain (iOS), via `core/storage`
 - **Image Loading**: Coil 3.x
 - **Async**: Kotlin Coroutines
 
