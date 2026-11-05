@@ -77,8 +77,8 @@ android {
         applicationId = "com.ownstd.clothis"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "1.2.0-alpha"
+        versionCode = 4
+        versionName = "1.2.1-alpha"
     }
     signingConfigs {
         if (hasReleaseKeystore) {
