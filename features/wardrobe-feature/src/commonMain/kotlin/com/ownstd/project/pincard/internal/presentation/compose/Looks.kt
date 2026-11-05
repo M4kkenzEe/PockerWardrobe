@@ -29,7 +29,6 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,6 +50,7 @@ internal fun Looks(
     gridState: LazyGridState,
     onNavigateToConstructor: () -> Unit,
     navigateToDetails: (lookId: Int) -> Unit,
+    onAddClothe: () -> Unit,
 ) {
     val looksList by viewModel.looks.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -64,22 +64,15 @@ internal fun Looks(
         onRefresh = { onNavigateToConstructor() }
     )
 
-    LaunchedEffect(generateError) {
-        when (generateError) {
-            is GenerateLooksError.NotEnoughClothes -> {
-                snackbarHostState.showSnackbar("Добавьте минимум 3 вещи для генерации образа")
+    generateError?.let { error ->
+        GenerateLooksFeedback(
+            error = error,
+            onDismiss = viewModel::clearGenerateError,
+            onAction = {
                 viewModel.clearGenerateError()
+                if (error is GenerateLooksError.NetworkError) viewModel.generateLooks() else onAddClothe()
             }
-            is GenerateLooksError.NetworkError -> {
-                snackbarHostState.showSnackbar("Не удалось сгенерировать образы. Попробуйте позже")
-                viewModel.clearGenerateError()
-            }
-            is GenerateLooksError.NoNewLooks -> {
-                snackbarHostState.showSnackbar("Новых образов пока нет. Добавьте ещё вещей — появятся новые сочетания")
-                viewModel.clearGenerateError()
-            }
-            null -> {}
-        }
+        )
     }
 
     DisposableEffect(Unit) {

@@ -33,7 +33,6 @@ internal fun ClotheCard(
     clotheUrl: String = "",
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onShare: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var dropDownMenuState by remember { mutableStateOf(false) }
@@ -70,19 +69,6 @@ internal fun ClotheCard(
             expanded = dropDownMenuState,
             onDismissRequest = { dropDownMenuState = false }
         ) {
-            DropdownMenuItem(
-                onClick = {
-                    onShare()
-                    dropDownMenuState = false
-                }
-            ) { Text("Поделиться") }
-
-            Divider(
-                modifier = Modifier
-                    .height(1.dp)
-                    .background(Color.Gray)
-            )
-
             DropdownMenuItem(
                 onClick = {
                     showConfirmDialog = true

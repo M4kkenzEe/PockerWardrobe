@@ -55,12 +55,43 @@ class LooksViewModelTest {
     }
 
     @Test fun `not enough clothes keeps its own error`() = runTest(dispatcher) {
-        repo.generateResult = GenerateLooksResult.NotEnoughClothes
+        repo.generateResult = GenerateLooksResult.NotEnoughClothes(listOf(com.ownstd.project.pincard.internal.data.model.MissingCategory.Shoes))
         val vm = viewModel
         vm.generateLooks()
         advanceUntilIdle()
-        assertEquals(GenerateLooksError.NotEnoughClothes, vm.generateError.value)
+        assertEquals(GenerateLooksError.NotEnoughClothes(listOf(com.ownstd.project.pincard.internal.data.model.MissingCategory.Shoes)), vm.generateError.value)
         assertEquals(0, repo.getLooksCalls)
+    }
+
+    @Test fun `repeated presses while a request is pending launch once and reset old message`() = runTest(dispatcher) {
+        val vm = viewModel
+        vm.generateError.value = GenerateLooksError.NoNewLooks
+        vm.generateLooks()
+        vm.generateLooks()
+        assertNull(vm.generateError.value)
+        assertEquals(true, vm.isGenerating.value)
+        advanceUntilIdle()
+        assertEquals(1, repo.generateCalls)
+        assertFalse(vm.isGenerating.value)
+        repo.generateResult = GenerateLooksResult.Success(listOf(7))
+        vm.generateLooks()
+        advanceUntilIdle()
+        assertNull(vm.generateError.value)
+        assertEquals(2, repo.generateCalls)
+    }
+
+    @Test fun `unexpected repository exception resets loading and permits retry`() = runTest(dispatcher) {
+        repo.failure = IllegalStateException("offline")
+        val vm = viewModel
+        vm.generateLooks()
+        advanceUntilIdle()
+        assertEquals(GenerateLooksError.NetworkError, vm.generateError.value)
+        assertFalse(vm.isGenerating.value)
+        repo.failure = null
+        repo.generateResult = GenerateLooksResult.Success(listOf(7))
+        vm.generateLooks()
+        advanceUntilIdle()
+        assertNull(vm.generateError.value)
     }
 
     @Test fun `network failure keeps its own error`() = runTest(dispatcher) {
@@ -77,13 +108,19 @@ private class GenerateRepository : LookRepository {
     var generateResult: GenerateLooksResult = GenerateLooksResult.Success(emptyList())
     var looks: List<Look> = emptyList()
     var getLooksCalls = 0
+    var generateCalls = 0
+    var failure: Exception? = null
 
     override suspend fun getLooks(): List<Look> {
         getLooksCalls++
         return looks
     }
 
-    override suspend fun generateLooks(): GenerateLooksResult = generateResult
+    override suspend fun generateLooks(): GenerateLooksResult {
+        generateCalls++
+        failure?.let { throw it }
+        return generateResult
+    }
 
     override suspend fun addLook(look: DraftLook, image: ByteArray): LookRepositoryResult<Unit> = error("unused")
     override suspend fun getLookById(lookId: Int): Look? = error("unused")

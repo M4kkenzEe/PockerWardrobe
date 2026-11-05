@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -82,22 +81,12 @@ fun LookDetailsScreen(
     }
     val look by viewModel.look.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val affiliateLinkLoadingIds by viewModel.affiliateLinkLoadingIds.collectAsState()
-    val pendingAffiliateUrl by viewModel.pendingAffiliateUrl.collectAsState()
     val addingClotheIds by viewModel.addingClotheIds.collectAsState()
     val addedClotheIds by viewModel.addedClotheIds.collectAsState()
     val addLookMode by viewModel.addLookMode.collectAsState()
     val isAddingLook by viewModel.isAddingLook.collectAsState()
     val lookAdded by viewModel.lookAdded.collectAsState()
-    val uriHandler = LocalUriHandler.current
     val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(pendingAffiliateUrl) {
-        pendingAffiliateUrl?.let { url ->
-            uriHandler.openUri(url)
-            viewModel.consumeAffiliateUrl()
-        }
-    }
 
     val addLookError = stringResource(Res.string.look_add_error)
     val addClotheError = stringResource(Res.string.look_add_clothe_error)
@@ -164,12 +153,8 @@ fun LookDetailsScreen(
                 if (!currentLook.lookItems.isNullOrEmpty()) {
                     ClothesListSection(
                         lookItems = currentLook.lookItems,
-                        affiliateLinkLoadingIds = affiliateLinkLoadingIds,
                         addingClotheIds = addingClotheIds,
                         addedClotheIds = addedClotheIds,
-                        onFindSimilar = { clotheId, storeUrl ->
-                            viewModel.requestAffiliateLink(clotheId, storeUrl)
-                        },
                         onAddClothe = if (addLookMode == AddLookMode.Share) viewModel::onAddClotheClick else null,
                         onNavigateToClotheDetail = onNavigateToClotheDetail,
                         modifier = Modifier
@@ -358,10 +343,8 @@ private fun ClotheItemInLook(
 @Composable
 private fun ClothesListSection(
     lookItems: List<LookItem>,
-    affiliateLinkLoadingIds: Set<Int>,
     addingClotheIds: Set<Int> = emptySet(),
     addedClotheIds: Set<Int> = emptySet(),
-    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
     onAddClothe: ((Int) -> Unit)? = null,
     onNavigateToClotheDetail: ((Clothe) -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -388,10 +371,8 @@ private fun ClothesListSection(
             items(lookItems) { lookItem ->
                 ClotheItemCard(
                     clotheItem = lookItem,
-                    isAffiliateLinkLoading = lookItem.clothe.id?.let { it in affiliateLinkLoadingIds } == true,
                     isAddingToWardrobe = lookItem.clothe.id?.let { it in addingClotheIds } == true,
                     isAddedToWardrobe = lookItem.clothe.id?.let { it in addedClotheIds } == true,
-                    onFindSimilar = onFindSimilar,
                     onAddToWardrobe = onAddClothe,
                     onNavigateToClotheDetail = onNavigateToClotheDetail
                 )
@@ -403,10 +384,8 @@ private fun ClothesListSection(
 @Composable
 private fun ClotheItemCard(
     clotheItem: LookItem,
-    isAffiliateLinkLoading: Boolean,
     isAddingToWardrobe: Boolean = false,
     isAddedToWardrobe: Boolean = false,
-    onFindSimilar: (clotheId: Int, storeUrl: String) -> Unit,
     onAddToWardrobe: ((Int) -> Unit)? = null,
     onNavigateToClotheDetail: ((Clothe) -> Unit)? = null
 ) {
@@ -444,35 +423,6 @@ private fun ClotheItemCard(
                     color = Color.Black,
                     maxLines = 2
                 )
-            }
-
-            if (!clotheItem.clothe.storeUrl.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = {
-                        val clotheId = clotheItem.clothe.id ?: return@Button
-                        onFindSimilar(clotheId, clotheItem.clothe.storeUrl ?: "")
-                    },
-                    enabled = !isAffiliateLinkLoading,
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF1A1A1A)),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isAffiliateLinkLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(
-                            text = "Найти похожее →",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
             }
 
             if (onAddToWardrobe != null && clotheItem.clothe.id != null) {

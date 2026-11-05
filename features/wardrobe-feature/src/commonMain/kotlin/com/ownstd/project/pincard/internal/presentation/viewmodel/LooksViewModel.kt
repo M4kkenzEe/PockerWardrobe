@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
+import com.ownstd.project.pincard.internal.data.model.MissingCategory
+import kotlinx.coroutines.CancellationException
 import com.ownstd.project.pincard.internal.domain.usecase.LookUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 internal sealed class GenerateLooksError {
-    data object NotEnoughClothes : GenerateLooksError()
+    data class NotEnoughClothes(val missing: List<MissingCategory>) : GenerateLooksError()
     data object NetworkError : GenerateLooksError()
     data object NoNewLooks : GenerateLooksError()
 }
@@ -70,15 +72,24 @@ internal class LooksViewModel(
     }
 
     fun generateLooks() {
+        if (!isGenerating.compareAndSet(expect = false, update = true)) return
+        generateError.value = null
         viewModelScope.launch(ioDispatcher) {
-            isGenerating.value = true
-            when (val result = useCase.generateLooks()) {
-                is GenerateLooksResult.Success ->
-                    if (result.lookIds.isEmpty()) generateError.value = GenerateLooksError.NoNewLooks else getLooks()
-                is GenerateLooksResult.NotEnoughClothes -> generateError.value = GenerateLooksError.NotEnoughClothes
-                is GenerateLooksResult.NetworkError -> generateError.value = GenerateLooksError.NetworkError
+            try {
+                when (val result = useCase.generateLooks()) {
+                    is GenerateLooksResult.Success ->
+                        if (result.lookIds.isEmpty()) generateError.value = GenerateLooksError.NoNewLooks else getLooks()
+                    is GenerateLooksResult.NotEnoughClothes ->
+                        generateError.value = GenerateLooksError.NotEnoughClothes(result.missing)
+                    is GenerateLooksResult.NetworkError -> generateError.value = GenerateLooksError.NetworkError
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                generateError.value = GenerateLooksError.NetworkError
+            } finally {
+                isGenerating.value = false
             }
-            isGenerating.value = false
         }
     }
 

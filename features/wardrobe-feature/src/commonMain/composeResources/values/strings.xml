@@ -69,4 +69,16 @@
     <string name="anchor_hook_dismiss">Позже</string>
     <string name="anchor_hook_generating">Подбираем образ…</string>
     <string name="anchor_hook_error">Не удалось подобрать образы. Попробуйте позже.</string>
+    <string name="generate_looks_top">Чтобы составить образ, добавь верх</string>
+    <string name="generate_looks_bottom">Чтобы составить образ, добавь низ</string>
+    <string name="generate_looks_shoes">Чтобы составить образ, добавь обувь</string>
+    <string name="generate_looks_top_bottom">Чтобы составить образ, добавь верх и низ</string>
+    <string name="generate_looks_top_shoes">Чтобы составить образ, добавь верх и обувь</string>
+    <string name="generate_looks_bottom_shoes">Чтобы составить образ, добавь низ и обувь</string>
+    <string name="generate_looks_all">Чтобы составить образ, добавь верх, низ и обувь</string>
+    <string name="generate_looks_generic">Добавь вещи в гардероб, чтобы составить образ</string>
+    <string name="generate_looks_no_new">Новых образов пока нет. Добавь ещё вещей — появятся новые сочетания</string>
+    <string name="generate_looks_network_error">Не удалось сгенерировать образы. Проверь подключение и попробуй ещё раз</string>
+    <string name="generate_looks_add">Добавить вещь</string>
+    <string name="generate_looks_close">Закрыть</string>
 </resources>

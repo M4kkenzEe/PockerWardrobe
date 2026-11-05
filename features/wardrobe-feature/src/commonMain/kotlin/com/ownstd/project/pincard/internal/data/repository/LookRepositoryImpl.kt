@@ -7,6 +7,7 @@ import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResponse
 import com.ownstd.project.pincard.internal.data.model.GenerateDraftsResult
 import com.ownstd.project.pincard.internal.data.model.GenerateLooksResult
 import com.ownstd.project.pincard.internal.data.model.Look
+import com.ownstd.project.pincard.internal.data.model.MissingCategory
 import com.ownstd.project.pincard.internal.data.model.LookRepositoryResult
 import com.ownstd.project.pincard.internal.data.model.ShareResponse
 import com.ownstd.project.pincard.internal.data.model.SharedLookResponse
@@ -213,11 +214,22 @@ class LookRepositoryImpl(
                     val body = response.body<Map<String, List<Int>>>()
                     GenerateLooksResult.Success(body["look_ids"] ?: emptyList())
                 }
-                HttpStatusCode.BadRequest -> GenerateLooksResult.NotEnoughClothes
+                HttpStatusCode.BadRequest -> {
+                    val error = response.body<GenerateDraftsErrorResponse>()
+                    if (error.error == "not_enough_clothes") {
+                        val categories = parseMissingCategories(error.missing)
+                        val reliable = categories.size == error.missing.size
+                        GenerateLooksResult.NotEnoughClothes(
+                            if (reliable) MissingCategory.entries.filter { it in categories } else emptyList()
+                        )
+                    } else GenerateLooksResult.NetworkError(IllegalStateException("HTTP 400"))
+                }
                 else -> GenerateLooksResult.NetworkError(
                     IllegalStateException("HTTP ${response.status.value}")
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             GenerateLooksResult.NetworkError(e)
         }

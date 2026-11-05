@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.ownstd.project.designsystem.components.WardrobeSegmentedControl
 import com.ownstd.project.designsystem.theme.ClothisTheme
 import com.ownstd.project.pincard.internal.presentation.compose.Looks
+import com.ownstd.project.pincard.internal.presentation.compose.AddClotheFloatButton
 import com.ownstd.project.pincard.internal.presentation.compose.Wardrobe
 import com.ownstd.project.pincard.internal.presentation.compose.ScrollActivePageToTopEffect
 import com.ownstd.project.pincard.internal.presentation.viewmodel.LooksViewModel
@@ -58,6 +59,17 @@ fun WardrobeMainScreen(
     val looksGridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     val colors = ClothisTheme.colors
+
+    var requestAddClothe by remember { mutableStateOf(false) }
+
+    AddClotheFloatButton(
+        onButtonClick = { bitmap ->
+            wardrobeViewModel.loadClothe(bitmap, null)
+            scope.launch { pagerState.animateScrollToPage(0) }
+        },
+        requestLaunch = requestAddClothe,
+        onLaunchConsumed = { requestAddClothe = false },
+    )
 
     var pillVisible by remember { mutableStateOf(false) }
 
@@ -92,6 +104,7 @@ fun WardrobeMainScreen(
                     gridState = looksGridState,
                     onNavigateToConstructor = openConstructor,
                     navigateToDetails = openDetails,
+                    onAddClothe = { requestAddClothe = true },
                 )
             }
         }

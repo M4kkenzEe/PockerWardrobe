@@ -48,12 +48,6 @@ internal class LookDetailsViewModel(
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _affiliateLinkLoadingIds = MutableStateFlow<Set<Int>>(emptySet())
-    val affiliateLinkLoadingIds: StateFlow<Set<Int>> = _affiliateLinkLoadingIds
-
-    private val _pendingAffiliateUrl = MutableStateFlow<String?>(null)
-    val pendingAffiliateUrl: StateFlow<String?> = _pendingAffiliateUrl
-
     // Per-item add-to-wardrobe states
     private val _addingClotheIds = MutableStateFlow<Set<Int>>(emptySet())
     val addingClotheIds: StateFlow<Set<Int>> = _addingClotheIds
@@ -110,19 +104,6 @@ internal class LookDetailsViewModel(
                 _isLoading.value = false
             }
         }
-    }
-
-    fun requestAffiliateLink(clotheId: Int, storeUrl: String) {
-        viewModelScope.launch(ioDispatcher) {
-            _affiliateLinkLoadingIds.update { it + clotheId }
-            val url = runCatching { useCase.getAffiliateLink(storeUrl) }.getOrNull() ?: storeUrl
-            _affiliateLinkLoadingIds.update { it - clotheId }
-            _pendingAffiliateUrl.value = url
-        }
-    }
-
-    fun consumeAffiliateUrl() {
-        _pendingAffiliateUrl.value = null
     }
 
     fun onAddLookClick() {
